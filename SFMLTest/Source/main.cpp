@@ -10,6 +10,9 @@ main() {
   sf::RenderWindow window(sf::VideoMode(1280, 720), "Level editor");
   window.setVerticalSyncEnabled(true);
   ImGui::SFML::Init(window);
+  
+  ImGuiIO& io = ImGui::GetIO();
+  io.ConfigWindowsMoveFromTitleBarOnly = true;
 
   sf::Color bgColor;
 
@@ -29,6 +32,11 @@ main() {
 
       if (event.type == sf::Event::Closed) {
         window.close();
+      }
+      if (event.type == sf::Event::KeyPressed) {
+        if (event.key.code == sf::Keyboard::Escape) {
+          window.close();
+        }
       }
     }
 

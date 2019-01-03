@@ -1,14 +1,17 @@
 #pragma once
-#include "tb_util_prerequisites.h"
+
+#include "tb_utils_prerequisites.h"
 
 namespace toyboxSDK {
 
 /**
+* Description.
 *
+* Example usage.
+* 
 */
-
 template<class T>
-class Module
+class TB_UTIL_EXPORT Module
 {
  public:
   

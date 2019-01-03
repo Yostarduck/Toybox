@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\tb_command.h" />
     <ClInclude Include="Include\tb_defines.h" />
     <ClInclude Include="Include\tb_module.h" />
+    <ClInclude Include="Include\tb_random.h" />
     <ClInclude Include="Include\tb_types.h" />
-    <ClInclude Include="Include\tb_util_prerequisites.h" />
+    <ClInclude Include="Include\tb_utils_prerequisites.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_random.cpp" />

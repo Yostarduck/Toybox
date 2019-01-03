@@ -15,7 +15,7 @@
 # if defined(TB_STATIC_LIB)
 #   define TB_AI_EXPORT
 # else
-#	if defined(MATH_EXPORTS)
+#	if defined(AI_EXPORTS)
 #   define TB_AI_EXPORT __declspec(dllexport)
 #   else
 #     if defined(__MINGW32__)

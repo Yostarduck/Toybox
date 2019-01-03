@@ -24,7 +24,13 @@
     <ClInclude Include="Include\tb_types.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Include\tb_util_prerequisites.h">
+    <ClInclude Include="Include\tb_command.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_random.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_utils_prerequisites.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

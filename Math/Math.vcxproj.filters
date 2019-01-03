@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\math_prerequisites.h">
+    <ClInclude Include="Include\tb_math_prerequisites.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
