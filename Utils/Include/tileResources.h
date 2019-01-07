@@ -8,11 +8,23 @@
 
 namespace toyboxSDK {
  
+/**
+ * @brief Returns the coordinates in pixel format
+ * @param grid coordinates
+ * @return pixel coordinates
+ *
+ */
 static sf::Vector2f
 GridtoPixel(sf::Vector2f vec) {
-  return vec * TILESIZE;
+  return sf::Vector2f(vec.x * TILESIZE, vec.y * TILESIZE);
 }
 
+/**
+ * @brief Returns the coordinates in tile format
+ * @param pixel coordinates
+ * @return grid coordinates
+ *
+ */
 static sf::Vector2f
 PixeltoGrid(sf::Vector2f vec) {
   sf::Vector2f temp;
@@ -20,6 +32,5 @@ PixeltoGrid(sf::Vector2f vec) {
   temp.y = (((int)vec.y - (int)vec.y % TILESIZE) / TILESIZE);
   return temp;
 }
-
 
 }

@@ -25,10 +25,13 @@
     <ClInclude Include="Include\tb_random.h" />
     <ClInclude Include="Include\tb_types.h" />
     <ClInclude Include="Include\tb_utils_prerequisites.h" />
-    <ClInclude Include="tileResources.h" />
+    <ClInclude Include="Include\tileResources.h" />
+    <ClInclude Include="tb_resourceManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\sfmlOperators.cpp" />
     <ClCompile Include="Source\tb_random.cpp" />
+    <ClCompile Include="tb_resourceManager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
