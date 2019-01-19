@@ -93,7 +93,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)AI/Include;$(SolutionDir)ImGui/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include/;$(SolutionDir)Math/Include;$(SolutionDir)AI/Include;$(SolutionDir)ImGui/Include;$(SolutionDir)Batallion/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -106,7 +106,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)AI/Include;$(SolutionDir)ImGui/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include/;$(SolutionDir)Math/Include;$(SolutionDir)AI/Include;$(SolutionDir)ImGui/Include;$(SolutionDir)Batallion/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -121,7 +121,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)AI/Include;$(SolutionDir)ImGui/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include/;$(SolutionDir)Math/Include;$(SolutionDir)AI/Include;$(SolutionDir)ImGui/Include;$(SolutionDir)Batallion/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -138,7 +138,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)AI/Include;$(SolutionDir)ImGui/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include/;$(SolutionDir)Math/Include;$(SolutionDir)AI/Include;$(SolutionDir)ImGui/Include;$(SolutionDir)Batallion/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -148,11 +148,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="tileObject.h" />
+    <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="Source\tileObject.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\main.cpp" />
-    <ClCompile Include="tileObject.cpp" />
+    <ClInclude Include="Include\tileObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

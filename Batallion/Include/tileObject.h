@@ -9,7 +9,7 @@
  */
 /*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
 #pragma once
-
+#include <tileResources.h>
 
 namespace toyboxSDK {
    /**
@@ -43,6 +43,11 @@ namespace toyboxSDK {
      * tile sprite
      */
     sf::Sprite m_sprite;
+
+    /**
+     * Position in Grid Map
+     */
+    sf::Vector2f m_position;
 
   };
 }
