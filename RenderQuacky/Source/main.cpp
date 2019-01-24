@@ -1,8 +1,19 @@
 #include <tb_types.h>
+#include <iostream>
 #include "TestApplication.h"
 
 toyboxSDK::Int32
-main() {
+main(toyboxSDK::Int32 argc, toyboxSDK::ANSIChar* argv[]) {
+
+  // Check the number of parameters
+  if (argc < 2) {
+    std::cout << "App path: " << argv[0] << std::endl;
+  }
+  else {
+    //Parse parameters.
+    //TODO: use parameters to select graphic api.
+  }
+
   toyboxSDK::RenderQuackyApp app;
 
   toyboxSDK::Viewport vp;

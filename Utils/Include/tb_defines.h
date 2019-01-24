@@ -1,22 +1,22 @@
 #pragma once
 
-#define TB_PLATFORM_WINDOWS	  1   //Windows Platform
-#define TB_PLATFORM_LINUX	    2	  //Linux Platform
-#define TB_PLATFORM_OSX		    3	  //Mac Platfomr
-#define TB_PLATFORM_IOS		    4	  //iPhone Platform
-#define TB_PLATFORM_ANDROID	  5	  //Android Platform
-#define TB_PLATFORM_PS4		    6	  //Play Station 4 Platform
+#define TB_PLATFORM_WINDOWS	  1     //Windows Platform
+#define TB_PLATFORM_LINUX	    2     //Linux Platform
+#define TB_PLATFORM_OSX		    3     //Mac Platfomr
+#define TB_PLATFORM_IOS		    4     //iPhone Platform
+#define TB_PLATFORM_ANDROID	  5     //Android Platform
+#define TB_PLATFORM_PS4		    6     //Play Station 4 Platform
 
-#define TB_COMPILER_MSVC  1   //VS Compiler
-#define TB_COMPILER_GNU   2   //GCC Compiler
-#define TB_COMPILER_INTEL 3   //Intel Compiler
-#define TB_COMPILER_CLANG 4   //Clang Compiler
+#define TB_COMPILER_MSVC  1     //VS Compiler
+#define TB_COMPILER_GNU   2     //GCC Compiler
+#define TB_COMPILER_INTEL 3     //Intel Compiler
+#define TB_COMPILER_CLANG 4     //Clang Compiler
 
 #define TB_ARCHITECTURE_X86_32 1
 #define TB_ARCHITECTURE_X86_64 2
 
-#define TB_ENDIAN_LITTLE  1	        //Little endinan
-#define TB_ENDIAN_BIG	    2	        //Big endian
+#define TB_ENDIAN_LITTLE 1      //Little endinan
+#define TB_ENDIAN_BIG	   2      //Big endian
 
 #define TB_ENDINAN TB_ENDIAN_LITTLE
 
@@ -28,9 +28,9 @@
 
 //If this is a debug build
 #if defined(_DEBUG) || defined(DEBUG)
-# define TB_DEBUG_MODE 1			  //Debug mode is on
+# define TB_DEBUG_MODE 1      //Debug mode is on
 #else
-# define TB_DEBUG_MODE 0			  //Debug mode is off
+# define TB_DEBUG_MODE 0      //Debug mode is off
 #endif
 
 #if TB_DEBUG_MODE

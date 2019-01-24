@@ -6,7 +6,15 @@ namespace toyboxSDK {
 class RenderQuackyApp : public Application
 {
  public:
+  /*
+  * Default class constructor.
+  */
+  RenderQuackyApp();
 
+  /*
+  * Default class destructor.
+  */
+  ~RenderQuackyApp();
  private:
 
   virtual void 
