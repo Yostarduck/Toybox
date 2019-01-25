@@ -21,7 +21,6 @@ GraphicsAPI::init(UInt32 w,
                   UInt32 h,
                   void* hwnd,
                   TB_GRAPHICS_API::E api) {
-  
   //Create device.
   //Create device context.
   if (TB_GRAPHICS_API::E::kD3D11 == api) {
@@ -39,8 +38,8 @@ GraphicsAPI::init(UInt32 w,
   else if (TB_GRAPHICS_API::E::kVK_LG == api) {
     //I don't know vulkan :c
     exit(162);
-    //1.62 m/(s^2) is the lunar gravity
-    //refering to "Vulkan Lunar G"
+    //1.62 m/(s^2) is the lunar gravity.
+    //Because "Vulkan Lunar G"
   }
   else if (TB_GRAPHICS_API::E::kNone == api) {
     //App doesn't require a graphic API.
