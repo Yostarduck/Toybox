@@ -2,6 +2,12 @@
 
 namespace toyboxSDK {
 
+RenderQuackyApp::RenderQuackyApp() {
+}
+
+RenderQuackyApp::~RenderQuackyApp() {
+}
+
 void
 RenderQuackyApp::postInit() {
 }

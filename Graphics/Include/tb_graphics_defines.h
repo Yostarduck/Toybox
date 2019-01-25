@@ -411,7 +411,7 @@ enum class E {
 };
 }
 
-struct TB_GRAPHICS_EXPORT DrInputElementDesc {
+struct TB_GRAPHICS_EXPORT InputElementDesc {
   String semanticName;
   UInt32 semanticIndex;
   TB_FORMAT::E format;
@@ -419,7 +419,7 @@ struct TB_GRAPHICS_EXPORT DrInputElementDesc {
   UInt32 offset;
   TB_INPUT_CLASSIFICATION::E slotClass;
   UInt32 stepRate;
-  DrInputElementDesc() {
+  InputElementDesc() {
     semanticName = "";
     semanticIndex = 0;
     format = TB_FORMAT::E::kB4G4R4A4_UNORM;
@@ -430,7 +430,7 @@ struct TB_GRAPHICS_EXPORT DrInputElementDesc {
   }
 };
 
-struct TB_GRAPHICS_EXPORT DrSampleDesc {
+struct TB_GRAPHICS_EXPORT SampleDesc {
   TB_TEXTURE_FILTER::E Filter;
   TB_TEXTURE_ADDRESS::E addressU;
   TB_TEXTURE_ADDRESS::E addressV;
@@ -441,7 +441,7 @@ struct TB_GRAPHICS_EXPORT DrSampleDesc {
   float borderColor[4];
   float minLOD;
   float maxLOD;
-  DrSampleDesc() {
+  SampleDesc() {
     Filter = TB_TEXTURE_FILTER::E::kMIN_MAG_LINEAR_MIP_POINT;
     addressU = TB_TEXTURE_ADDRESS::E::kClamp;
     addressV = TB_TEXTURE_ADDRESS::E::kClamp;
@@ -458,12 +458,12 @@ struct TB_GRAPHICS_EXPORT DrSampleDesc {
   }
 };
 
-struct TB_GRAPHICS_EXPORT DrBufferDesc {
+struct TB_GRAPHICS_EXPORT BufferDesc {
   TB_BUFFER_USAGE::E usage;
   TB_BUFFER_TYPE::E type;
   UInt32 stride;
   UInt32 sizeInBytes;
-  DrBufferDesc() {
+  BufferDesc() {
     usage = TB_BUFFER_USAGE::E::kDefault;
     type = TB_BUFFER_TYPE::E::kCONSTANT;
     stride = 0;
@@ -471,7 +471,7 @@ struct TB_GRAPHICS_EXPORT DrBufferDesc {
   }
 };
 
-struct TB_GRAPHICS_EXPORT DrTextureDesc {
+struct TB_GRAPHICS_EXPORT TextureDesc {
   TB_FORMAT::E Format;
   TB_BUFFER_USAGE::E Usage;
   TB_DIMENSION::E dimension;
@@ -482,7 +482,7 @@ struct TB_GRAPHICS_EXPORT DrTextureDesc {
   UInt32 CPUAccessFlags;
   UInt32 bindFlags;
   bool genMipMaps;
-  DrTextureDesc() {
+  TextureDesc() {
     Format = TB_FORMAT::E::kB4G4R4A4_UNORM;
     Usage = TB_BUFFER_USAGE::E::kDefault;
     dimension = TB_DIMENSION::E::k2D;
@@ -496,21 +496,21 @@ struct TB_GRAPHICS_EXPORT DrTextureDesc {
   }
 };
 
-struct TB_GRAPHICS_EXPORT DrDepthStencilDesc {
+struct TB_GRAPHICS_EXPORT DepthStencilDesc {
   TB_FORMAT::E Format;
   UInt32 width;
   UInt32 height;
   UInt32 bindFlags;
 
-  DrDepthStencilDesc() {
+  DepthStencilDesc() {
     Format = TB_FORMAT::E::kD24_UNORM_S8_UINT;
     width = 0;
     height = 0;
-    bindFlags = TB_BIND_FLAGS::DEPTH_STENCIL;
+    bindFlags = TB_BIND_FLAGS::kDEPTH_STENCIL;
   }
 };
 
-struct TB_GRAPHICS_EXPORT DrRasterizerDesc {
+struct TB_GRAPHICS_EXPORT RasterizerDesc {
   TB_FILL_MODE::E fillMode;
   TB_CULL_MODE::E cullMode;
   bool  frontCounterClockwise;
@@ -521,7 +521,7 @@ struct TB_GRAPHICS_EXPORT DrRasterizerDesc {
   bool scissorEnable;
   bool multisampleEnable;
   bool antialiasedLineEnable;
-  DrRasterizerDesc() {
+  RasterizerDesc() {
     fillMode = TB_FILL_MODE::E::kSolid;
     cullMode = TB_CULL_MODE::E::kBack;
     frontCounterClockwise = true;
@@ -535,7 +535,7 @@ struct TB_GRAPHICS_EXPORT DrRasterizerDesc {
   }
 };
 
-struct TB_GRAPHICS_EXPORT DrBlendStateDesc {
+struct TB_GRAPHICS_EXPORT BlendStateDesc {
   bool blendEnable;
   TB_BLEND::E srcBlend;
   TB_BLEND::E destBlend;
@@ -543,32 +543,32 @@ struct TB_GRAPHICS_EXPORT DrBlendStateDesc {
   TB_BLEND::E destBlendAlpha;
   TB_BLEND_OP::E blendOp;
   TB_BLEND_OP::E blendOpAlpha;
-  DrBlendStateDesc() {
+  BlendStateDesc() {
     blendEnable = true;
   }
 };
 
-struct TB_GRAPHICS_EXPORT DrRationalNumber {
+struct TB_GRAPHICS_EXPORT RationalNumber {
   UInt32 numerator;
   UInt32 denominator;
-  DrRationalNumber() {
+  RationalNumber() {
     numerator = 0;
     denominator = 1;
   }
 };
 
-struct TB_GRAPHICS_EXPORT DrSwapChainDesc  {
+struct TB_GRAPHICS_EXPORT SwapChainDesc  {
   UInt32 width;
   UInt32 height;
-  DrRationalNumber refreshRate;
+  RationalNumber refreshRate;
   TB_FORMAT::E Format;
   UInt32 bufferCount;
   void* windowHandler;
   bool windowed;
-  DrSwapChainDesc() {
+  SwapChainDesc() {
     width = 0;
     height = 0;
-    DrRationalNumber ref;
+    RationalNumber ref;
     ref.denominator = 0;
     ref.numerator = 0;
     refreshRate = ref;
@@ -579,14 +579,14 @@ struct TB_GRAPHICS_EXPORT DrSwapChainDesc  {
   }
 };
 
-struct TB_GRAPHICS_EXPORT DrDepthStencilStateDesc {
+struct TB_GRAPHICS_EXPORT DepthStencilStateDesc {
   bool depthEnable;
   TB_COMPARISON_FUNC::E depthFunc; 
   bool stencilEnable;
   UInt8 stencilReadMask;
   UInt8 stencilWriteMask;
   TB_DEPTH_WRITE_MASK::E depthWriteMask;
-  DrDepthStencilStateDesc() {
+  DepthStencilStateDesc() {
     depthEnable = true;
     depthFunc = TB_COMPARISON_FUNC::E::kLESS_EQUAL;
     stencilEnable = false;

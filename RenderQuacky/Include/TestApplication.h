@@ -3,6 +3,9 @@
 
 namespace toyboxSDK {
 
+/*
+*
+*/
 class RenderQuackyApp : public Application
 {
  public:
@@ -16,19 +19,34 @@ class RenderQuackyApp : public Application
   */
   ~RenderQuackyApp();
  private:
-
+  
+  /*
+  * Inherited via Application
+  */
   virtual void 
   postInit() override;
 
+  /*
+  * Inherited via Application
+  */
   virtual void 
   postUpdate() override;
 
+  /*
+  * Inherited via Application
+  */
   virtual void 
   postRender() override;
 
+  /*
+  * Inherited via Application
+  */
   virtual void 
   postDestroy() override;
 
+  /*
+  * Inherited via Application
+  */
   virtual void
   onResize() override;
 };

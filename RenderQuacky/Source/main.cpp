@@ -1,6 +1,6 @@
+#include "TestApplication.h"
 #include <tb_types.h>
 #include <iostream>
-#include "TestApplication.h"
 
 toyboxSDK::Int32
 main(toyboxSDK::Int32 argc, toyboxSDK::ANSIChar* argv[]) {
@@ -10,8 +10,11 @@ main(toyboxSDK::Int32 argc, toyboxSDK::ANSIChar* argv[]) {
     std::cout << "App path: " << argv[0] << std::endl;
   }
   else {
-    //Parse parameters.
-    //TODO: use parameters to select graphic api.
+    //TODO: Use & parse parameters.
+    //Uses window parameter.
+    //Graphic API parameter.
+    //Width parameter.
+    //Height parameter.
   }
 
   toyboxSDK::RenderQuackyApp app;

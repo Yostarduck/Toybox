@@ -15,8 +15,12 @@ class DepthStencil;
 class DepthStencilState;
 class RasterizerState;
 
+/*
+*
+*/
 class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
  public:
+  
   /*
   * Default class constructor.
   */
@@ -40,6 +44,15 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   onShutDown() override;
 
   /*
+  *
+  */
+  virtual void
+  init(UInt32 w,
+       UInt32 h,
+       void* hwnd,
+       TB_GRAPHICS_API::E api = TB_GRAPHICS_API::E::kD3D11);
+
+  /*
   * Returns which graphic is being used.
   * 
   * @return
@@ -51,7 +64,11 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   }
 
  protected:
-  
+   std::unique_ptr<Device> m_device;
+   std::unique_ptr<DeviceContext> m_deviceContext;
+   
+   void* m_hwnd;
+
  private:
   TB_GRAPHICS_API::E m_SelectedGraphicAPI;
 };

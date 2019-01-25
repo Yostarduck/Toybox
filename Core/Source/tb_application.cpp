@@ -1,11 +1,17 @@
 #include "tb_application.h"
+
 #include <iostream>
 #include <Windows.h>
+
 #include <SDL2/SDL.h>
 
 namespace toyboxSDK {
 
 Application* Application::application;
+
+Application::Application(bool _usesWindow)
+  : m_usesWindow(_usesWindow) {
+}
 
 Int32
 Application::run(const Viewport& _viewport) {
