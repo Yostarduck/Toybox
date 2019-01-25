@@ -1,4 +1,5 @@
 #pragma once
+
 #include <tb_application.h>
 
 namespace toyboxSDK {
