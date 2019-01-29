@@ -2,7 +2,8 @@
 
 namespace toyboxSDK {
 
-Device::Device() {
+Device::Device() :
+  m_useCPU(false) {
 }
 
 Device::~Device() {

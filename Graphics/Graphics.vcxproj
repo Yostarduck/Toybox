@@ -136,9 +136,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\tb_device.cpp" />
     <ClCompile Include="Source\tb_graphics_api.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\tb_device.h" />
     <ClInclude Include="Include\tb_graphics_api.h" />
     <ClInclude Include="Include\tb_graphics_defines.h" />
     <ClInclude Include="Include\tb_graphics_prerequisites.h" />

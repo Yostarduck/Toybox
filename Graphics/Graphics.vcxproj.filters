@@ -13,10 +13,19 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Archivos de encabezado\Wrapper">
+      <UniqueIdentifier>{4a75a320-ecbb-4447-8ad9-55033df336ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\Wrapper">
+      <UniqueIdentifier>{a676eb02-5f52-44c5-b337-42abb455102b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_graphics_api.cpp">
       <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_device.cpp">
+      <Filter>Archivos de origen\Wrapper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -28,6 +37,9 @@
     </ClInclude>
     <ClInclude Include="Include\tb_graphics_defines.h">
       <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_device.h">
+      <Filter>Archivos de encabezado\Wrapper</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -52,10 +52,10 @@ GraphicsAPI::init(UInt32 w,
 
   m_hwnd = hwnd;
 
+  //Create swap chain.
+
   //Create a device and its context.
   //m_device->createDeviceAndDeviceContext(*m_deviceContext);
-
-  //Create swap chain.
 
   //Create depth stencil.
 

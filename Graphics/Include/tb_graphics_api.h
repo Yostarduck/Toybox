@@ -46,7 +46,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   onShutDown() override;
 
   /**
-  * Initializes the graphic api if required.
+  * Initializes the graphic API if required.
   *
   * Creates a Device and DeviceContext.
   * Holds a reference to the handle window.

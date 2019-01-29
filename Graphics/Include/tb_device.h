@@ -21,7 +21,14 @@ class TB_GRAPHICS_EXPORT Device {
   */
   ~Device();
 
+  /**
+  * 
+  */
+  virtual void
+  CreateDevice() = 0;
+
  protected:
+   bool m_useCPU;
 
  private:
 
