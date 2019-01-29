@@ -19,6 +19,12 @@
     <Filter Include="Archivos de origen\Wrapper">
       <UniqueIdentifier>{a676eb02-5f52-44c5-b337-42abb455102b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Archivos de encabezado\D3D12">
+      <UniqueIdentifier>{4b86d9f2-11b9-40a9-bf4e-d31ee860ef51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de origen\D3D12">
+      <UniqueIdentifier>{7682d9a9-0792-4ea8-9d49-49392b1dfbf9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_graphics_api.cpp">
@@ -26,6 +32,9 @@
     </ClCompile>
     <ClCompile Include="Source\tb_device.cpp">
       <Filter>Archivos de origen\Wrapper</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_d3d12_device.cpp">
+      <Filter>Archivos de origen\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -40,6 +49,9 @@
     </ClInclude>
     <ClInclude Include="Include\tb_device.h">
       <Filter>Archivos de encabezado\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_d3d12_device.h">
+      <Filter>Archivos de encabezado\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

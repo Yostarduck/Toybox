@@ -136,10 +136,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\tb_d3d12_device.cpp" />
     <ClCompile Include="Source\tb_device.cpp" />
     <ClCompile Include="Source\tb_graphics_api.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\tb_d3d12_device.h" />
     <ClInclude Include="Include\tb_device.h" />
     <ClInclude Include="Include\tb_graphics_api.h" />
     <ClInclude Include="Include\tb_graphics_defines.h" />
