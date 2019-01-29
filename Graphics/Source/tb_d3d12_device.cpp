@@ -1,6 +1,4 @@
 #include "tb_d3d12_device.h"
-#include <d3d12.h>
-#include <dxgi1_4.h>
 
 namespace toyboxSDK {
 
@@ -52,7 +50,7 @@ DeviceD3D12::CreateDevice() {
 
     HRESULT HRCreateDevice = D3D12CreateDevice(warpAdapter.get(),
 			                                         D3D_FEATURE_LEVEL_11_0,
-                                               __uuidof(&m_device),
+                                               __uuidof(**(&m_device)),
                                                reinterpret_cast<void**>(&m_device));
     if (FAILED(HRCreateDevice)) {
       throw std::exception();
@@ -64,7 +62,7 @@ DeviceD3D12::CreateDevice() {
 
     HRESULT HRCreateDevice = D3D12CreateDevice(hardwareAdapter.get(),
 			                                         D3D_FEATURE_LEVEL_11_0,
-                                               __uuidof(&m_device),
+                                               __uuidof(**(&m_device)),
                                                reinterpret_cast<void**>(&m_device));
     if (FAILED(HRCreateDevice)) {
       throw std::exception();
@@ -79,7 +77,7 @@ DeviceD3D12::CreateDevice() {
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
   HRESULT HRCommand = m_device->CreateCommandQueue(&queueDesc,
-                                                   __uuidof(&m_commandQueue),
+                                                   __uuidof(**(&m_commandQueue)),
                                                    reinterpret_cast<void**>(&m_commandQueue));
 
   if (FAILED(HRCommand)) {
@@ -118,13 +116,17 @@ DeviceD3D12::CreateDevice() {
     std::exception();
   }
 
-  HRESULT HRQueryInterface = swapChain->QueryInterface(__uuidof(&m_swapChain),
+  //////////////////////////////////////////////////////////////////////////////
+
+  HRESULT HRQueryInterface = swapChain->QueryInterface(__uuidof(**(&m_swapChain)),
                                                        reinterpret_cast<void**>(&m_swapChain));
   if (FAILED(HRQueryInterface)) {
     std::exception();
   }
 
   m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+  //////////////////////////////////////////////////////////////////////////////
 
 	//Create descriptor heaps.
 	{
@@ -133,26 +135,43 @@ DeviceD3D12::CreateDevice() {
 		rtvHeapDesc.NumDescriptors = FrameCount;
 		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		ThrowIfFailed(m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
+    HRESULT HRDescriptorHeap = m_device->CreateDescriptorHeap(&rtvHeapDesc,
+                                                              __uuidof(**(&m_rtvHeap)),
+                                                              reinterpret_cast<void**>(&m_rtvHeap));
+
+    if (FAILED(HRDescriptorHeap)) {
+      std::exception();
+    }
 
 		m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	}
+
+  //////////////////////////////////////////////////////////////////////////////
 
 	//Create frame resources.
 	{
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
 
 		// Create a RTV for each frame.
-		for (UINT n = 0; n < FrameCount; n++)
-		{
-			ThrowIfFailed(m_swapChain->GetBuffer(n, IID_PPV_ARGS(&m_renderTargets[n])));
+		for (UInt32 n = 0; n < FrameCount; ++n) {
+      HRESULT HRBuffer = m_swapChain->GetBuffer(n,
+                                                __uuidof(**(&m_renderTargets[n])),
+                                                reinterpret_cast<void**>(&m_renderTargets[n]));
+      if (FAILED(HRBuffer)) {
+        std::exception();
+      }
+
 			m_device->CreateRenderTargetView(m_renderTargets[n].Get(), nullptr, rtvHandle);
 			rtvHandle.Offset(1, m_rtvDescriptorSize);
 		}
 	}
 
-	ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
-                                                 IID_PPV_ARGS(&m_commandAllocator)));
+  HRESULT HRCommandAllocator = m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+                                                                __uuidof(**(&m_commandAllocator)),
+                                                                reinterpret_cast<void**>(&m_commandAllocator));
+  if (FAILED(HRCommandAllocator)) {
+    std::exception();
+  }
 }
 
 void
