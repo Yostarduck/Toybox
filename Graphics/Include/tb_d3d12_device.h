@@ -14,7 +14,7 @@ namespace toyboxSDK {
 /**
 *
 */
-class TB_GRAPHICS_EXPORT DeviceD3D12 : Device {
+class TB_GRAPHICS_EXPORT DeviceD3D12 : public Device {
  public:
   
   /**
@@ -33,6 +33,7 @@ class TB_GRAPHICS_EXPORT DeviceD3D12 : Device {
   void
   CreateDevice() override;
 
+   std::unique_ptr<ID3D12Device> m_device;
  protected:
   /**
   * Search a hardware where the
@@ -45,12 +46,10 @@ class TB_GRAPHICS_EXPORT DeviceD3D12 : Device {
   *   
   */
   void
-  GetHardwareAdapter(IDXGIFactory2* pFactory, std::unique_ptr<IDXGIAdapter1>* ppAdapter);
+  GetHardwareAdapter(IDXGIFactory2* pFactory, IDXGIAdapter1** ppAdapter);
 
  private:
-   std::unique_ptr<ID3D12Device> m_device;
    std::unique_ptr<ID3D12CommandQueue> m_commandQueue;
-   std::unique_ptr<IDXGISwapChain3> m_swapChain;
 
 };
 

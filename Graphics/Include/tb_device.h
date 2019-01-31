@@ -19,7 +19,7 @@ class TB_GRAPHICS_EXPORT Device {
   /**
   * Default class destructor.
   */
-  ~Device();
+  virtual ~Device();
 
   /**
   * 

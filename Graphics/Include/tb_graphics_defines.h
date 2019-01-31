@@ -71,7 +71,7 @@ enum class E {
 }
 
 namespace TB_FORMAT {
-enum class E {
+enum E {
   kUNKNOWN                    = 0,
   kR32G32B32A32_TYPELESS      = 1,
   kR32G32B32A32_FLOAT         = 2,

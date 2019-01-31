@@ -137,15 +137,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_d3d12_device.cpp" />
+    <ClCompile Include="Source\tb_d3d12_swap_chain.cpp" />
     <ClCompile Include="Source\tb_device.cpp" />
     <ClCompile Include="Source\tb_graphics_api.cpp" />
+    <ClCompile Include="Source\tb_swap_chain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\tb_d3d12_device.h" />
+    <ClInclude Include="Include\tb_d3d12_swap_chain.h" />
     <ClInclude Include="Include\tb_device.h" />
     <ClInclude Include="Include\tb_graphics_api.h" />
     <ClInclude Include="Include\tb_graphics_defines.h" />
     <ClInclude Include="Include\tb_graphics_prerequisites.h" />
+    <ClInclude Include="Include\tb_swap_chain.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

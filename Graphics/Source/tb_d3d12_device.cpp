@@ -18,7 +18,7 @@ DeviceD3D12::CreateDevice() {
   {
     std::unique_ptr<ID3D12Debug> dbgController;
     HRESULT HRDbgInterface = D3D12GetDebugInterface(__uuidof(**(&dbgController)),
-                                                    reinterpret_cast<void**>(&dbgController));
+                                                    (void**)(&dbgController));
     if (SUCCEEDED(HRDbgInterface)) {
       dbgController->EnableDebugLayer();
 
@@ -29,11 +29,11 @@ DeviceD3D12::CreateDevice() {
 #endif
 
   //Factory creation
-  std::unique_ptr<IDXGIFactory4> factory;
+  IDXGIFactory4* factory;
 
   HRESULT HRFactory = CreateDXGIFactory2(dxgiFactoryFlags,
                                          __uuidof(**(&factory)),
-                                         reinterpret_cast<void**>(&factory));
+                                         (void**)(&factory));
 
   if (FAILED(HRFactory)) {
     throw std::exception();
@@ -41,89 +41,79 @@ DeviceD3D12::CreateDevice() {
 
   //Create device
 	if (m_useCPU) {
-    std::unique_ptr<IDXGIAdapter> warpAdapter;
+    IDXGIAdapter* warpAdapter;
     HRESULT HRWarpAdapter = factory->EnumWarpAdapter(__uuidof(**(&warpAdapter)),
-                                                     reinterpret_cast<void**>(&warpAdapter));
+                                                     (void**)(&warpAdapter));
     if (FAILED(HRWarpAdapter)) {
       throw std::exception();
     }
 
-    HRESULT HRCreateDevice = D3D12CreateDevice(warpAdapter.get(),
+    HRESULT HRCreateDevice = D3D12CreateDevice(warpAdapter,
 			                                         D3D_FEATURE_LEVEL_11_0,
                                                __uuidof(**(&m_device)),
-                                               reinterpret_cast<void**>(&m_device));
+                                               (void**)(&m_device));
     if (FAILED(HRCreateDevice)) {
       throw std::exception();
     }
+    warpAdapter->Release();
 	}
 	else {
-		std::unique_ptr<IDXGIAdapter1> hardwareAdapter;
-		GetHardwareAdapter(factory.get(), &hardwareAdapter);
+		IDXGIAdapter1* hardwareAdapter;
+		GetHardwareAdapter(factory, &hardwareAdapter);
 
-    HRESULT HRCreateDevice = D3D12CreateDevice(hardwareAdapter.get(),
+    HRESULT HRCreateDevice = D3D12CreateDevice(hardwareAdapter,
 			                                         D3D_FEATURE_LEVEL_11_0,
                                                __uuidof(**(&m_device)),
-                                               reinterpret_cast<void**>(&m_device));
+                                               (void**)(&m_device));
     if (FAILED(HRCreateDevice)) {
       throw std::exception();
     }
+    hardwareAdapter->Release();
 	}
 
   //////////////////////////////////////////////////////////////////////////////
 
-	//Create command queue. (Only for the swap chain)
-	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+  // Describe and create the command queue.
+  D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+  queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+  queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 
   HRESULT HRCommand = m_device->CreateCommandQueue(&queueDesc,
                                                    __uuidof(**(&m_commandQueue)),
-                                                   reinterpret_cast<void**>(&m_commandQueue));
+                                                   (void**)(&m_commandQueue));
 
   if (FAILED(HRCommand)) {
     throw std::exception();
   }
 
-	//Create swap chain.
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-	swapChainDesc.BufferCount = FrameCount;
-	swapChainDesc.Width = m_width;
-	swapChainDesc.Height = m_height;
-	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc.SampleDesc.Count = 1;
+  // Describe and create the swap chain.
+  DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+  swapChainDesc.BufferCount = FrameCount;
+  swapChainDesc.Width = m_width;
+  swapChainDesc.Height = m_height;
+  swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+  swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
+  swapChainDesc.SampleDesc.Count = 1;
 
-  std::unique_ptr<IDXGISwapChain1> swapChain;
-  HRESULT HRSwapChain = factory->CreateSwapChainForHwnd(m_commandQueue.get(),		// Swap chain needs the queue so that it can force a flush on it.
-		                                                    Win32Application::GetHwnd(),
-		                                                    &swapChainDesc,
-		                                                    nullptr,
-		                                                    nullptr,
-		                                                    reinterpret_cast<IDXGISwapChain1**>(&swapChain));
+  IDXGISwapChain1* swapChain;
+  // Swap chain needs the queue so that it can force a flush on it.
+  factory->CreateSwapChain(m_commandQueue.get(), &swapChainDesc, &swapChain);
+  HRESULT HRSwapChain = factory->CreateSwapChainForHwnd(m_commandQueue.get(),
+                                                        Win32Application::GetHwnd(),
+                                                        &swapChainDesc,
+                                                        nullptr,
+                                                        nullptr,
+                                                        &swapChain);
 
   if (FAILED(HRSwapChain)) {
-    std::exception();
+    throw std::exception();
   }
 
-  //////////////////////////////////////////////////////////////////////////////
+  // This sample does not support fullscreen transitions.
+  ThrowIfFailed(factory->MakeWindowAssociation(Win32Application::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
 
-	// This sample does not support fullscreen transitions.
-  HRESULT HRWndAssociation = factory->MakeWindowAssociation(Win32Application::GetHwnd(),
-                                                            DXGI_MWA_NO_ALT_ENTER);
-
-  if (FAILED(HRWndAssociation)) {
-    std::exception();
-  }
-
-  //////////////////////////////////////////////////////////////////////////////
-
-  HRESULT HRQueryInterface = swapChain->QueryInterface(__uuidof(**(&m_swapChain)),
-                                                       reinterpret_cast<void**>(&m_swapChain));
-  if (FAILED(HRQueryInterface)) {
-    std::exception();
-  }
-
+  ThrowIfFailed(swapChain.As(&m_swapChain));
   m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
   //////////////////////////////////////////////////////////////////////////////
@@ -176,7 +166,7 @@ DeviceD3D12::CreateDevice() {
 
 void
 DeviceD3D12::GetHardwareAdapter(IDXGIFactory2* pFactory,
-                                std::unique_ptr<IDXGIAdapter1>* ppAdapter) {
+                                IDXGIAdapter1** ppAdapter) {
   
 	std::unique_ptr<IDXGIAdapter1> adapter;
 	*ppAdapter = nullptr;
