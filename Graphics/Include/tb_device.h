@@ -5,6 +5,8 @@
 
 namespace toyboxSDK {
 
+class SwapChain;
+
 /**
 *
 */
@@ -26,6 +28,12 @@ class TB_GRAPHICS_EXPORT Device {
   */
   virtual void
   CreateDevice() = 0;
+
+  /**
+  *
+  */
+  virtual SwapChain*
+  CreateSwapChain(const SwapChainDesc& desc, void* hwnd) const = 0;
 
  protected:
    bool m_useCPU;

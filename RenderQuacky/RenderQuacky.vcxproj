@@ -85,10 +85,10 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)Core/Include;$(SolutionDir)AI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)Core/Include;$(SolutionDir)AI/Include;$(SolutionDir)Graphics/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Utilsd.lib;Cored.lib;AId.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Utilsd.lib;Cored.lib;AId.lib;Graphicsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -98,10 +98,10 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)Core/Include;$(SolutionDir)AI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)Core/Include;$(SolutionDir)AI/Include;$(SolutionDir)Graphics/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Utilsd.lib;Cored.lib;AId.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Utilsd.lib;Cored.lib;AId.lib;Graphicsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -113,12 +113,12 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)Core/Include;$(SolutionDir)AI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)Core/Include;$(SolutionDir)AI/Include;$(SolutionDir)Graphics/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Utils.lib;Core.lib;AI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Utils.lib;Core.lib;AI.lib;Graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -130,12 +130,12 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)Core/Include;$(SolutionDir)AI/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;$(SolutionDir)Math/Include;$(SolutionDir)Core/Include;$(SolutionDir)AI/Include;$(SolutionDir)Graphics/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>Utils.lib;Core.lib;AI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Utils.lib;Core.lib;AI.lib;Graphics.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

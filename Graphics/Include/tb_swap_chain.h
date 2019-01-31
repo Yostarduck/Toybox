@@ -6,7 +6,6 @@
 namespace toyboxSDK {
 
 class Device;
-class DeviceContext;
 class RenderTarget;
 
 class TB_GRAPHICS_EXPORT SwapChain
@@ -35,38 +34,38 @@ class TB_GRAPHICS_EXPORT SwapChain
   *   Return a TB_GRAPHICS_ERROR code, ERROR_NONE means all went well.
   */
   virtual void
-  create(const Device& device, const SwapChainDesc& desc) = 0;
+  create(const Device& device, const SwapChainDesc& desc, void* hwnd) = 0;
+  
+  ///**
+  //* Get the back buffer.
+  //*
+  //* @param out texture
+  //*   The texture to fill out.
+  //*
+  //* @return
+  //*   Return a TB_GRAPHICS_ERROR code, ERROR_NONE means all went well.
+  //*/
+  //virtual RenderTarget&
+  //getBackBufferRT() = 0;
 
-  /**
-  * Get the back buffer.
-  *
-  * @param out texture
-  *   The texture to fill out.
-  *
-  * @return
-  *   Return a TB_GRAPHICS_ERROR code, ERROR_NONE means all went well.
-  */
-  virtual RenderTarget&
-  getBackBufferRT() = 0;
+  ///**
+  //* Release the allocated memory.
+  //*/
+  //virtual void
+  //release() = 0;
 
-  /**
-  * Release the allocated memory.
-  */
-  virtual void
-  release() = 0;
+  ///**
+  //* Resize back buffer.
+  //* This should be called when the application window is resized.
+  //*/
+  //virtual void
+  //resize(const Device& device, UInt32 _w, UInt32 _h) = 0;
 
-  /**
-  * Resize back buffer.
-  * This should be called when the application window is resized.
-  */
-  virtual void
-  resize(const Device& device, UInt32 _w, UInt32 _h) = 0;
-
-  /**
-  * Swaps Back and Front buffer.
-  */
-  virtual void
-  swapBuffers() = 0;
+  ///**
+  //* Swaps Back and Front buffer.
+  //*/
+  //virtual void
+  //swapBuffers() = 0;
   
   /**
   * Returns a copy of the descriptor.

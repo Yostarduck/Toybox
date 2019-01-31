@@ -8,14 +8,13 @@ namespace toyboxSDK {
 
 //TODO: Implement this classes.
 class Device;
-class DeviceContext;
 class SwapChain;
-class Texture;
-class RenderTarget;
-class BlendState;
-class DepthStencil;
-class DepthStencilState;
-class RasterizerState;
+//class Texture;
+//class RenderTarget;
+//class BlendState;
+//class DepthStencil;
+//class DepthStencilState;
+//class RasterizerState;
 
 /**
 *
@@ -72,7 +71,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   init(UInt32 w,
        UInt32 h,
        void* hwnd,
-       TB_GRAPHICS_API::E api = TB_GRAPHICS_API::E::kD3D11);
+       TB_GRAPHICS_API::E api = TB_GRAPHICS_API::E::kD3D12);
 
   /**
   * Returns which graphic is being used.
@@ -86,8 +85,8 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   }
 
  protected:
-   std::unique_ptr<Device> m_device;
-   std::unique_ptr<DeviceContext> m_deviceContext;
+   Device* m_device;
+   SwapChain* m_swapChain;
    
    void* m_hwnd;
 

@@ -33,7 +33,13 @@ class TB_GRAPHICS_EXPORT DeviceD3D12 : public Device {
   void
   CreateDevice() override;
 
-   std::unique_ptr<ID3D12Device> m_device;
+  /**
+  *
+  */
+  SwapChain*
+  CreateSwapChain(const SwapChainDesc& desc, void* hwnd) const override;
+
+   ID3D12Device* m_device;
  protected:
   /**
   * Search a hardware where the
@@ -49,7 +55,8 @@ class TB_GRAPHICS_EXPORT DeviceD3D12 : public Device {
   GetHardwareAdapter(IDXGIFactory2* pFactory, IDXGIAdapter1** ppAdapter);
 
  private:
-   std::unique_ptr<ID3D12CommandQueue> m_commandQueue;
+   ID3D12CommandQueue* m_commandQueue;
+   ID3D12CommandAllocator* m_commandAlloc;
 
 };
 

@@ -4,6 +4,7 @@
 #include "tb_graphics_defines.h"
 
 #include "tb_swap_chain.h"
+#include <dxgi1_4.h>
 #include <dxgi.h>
 #include <d3d12.h>
 
@@ -35,38 +36,38 @@ class TB_GRAPHICS_EXPORT SwapChainD3D12 : public SwapChain
   *   Return a TB_GRAPHICS_ERROR code, ERROR_NONE means all went well.
   */
   virtual void
-  create(const Device& device, const SwapChainDesc& desc) override;
+  create(const Device& device, const SwapChainDesc& desc, void* hwnd) override;
 
-  /**
-  * Get the back buffer.
-  *
-  * @param out texture
-  *   The texture to fill out.
-  *
-  * @return
-  *   Return a TB_GRAPHICS_ERROR code, ERROR_NONE means all went well.
-  */
-  virtual RenderTarget&
-  getBackBufferRT() override;
-
-  /**
-  * Release the allocated memory.
-  */
-  virtual void
-  release() override;
-
-  /**
-  * Resize back buffer.
-  * This should be called when the application window is resized.
-  */
-  virtual void
-  resize(const Device& device, UInt32 _w, UInt32 _h) override;
-
-  /**
-  * Swaps Back and Front buffer.
-  */
-  virtual void
-  swapBuffers() override;
+  ///**
+  //* Get the back buffer.
+  //*
+  //* @param out texture
+  //*   The texture to fill out.
+  //*
+  //* @return
+  //*   Return a TB_GRAPHICS_ERROR code, ERROR_NONE means all went well.
+  //*/
+  //virtual RenderTarget&
+  //getBackBufferRT() override;
+  //
+  ///**
+  //* Release the allocated memory.
+  //*/
+  //virtual void
+  //release() override;
+  //
+  ///**
+  //* Resize back buffer.
+  //* This should be called when the application window is resized.
+  //*/
+  //virtual void
+  //resize(const Device& device, UInt32 _w, UInt32 _h) override;
+  //
+  ///**
+  //* Swaps Back and Front buffer.
+  //*/
+  //virtual void
+  //swapBuffers() override;
   
   /**
   * Returns a copy of the descriptor.
@@ -84,8 +85,9 @@ class TB_GRAPHICS_EXPORT SwapChainD3D12 : public SwapChain
   SwapChainDesc m_descriptor;
 
  private:
-   IDXGISwapChain* m_swapChain;
+   IDXGISwapChain3* m_swapChain;
    ID3D12CommandQueue* m_commandQueue;
+   UInt32 m_frameIndex;
 };
 
 }

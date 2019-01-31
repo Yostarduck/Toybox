@@ -1,4 +1,5 @@
 #include "TestApplication.h"
+#include <tb_graphics_api.h>
 
 namespace toyboxSDK {
 
@@ -10,6 +11,8 @@ RenderQuackyApp::~RenderQuackyApp() {
 
 void
 RenderQuackyApp::postInit() {
+  GraphicsAPI::startUp();
+  GraphicsAPI::instance().init(1280, 720, m_hwnd);
 }
 
 void

@@ -1,4 +1,6 @@
 #include "tb_graphics_api.h"
+#include "tb_d3d12_device.h"
+#include "tb_d3d12_swap_chain.h"
 
 namespace toyboxSDK {
 
@@ -24,15 +26,16 @@ GraphicsAPI::init(UInt32 w,
   //Create device.
   //Create device context.
   if (TB_GRAPHICS_API::E::kD3D11 == api) {
-    //m_device = std::make_unique<Device>(D3D11Device);
+    //m_device = std::make_unique<Device>(new DeviceD3D11);
     //m_deviceContext = std::make_unique<DeviceContext>(new D3D11DeviceContext);
   }
   else if (TB_GRAPHICS_API::E::kD3D12 == api) {
-    //m_device = std::make_unique<Device>(D3D12Device);
+    //m_device = std::make_unique<Device>(new DeviceD3D12);
+    m_device = new DeviceD3D12;
     //m_deviceContext = std::make_unique<DeviceContext>(new D3D12DeviceContext);
   }
   else if (TB_GRAPHICS_API::E::kGL3 == api) {
-    //m_device = std::make_unique<Device>(GLDevice);
+    //m_device = std::make_unique<Device>(DeviceGL);
     //m_deviceContext = std::make_unique<DeviceContext>(new GLDeviceContext);
   }
   else if (TB_GRAPHICS_API::E::kVK_LG == api) {
@@ -50,9 +53,20 @@ GraphicsAPI::init(UInt32 w,
     exit(666);
   }
 
+  m_device->CreateDevice();
+
   m_hwnd = hwnd;
 
   //Create swap chain.
+  SwapChainDesc swapDesc;
+  swapDesc.bufferCount = 1;
+  swapDesc.windowed = true;
+  swapDesc.windowHandler = hwnd;
+  swapDesc.height = h;
+  swapDesc.width = w;
+
+  //m_swapChain = std::make_unique<SwapChain>(m_device->CreateSwapChain(swapDesc, hwnd));
+  m_swapChain = m_device->CreateSwapChain(swapDesc, hwnd);
 
   //Create a device and its context.
   //m_device->createDeviceAndDeviceContext(*m_deviceContext);
