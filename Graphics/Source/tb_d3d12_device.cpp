@@ -11,36 +11,7 @@ DeviceD3D12::~DeviceD3D12() {
 
 void
 DeviceD3D12::CreateDevice() {
-  UInt32 dxgiFactoryFlags = 0;
-
-#if TB_DEBUG_MODE
-  //Enable the debug layer (requires the Graphics Tools "optional feature").
-  //NOTE: Enabling the debug layer after device creation will invalidate the active device.
-  {
-    ID3D12Debug* dbgController;
-    HRESULT HRDbgInterface = D3D12GetDebugInterface(__uuidof(**(&dbgController)),
-                                                    (void**)(&dbgController));
-    if (SUCCEEDED(HRDbgInterface)) {
-      dbgController->EnableDebugLayer();
-
-      // Enable additional debug layers.
-      dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
-    }
-
-    dbgController->Release();
-  }
-#endif
-
-  //Factory creation
-  IDXGIFactory4* factory;
-
-  HRESULT HRFactory = CreateDXGIFactory2(dxgiFactoryFlags,
-                                         __uuidof(**(&factory)),
-                                         (void**)(&factory));
-
-  if (FAILED(HRFactory)) {
-    throw std::exception();
-  }
+  IDXGIFactory4* factory = GetFactory();
 
   //Create device
 	if (m_useCPU) {
@@ -61,7 +32,7 @@ DeviceD3D12::CreateDevice() {
     warpAdapter->Release();
 	}
 	else {
-		IDXGIAdapter1* hardwareAdapter;
+    IDXGIAdapter1* hardwareAdapter;
 		GetHardwareAdapter(factory, &hardwareAdapter);
 
     HRESULT HRCreateDevice = D3D12CreateDevice(hardwareAdapter,
@@ -93,8 +64,42 @@ DeviceD3D12::CreateSwapChain(const SwapChainDesc& desc, void* hwnd) const {
   return swapChain;
 }
 
+IDXGIFactory4*
+DeviceD3D12::GetFactory(UInt32 flags) const {
+  UInt32 dxgiFactoryFlags = flags;
+
+#if TB_DEBUG_MODE
+  // Enable the debug layer (requires the Graphics Tools "optional feature").
+  //NOTE: Enabling the debug layer after device creation will invalidate the active device.
+  {
+    ID3D12Debug* dbgController;
+    HRESULT HRDbgInterface = D3D12GetDebugInterface(__uuidof(**(&dbgController)),
+                                                    (void**)(&dbgController));
+    if (SUCCEEDED(HRDbgInterface)) {
+      dbgController->EnableDebugLayer();
+
+      // Enable additional debug layers.
+      dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+    }
+
+    dbgController->Release();
+  }
+#endif
+
+  IDXGIFactory4* factoryOut;
+  HRESULT HRFactory = CreateDXGIFactory2(dxgiFactoryFlags,
+                                         __uuidof(**(&factoryOut)),
+                                         (void**)(&factoryOut));
+
+  if (FAILED(HRFactory)) {
+    throw std::exception();
+  }
+
+  return factoryOut;
+}
+
 void
-DeviceD3D12::GetHardwareAdapter(IDXGIFactory2* pFactory,
+DeviceD3D12::GetHardwareAdapter(IDXGIFactory4* pFactory,
                                 IDXGIAdapter1** ppAdapter) {
   
 	IDXGIAdapter1* adapter;
@@ -102,7 +107,7 @@ DeviceD3D12::GetHardwareAdapter(IDXGIFactory2* pFactory,
 
 	for (UInt32 adapterIndex = 0;
        DXGI_ERROR_NOT_FOUND != pFactory->EnumAdapters1(adapterIndex,
-                                                       reinterpret_cast<IDXGIAdapter1**>(&adapter));
+                                                       (IDXGIAdapter1**)(&adapter));
        ++adapterIndex) {
 		DXGI_ADAPTER_DESC1 desc;
 		adapter->GetDesc1(&desc);

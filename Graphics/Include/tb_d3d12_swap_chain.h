@@ -21,7 +21,7 @@ class TB_GRAPHICS_EXPORT SwapChainD3D12 : public SwapChain
   /**
   * Class default destructor.
   */
-  virtual ~SwapChainD3D12();
+  ~SwapChainD3D12();
   
   /**
   * Create a swap chain
@@ -35,7 +35,7 @@ class TB_GRAPHICS_EXPORT SwapChainD3D12 : public SwapChain
   * @return
   *   Return a TB_GRAPHICS_ERROR code, ERROR_NONE means all went well.
   */
-  virtual void
+  void
   create(const Device& device, const SwapChainDesc& desc, void* hwnd) override;
 
   ///**

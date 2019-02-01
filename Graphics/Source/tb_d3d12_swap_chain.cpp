@@ -37,28 +37,12 @@ SwapChainD3D12::create(const Device& device, const SwapChainDesc& desc, void* hw
   swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
   swapChainDesc.SampleDesc.Count = 1;
 
-  IDXGIDevice* pDXGIDevice = nullptr;
-  HRESULT HRQuery = dev->QueryInterface(__uuidof(IDXGIDevice), (void**)&pDXGIDevice);
-  if (FAILED(HRQuery)) {
-    std::exception();
-  }
-
-  IDXGIAdapter* pDXGIAdapter = nullptr;
-  HRESULT HRAdapter = pDXGIDevice->GetAdapter(&pDXGIAdapter);
-  if (FAILED(HRAdapter)) {
-    std::exception();
-  }
-
-  IDXGIFactory4* factory = nullptr;
-  HRESULT HRParent = pDXGIAdapter->GetParent(__uuidof(IDXGIFactory4), (void**)&factory);
-  if (FAILED(HRParent)) {
-    std::exception();
-  }
+  IDXGIFactory4* factory = devd3d12->GetFactory();
 
   IDXGISwapChain1* swapChain;
   //Swap chain needs the queue so that it can force a flush on it.
   HRESULT HRSwapChain = factory->CreateSwapChainForHwnd(m_commandQueue,
-                                                        *reinterpret_cast<HWND*>(hwnd),
+                                                        static_cast<HWND>(hwnd),
                                                         &swapChainDesc,
                                                         nullptr,
                                                         nullptr,
@@ -68,7 +52,7 @@ SwapChainD3D12::create(const Device& device, const SwapChainDesc& desc, void* hw
     throw std::exception();
   }
 
-  HRESULT HRWindowAssociation = factory->MakeWindowAssociation(*reinterpret_cast<HWND*>(hwnd),
+  HRESULT HRWindowAssociation = factory->MakeWindowAssociation(static_cast<HWND>(hwnd),
                                                                DXGI_MWA_NO_ALT_ENTER);
 
   // This sample does not support fullscreen transitions.
@@ -84,8 +68,6 @@ SwapChainD3D12::create(const Device& device, const SwapChainDesc& desc, void* hw
 
   m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
-  pDXGIDevice->Release();
-  pDXGIAdapter->Release();
   factory->Release();
   swapChain->Release();
   /*

@@ -337,8 +337,8 @@ Update(const sf::Vector2i& mousePos, const sf::Vector2f& displaySize, float dt) 
 
   if (s_windowHasFocus) {
     if (io.WantSetMousePos) {
-      sf::Vector2i mousePos(static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
-      sf::Mouse::setPosition(mousePos);
+      sf::Vector2i newPos(static_cast<int>(io.MousePos.x), static_cast<int>(io.MousePos.y));
+      sf::Mouse::setPosition(newPos);
     } else {
       io.MousePos = mousePos;
     }
@@ -416,7 +416,7 @@ UpdateFontTexture() {
   sf::Texture& texture = *s_fontTexture;
   texture.create(width, height);
   texture.update(pixels);
-
+  
   io.Fonts->TexID = (void*)texture.getNativeHandle();
 }
 

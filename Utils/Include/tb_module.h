@@ -11,7 +11,7 @@ namespace toyboxSDK {
 * 
 */
 template<class T>
-class TB_UTIL_EXPORT Module
+class Module
 {
  public:
   

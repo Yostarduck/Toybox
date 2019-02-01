@@ -39,7 +39,12 @@ class TB_GRAPHICS_EXPORT DeviceD3D12 : public Device {
   SwapChain*
   CreateSwapChain(const SwapChainDesc& desc, void* hwnd) const override;
 
-   ID3D12Device* m_device;
+  /**
+  */
+  IDXGIFactory4*
+  GetFactory(UInt32 flags = 0) const;
+
+  ID3D12Device* m_device;
  protected:
   /**
   * Search a hardware where the
@@ -52,7 +57,7 @@ class TB_GRAPHICS_EXPORT DeviceD3D12 : public Device {
   *   
   */
   void
-  GetHardwareAdapter(IDXGIFactory2* pFactory, IDXGIAdapter1** ppAdapter);
+  GetHardwareAdapter(IDXGIFactory4* pFactory, IDXGIAdapter1** ppAdapter);
 
  private:
    ID3D12CommandQueue* m_commandQueue;

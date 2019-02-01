@@ -11,16 +11,16 @@
 **********************************************************************/
 
 #if TB_PLATFORM == TB_PLATFORM_WINDOWS
-# if defined( TB_STATIC_LIB )
+# if defined(TB_STATIC_LIB)
 #   define TB_GRAPHICS_EXPORT
 # else
 #	if defined(GRAPHICS_EXPORTS)
-#   define TB_GRAPHICS_EXPORT __declspec( dllexport )
+#   define TB_GRAPHICS_EXPORT __declspec(dllexport)
 #   else
-#     if defined( __MINGW32__ )
+#     if defined(__MINGW32__)
 #       define TB_GRAPHICS_EXPORT              //Linux systems don't need this
 #     else
-#       define TB_GRAPHICS_EXPORT __declspec( dllimport )
+#       define TB_GRAPHICS_EXPORT __declspec(dllimport)
 #     endif
 #   endif
 # endif

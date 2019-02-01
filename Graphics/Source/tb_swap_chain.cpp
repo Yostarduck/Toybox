@@ -5,11 +5,9 @@
 namespace toyboxSDK {
 
 SwapChain::SwapChain() {
-
 }
 
 SwapChain::~SwapChain() {
-
 }
 
 }

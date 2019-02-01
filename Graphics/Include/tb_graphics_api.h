@@ -32,18 +32,6 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   */
   ~GraphicsAPI();
 
-  /***
-  * Inherited via Module.
-  */
-  virtual void
-  onStartUp() override;
-
-  /***
-  * Inherited via Module.
-  */
-  virtual void
-  onShutDown() override;
-
   /**
   * Initializes the graphic API if required.
   *
@@ -67,7 +55,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   * @param api
   *   The selected graphic API.
   */
-  virtual void
+  void
   init(UInt32 w,
        UInt32 h,
        void* hwnd,
@@ -85,10 +73,22 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   }
 
  protected:
-   Device* m_device;
-   SwapChain* m_swapChain;
-   
-   void* m_hwnd;
+  std::unique_ptr<Device*> m_device;
+  std::unique_ptr<SwapChain*> m_swapChain;
+
+  /**
+  /* Inherited via Module.
+  */
+  void
+  onStartUp();
+  
+  /***
+  * Inherited via Module.
+  */
+  void
+  onShutDown();
+  
+  void* m_hwnd;
 
  private:
   TB_GRAPHICS_API::E m_SelectedGraphicAPI;

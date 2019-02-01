@@ -35,6 +35,15 @@ class TB_GRAPHICS_EXPORT Device {
   virtual SwapChain*
   CreateSwapChain(const SwapChainDesc& desc, void* hwnd) const = 0;
 
+  
+  /**
+  *
+  */
+  FORCEINLINE bool
+  UseCPU() const {
+    return m_useCPU;
+  }
+
  protected:
    bool m_useCPU;
 
