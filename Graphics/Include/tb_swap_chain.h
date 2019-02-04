@@ -2,6 +2,7 @@
 
 #include "tb_graphics_prerequisites.h"
 #include "tb_graphics_defines.h"
+#include <tb_pointer.h>
 
 namespace toyboxSDK {
 
@@ -14,12 +15,12 @@ class TB_GRAPHICS_EXPORT SwapChain
   /**
   * Class default constructor.
   */
-  SwapChain();
+  SwapChain() {};
 
   /**
   * Class default destructor.
   */
-  virtual ~SwapChain();
+  virtual ~SwapChain() {};
   
   /**
   * Create a swap chain
@@ -81,6 +82,8 @@ class TB_GRAPHICS_EXPORT SwapChain
 
  protected:
   SwapChainDesc m_descriptor;
+
+  SimpleUnique<RenderTarget> m_renderTargets[2];
 
  private:
 };

@@ -16,12 +16,12 @@ class TB_GRAPHICS_EXPORT Device {
   /**
   * Default class constructor.
   */
-  Device();
+  Device() :m_useCPU(false) {};
 
   /**
   * Default class destructor.
   */
-  virtual ~Device();
+  virtual ~Device() {};
 
   /**
   * 

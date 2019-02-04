@@ -30,17 +30,17 @@
     <ClCompile Include="Source\tb_graphics_api.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Source\tb_device.cpp">
-      <Filter>Archivos de origen\Wrapper</Filter>
-    </ClCompile>
     <ClCompile Include="Source\tb_d3d12_device.cpp">
       <Filter>Archivos de origen\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Source\tb_swap_chain.cpp">
-      <Filter>Archivos de origen\Wrapper</Filter>
-    </ClCompile>
     <ClCompile Include="Source\tb_d3d12_swap_chain.cpp">
       <Filter>Archivos de origen\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\tb_d3d12_texture.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Include\tb_d3d12_render_target.cpp">
+      <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +63,18 @@
       <Filter>Archivos de encabezado\Wrapper</Filter>
     </ClInclude>
     <ClInclude Include="Include\tb_d3d12_swap_chain.h">
+      <Filter>Archivos de encabezado\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_render_target.h">
+      <Filter>Archivos de encabezado\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_texture.h">
+      <Filter>Archivos de encabezado\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_d3d12_render_target.h">
+      <Filter>Archivos de encabezado\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_d3d12_texture.h">
       <Filter>Archivos de encabezado\D3D12</Filter>
     </ClInclude>
   </ItemGroup>

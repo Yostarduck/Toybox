@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Include\tb_command.h" />
     <ClInclude Include="Include\tb_defines.h" />
+    <ClInclude Include="Include\tb_pointer.h" />
     <ClInclude Include="Include\tb_module.h" />
     <ClInclude Include="Include\tb_random.h" />
     <ClInclude Include="Include\tb_types.h" />

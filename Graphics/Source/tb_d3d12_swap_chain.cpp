@@ -1,5 +1,6 @@
 #include"tb_d3d12_swap_chain.h"
 #include "tb_d3d12_device.h"
+#include "tb_d3d12_render_target.h"
 
 namespace toyboxSDK {
 
@@ -70,9 +71,29 @@ SwapChainD3D12::create(const Device& device, const SwapChainDesc& desc, void* hw
 
   factory->Release();
   swapChain->Release();
-  /*
-  //Create Front & Back buffer (Requires Render target & Texture)
 
+  //////////////////////////////////////////////////////////////////////////////
+  
+  TextureDesc backDesc;
+  backDesc.dimension = TB_DIMENSION::E::k2D;
+  backDesc.width = desc.width;
+  backDesc.height = desc.height;
+  backDesc.Format = TB_FORMAT::kR8G8B8A8_UNORM;
+  backDesc.pitch = backDesc.width * 4 * 1;
+  backDesc.mipLevels = 0;
+  backDesc.genMipMaps = true;
+  backDesc.bindFlags = TB_BIND_FLAGS::E::kSHADER_RESOURCE |
+                       TB_BIND_FLAGS::E::kRENDER_TARGET;
+
+  m_renderTargets[0] = tb_simple_unique<RenderTarget>(new RenderTargetD3D12);
+  m_renderTargets[1] = tb_simple_unique<RenderTarget>(new RenderTargetD3D12);
+
+  m_renderTargets[0]->create(device, backDesc, 1);
+
+
+  //////////////////////////////////////////////////////////////////////////////
+  //Create Front
+  /*
   // Create descriptor heaps.
   {
     // Describe and create a render target view (RTV) descriptor heap.
