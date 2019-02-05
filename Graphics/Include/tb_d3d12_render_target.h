@@ -2,6 +2,8 @@
 
 #include "tb_render_target.h"
 
+#include <tb_pointer.h>
+
 #include <dxgi1_4.h>
 #include <dxgi.h>
 #include <d3d12.h>
@@ -14,12 +16,12 @@ class TB_GRAPHICS_EXPORT RenderTargetD3D12 : public RenderTarget
   /**
   * Class default constructor.
   */
-  RenderTargetD3D12() = default;
+  RenderTargetD3D12();
 
   /**
   * Class default destructor.
   */
-  ~RenderTargetD3D12() = default;
+  ~RenderTargetD3D12();
 
   /**
   * Inherited from RenderTarget.
@@ -47,7 +49,10 @@ class TB_GRAPHICS_EXPORT RenderTargetD3D12 : public RenderTarget
  protected:
 
  private:
-   std::vector<std::unique_ptr<ID3D12Resource>> m_renderTarget;
+  ID3D12DescriptorHeap* m_rtvHeap;
+  UInt32 m_rtvDescriptorSize;
+
+  //std::vector<std::unique_ptr<ID3D12Resource>> m_renderTarget;
 
 };
 

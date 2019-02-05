@@ -36,11 +36,11 @@
     <ClCompile Include="Source\tb_d3d12_swap_chain.cpp">
       <Filter>Archivos de origen\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Include\tb_d3d12_texture.cpp">
-      <Filter>Archivos de origen</Filter>
+    <ClCompile Include="Source\tb_d3d12_render_target.cpp">
+      <Filter>Archivos de origen\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Include\tb_d3d12_render_target.cpp">
-      <Filter>Archivos de origen</Filter>
+    <ClCompile Include="Source\tb_d3d12_texture.cpp">
+      <Filter>Archivos de origen\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

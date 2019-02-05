@@ -45,6 +45,8 @@ class TB_GRAPHICS_EXPORT DeviceD3D12 : public Device {
   GetFactory(UInt32 flags = 0) const;
 
   ID3D12Device* m_device;
+  ID3D12CommandQueue* m_commandQueue;
+  ID3D12CommandAllocator* m_commandAlloc;
  protected:
   /**
   * Search a hardware where the
@@ -60,9 +62,6 @@ class TB_GRAPHICS_EXPORT DeviceD3D12 : public Device {
   GetHardwareAdapter(IDXGIFactory4* pFactory, IDXGIAdapter1** ppAdapter);
 
  private:
-   ID3D12CommandQueue* m_commandQueue;
-   ID3D12CommandAllocator* m_commandAlloc;
-
 };
 
 }

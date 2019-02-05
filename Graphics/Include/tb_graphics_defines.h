@@ -482,7 +482,9 @@ struct TB_GRAPHICS_EXPORT TextureDesc {
   UInt32 mipLevels;
   UInt32 CPUAccessFlags;
   UInt32 bindFlags;
+  UInt32 arraySize;
   bool genMipMaps;
+  bool cubeMap;
   TextureDesc() {
     Format = TB_FORMAT::E::kB4G4R4A4_UNORM;
     Usage = TB_BUFFER_USAGE::E::kDefault;
@@ -493,7 +495,9 @@ struct TB_GRAPHICS_EXPORT TextureDesc {
     mipLevels = 0;
     CPUAccessFlags = 0;
     bindFlags = 0;
+    arraySize = 1;
     genMipMaps = false;
+    cubeMap = false;
   }
 };
 

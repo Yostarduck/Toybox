@@ -86,7 +86,6 @@ class TB_GRAPHICS_EXPORT SwapChainD3D12 : public SwapChain
 
  private:
    IDXGISwapChain3* m_swapChain;
-   ID3D12CommandQueue* m_commandQueue;
    UInt32 m_frameIndex;
 };
 

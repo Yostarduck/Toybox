@@ -45,16 +45,29 @@ DeviceD3D12::CreateDevice() {
     hardwareAdapter->Release();
 	}
 
-  //////////////////////////////////////////////////////////////////////////////
+  factory->Release();
 
-  HRESULT HRCommandAllocator = m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
-                                                                __uuidof(**(&m_commandAlloc)),
-                                                                (void**)(&m_commandAlloc));
-  if (FAILED(HRCommandAllocator)) {
+  //Create the command queue.
+  D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+  queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
+  queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
+
+  HRESULT HRCommandQueue = m_device->CreateCommandQueue(&queueDesc,
+                                                        __uuidof(**(&m_commandQueue)),
+                                                        (void**)(&m_commandQueue));
+
+  if (FAILED(HRCommandQueue)) {
     std::exception();
   }
 
-  factory->Release();
+  //Create command allocator
+  HRESULT HRCommandAllocator = m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
+                                                                __uuidof(**(&m_commandAlloc)),
+                                                                (void**)(&m_commandAlloc));
+
+  if (FAILED(HRCommandAllocator)) {
+    std::exception();
+  }
 }
 
 SwapChain*

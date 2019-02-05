@@ -15,19 +15,6 @@ SwapChainD3D12::create(const Device& device, const SwapChainDesc& desc, void* hw
   const DeviceD3D12* devd3d12 = reinterpret_cast<const DeviceD3D12*>(&device);
   ID3D12Device* dev = devd3d12->m_device;
 
-  // Describe and create the command queue.
-  D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-  queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-  queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-
-  HRESULT HRCommand = dev->CreateCommandQueue(&queueDesc,
-                                              __uuidof(**(&m_commandQueue)),
-                                              (void**)(&m_commandQueue));
-
-  if (FAILED(HRCommand)) {
-    throw std::exception();
-  }
-
   // Describe and create the swap chain.
   DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
   swapChainDesc.BufferCount = desc.bufferCount;
@@ -42,7 +29,7 @@ SwapChainD3D12::create(const Device& device, const SwapChainDesc& desc, void* hw
 
   IDXGISwapChain1* swapChain;
   //Swap chain needs the queue so that it can force a flush on it.
-  HRESULT HRSwapChain = factory->CreateSwapChainForHwnd(m_commandQueue,
+  HRESULT HRSwapChain = factory->CreateSwapChainForHwnd(devd3d12->m_commandQueue,
                                                         static_cast<HWND>(hwnd),
                                                         &swapChainDesc,
                                                         nullptr,
@@ -56,6 +43,8 @@ SwapChainD3D12::create(const Device& device, const SwapChainDesc& desc, void* hw
   HRESULT HRWindowAssociation = factory->MakeWindowAssociation(static_cast<HWND>(hwnd),
                                                                DXGI_MWA_NO_ALT_ENTER);
 
+  factory->Release();
+
   // This sample does not support fullscreen transitions.
   if (FAILED(HRWindowAssociation)) {
     throw std::exception();
@@ -68,8 +57,6 @@ SwapChainD3D12::create(const Device& device, const SwapChainDesc& desc, void* hw
   }
 
   m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-
-  factory->Release();
   swapChain->Release();
 
   //////////////////////////////////////////////////////////////////////////////

@@ -3,10 +3,17 @@
 
 namespace toyboxSDK {
 
+RenderTargetD3D12::RenderTargetD3D12() : m_rtvDescriptorSize(0) {
+}
+
+RenderTargetD3D12::~RenderTargetD3D12() {
+}
+
 void
 RenderTargetD3D12::create(const Device& device,
                           const TextureDesc& desc,
                           UInt32 numRTs) {
+  /*
   const DeviceD3D12* devd3d12 = reinterpret_cast<const DeviceD3D12*>(&device);
   ID3D12Device* dev = devd3d12->m_device;
 
@@ -41,6 +48,7 @@ RenderTargetD3D12::create(const Device& device,
       rtvHandle.Offset(1, m_rtvDescriptorSize);
     }
   }
+  */
 }
 
 void
