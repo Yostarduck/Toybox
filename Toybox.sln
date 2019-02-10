@@ -51,6 +51,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Graphics\Graphi
 		{6248805A-6156-4894-BB35-50BA6F5DE452} = {6248805A-6156-4894-BB35-50BA6F5DE452}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cypherTool", "cypherTool\cypherTool.vcxproj", "{D628794F-5A3E-46FA-B8CE-5BE93B9010EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -131,6 +133,14 @@ Global
 		{66AD476B-3338-4AC9-94FF-768A0E1672A5}.Release|x64.Build.0 = Release|x64
 		{66AD476B-3338-4AC9-94FF-768A0E1672A5}.Release|x86.ActiveCfg = Release|Win32
 		{66AD476B-3338-4AC9-94FF-768A0E1672A5}.Release|x86.Build.0 = Release|Win32
+		{D628794F-5A3E-46FA-B8CE-5BE93B9010EC}.Debug|x64.ActiveCfg = Debug|x64
+		{D628794F-5A3E-46FA-B8CE-5BE93B9010EC}.Debug|x64.Build.0 = Debug|x64
+		{D628794F-5A3E-46FA-B8CE-5BE93B9010EC}.Debug|x86.ActiveCfg = Debug|Win32
+		{D628794F-5A3E-46FA-B8CE-5BE93B9010EC}.Debug|x86.Build.0 = Debug|Win32
+		{D628794F-5A3E-46FA-B8CE-5BE93B9010EC}.Release|x64.ActiveCfg = Release|x64
+		{D628794F-5A3E-46FA-B8CE-5BE93B9010EC}.Release|x64.Build.0 = Release|x64
+		{D628794F-5A3E-46FA-B8CE-5BE93B9010EC}.Release|x86.ActiveCfg = Release|Win32
+		{D628794F-5A3E-46FA-B8CE-5BE93B9010EC}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
