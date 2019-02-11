@@ -24,6 +24,9 @@
     <ClCompile Include="Source\letterMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="textCypher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\codecString.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\letterMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="textCypher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

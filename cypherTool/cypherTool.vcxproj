@@ -22,11 +22,13 @@
     <ClCompile Include="Source\codecString.cpp" />
     <ClCompile Include="Source\letterMap.cpp" />
     <ClCompile Include="Source\main.cpp" />
+    <ClCompile Include="textCypher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\codecString.h" />
     <ClInclude Include="Include\cypherUtilities.h" />
     <ClInclude Include="Include\letterMap.h" />
+    <ClInclude Include="textCypher.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

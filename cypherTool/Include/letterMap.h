@@ -15,7 +15,6 @@ namespace toyboxSDK {
 using std::map;
 using std::pair;
 using std::priority_queue;
-using std::string;
 using std::vector;
 
 class letterMap
@@ -46,12 +45,14 @@ class letterMap
   /**
    * Map of letters with amount of use
    */
-  map<char, int> m_dictionary;
+  map<WChar, Int32> m_dictionary;
 
   /**
    * Sorted chars by use
    */
-  priority_queue< pair<char, int>, vector<pair<char, int>>, higherPair> m_sortedDictionary;
+  priority_queue<       pair<WChar, Int32>, 
+                 vector<pair<WChar, Int32>>, 
+                 higherPair>                  m_sortedDictionary;
 };
 
 }

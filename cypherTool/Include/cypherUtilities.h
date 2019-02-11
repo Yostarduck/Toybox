@@ -9,22 +9,24 @@
 /*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
 #pragma once
 
-#include <map>
-#include <vector>
-#include <queue>
 #include <algorithm>
+#include <map>
+#include <queue>
 #include <string>
+#include <vector>
+#include <tb_types.h>
 
 namespace toyboxSDK {
 
 using std::pair;
 using std::multimap;
 
-struct higherPair : public std::binary_function<pair<char, int>,
-                                                pair<char, int>,
+struct higherPair : public std::binary_function<pair<WChar, Int32>,
+                                                pair<WChar, Int32>,
                                                 bool>
 {
-  bool operator()(const pair<char, int> left, pair<char, int> right) const {
+  bool operator()(const pair<WChar, Int32> left, 
+                        pair<WChar, Int32> right) const {
     return left.second < right.second;
   }
 };
