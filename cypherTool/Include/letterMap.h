@@ -33,10 +33,7 @@ class letterMap
   ~letterMap() = default;
 
   /**
-   * @brief Loads the map with the letters by use in the language
-   * @param 
-   * @return 
-   *
+   * @brief Loads the map with the letters by use in the language.
    */
   void
   loadMap();

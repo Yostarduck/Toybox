@@ -21,7 +21,8 @@ codecString::codecString(string input) {
 
 void
 codecString::createMap() {
-  string alphabet = "abcdefghijklmn0opqrstuvwxyz";
+  string alphabet = "abcdefghijklmn@opqrstuvwxyz"; //esp
+  string alphabet = "etaoinshrdlcumwfgypbvkjxqz"; //eng
   
   m_dictionary.clear();
   for (char& c : alphabet) {
