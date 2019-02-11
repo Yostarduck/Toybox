@@ -12,7 +12,6 @@
 
 namespace toyboxSDK {
 
-using std::string;
 using std::map;
 using std::multimap;
 using std::vector;
@@ -33,7 +32,7 @@ class codecString
    * @param input
    *   The string to be sorted.
    */
-  codecString(string input);
+  codecString(WString input);
 
   /**
    * Default destructor
@@ -51,17 +50,19 @@ class codecString
   /**
    * Coded string
    */
-  string m_string;
+  WString m_string;
 
   /**
    * Map of how many times each letter repeats itself
    */
-  map<char, int> m_dictionary;
+  map<WChar, Int32> m_dictionary;
 
   /**
    * Sorted chars by use from higher to lower
    */
-  priority_queue< pair<char, int>, vector<pair<char, int>>, higherPair> m_sortedDictionary;
+  priority_queue<       pair<WChar, Int32>, 
+                 vector<pair<WChar, Int32>>, 
+                 higherPair>                 m_sortedDictionary;
 };
 
 }
