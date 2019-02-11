@@ -11,47 +11,47 @@
 #include "cypherUtilities.h"
 
 namespace toyboxSDK {
-  using std::map;
-  using std::pair;
-  using std::priority_queue;
-  using std::string;
-  using std::vector;
 
-  class letterMap
-  {
-   public:
-    
-    /**
-     * Default constructor
-     */
-    letterMap() = default;
+using std::map;
+using std::pair;
+using std::priority_queue;
+using std::string;
+using std::vector;
+
+class letterMap
+{
+ public:
   
-    /**
-     * Default destructor
-     */
-    ~letterMap() = default;
+  /**
+   * Default constructor
+   */
+  letterMap() = default;
+
+  /**
+   * Default destructor
+   */
+  ~letterMap() = default;
+
+  /**
+   * @brief Loads the map with the letters by use in the language
+   * @param 
+   * @return 
+   *
+   */
+  void
+  loadMap();
+
+ public:
   
-    /**
-     * @brief Loads the map with the letters by use in the language
-     * @param 
-     * @return 
-     *
-     */
-    void
-    loadMap();
+  /**
+   * Map of letters with amount of use
+   */
+  map<char, int> m_dictionary;
 
-   public:
+  /**
+   * Sorted chars by use
+   */
+  priority_queue< pair<char, int>, vector<pair<char, int>>, higherPair> m_sortedDictionary;
+};
 
-    /**
-     * Map of letters with amount of use
-     */
-    map<char, int> m_dictionary;
-
-    /**
-     * Sorted chars by use
-     */
-    priority_queue< pair<char, int>, vector<pair<char, int>>, higherPair> m_sortedDictionary;
-  };
-  
 }
-

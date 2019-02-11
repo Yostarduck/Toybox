@@ -11,10 +11,11 @@
 #include "letterMap.h"
 
 namespace toyboxSDK {
-  void
-  letterMap::loadMap() {
-    m_dictionary.clear();
 
-  }
+void
+letterMap::loadMap() {
+  m_dictionary.clear();
+}
+
 }
 
