@@ -2,7 +2,7 @@
 
 namespace toyboxSDK {
 
-codecString::codecString(string input) {
+codecString::codecString(WString input) {
   m_string = input;
 
   //Makes the whole string to lowercase.
@@ -21,15 +21,15 @@ codecString::codecString(string input) {
 
 void
 codecString::createMap() {
-  string alphabet = "abcdefghijklmn@opqrstuvwxyz"; //esp
-  string alphabet = "etaoinshrdlcumwfgypbvkjxqz"; //eng
+  WString alphabet = _T("abcdefghijklmn@opqrstuvwxyz"); //esp
+  //String alphabet = "etaoinshrdlcumwfgypbvkjxqz"; //eng
   
   m_dictionary.clear();
-  for (char& c : alphabet) {
+  for (WChar& c : alphabet) {
     m_dictionary.insert(std::make_pair(c, 0));
   }
 
-  for (char& c : m_string) {
+  for (WChar& c : m_string) {
     m_dictionary[c] += 1;
   }
 

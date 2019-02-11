@@ -47,9 +47,9 @@ class letterMap
   /**
    * Sorted chars by use
    */
-  priority_queue<       pair<WChar, Int32>, 
+  priority_queue<pair<WChar, Int32>, 
                  vector<pair<WChar, Int32>>, 
-                 higherPair>                  m_sortedDictionary;
+                 higherPair> m_sortedDictionary;
 };
 
 }

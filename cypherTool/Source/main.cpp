@@ -10,8 +10,8 @@
 #include "letterMap.h"
 #include "codecString.h"
 
-int
-main(int argc, char* argv[]) {
+toyboxSDK::Int32
+main(toyboxSDK::Int32 argc, toyboxSDK::WChar* argv[]) {
 
   return 0;
 }
