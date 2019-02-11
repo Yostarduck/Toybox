@@ -43,9 +43,45 @@ public:
    */
   ~textCypher() = default;
 
+  /**
+   * @brief Basically Caesar but with a specific key
+   * @param WString input, WChar key for the first letter of the offset, WString alphabet
+   * @return the decoded string
+   *
+   */
+  static WString vignereDecrypt(WString input, WChar first, WString alphabet) {
+    UInt32 i = 0;
+    vector<WChar> original;
+    WString output = _T("");
+
+    auto it = m_alphabetMap.find(alphabet);
+
+    //Checks if the alphabet actually exists
+    if (it == m_alphabetMap.end()) {
+      //Doest return a shifted text
+      cout << "Alphabet not mapped" << endl;
+      return output;
+    }
+    original = it->second;
+
+    //Gets the int corresponding to the char
+    for (i = 0; i < original.size(); ++i) {
+      if (first == original[i]) {
+        return caesarDecrypt(input, i, alphabet);
+      }
+    }
+
+  }
+
+  /**
+   * @brief codex based in an offset
+   * @param WString input, offset for the first letter of the offset, WString alphabet
+   * @return the decoded string
+   *
+   */
   static WString caesarDecrypt(WString input, Int32 offset, WString alphabet) {
     //Variables
-    vector<WChar> shifted;
+    map<WChar, WChar> shifted;
     vector<WChar> original;
     WString output = _T("");
     
@@ -68,14 +104,13 @@ public:
       if (i + offset < 0) {
         shift += original.size();
       }
-      shifted[i] = original[i + offset];
+      shifted.insert(std::make_pair(original[i], original[shift]));
     }
 
     //Decrypts the text
-
-    for (WChar& c : input) {
+    for (WChar c : input) {
       if (isalpha(c)) {
-
+        c = shifted[c];
       }
       output += c;
     }
