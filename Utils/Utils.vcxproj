@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Include\tb_command.h" />
     <ClInclude Include="Include\tb_defines.h" />
+    <ClInclude Include="Include\tb_file.h" />
     <ClInclude Include="Include\tb_pointer.h" />
     <ClInclude Include="Include\tb_module.h" />
     <ClInclude Include="Include\tb_random.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="Include\tileResources.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\tb_file.cpp" />
     <ClCompile Include="Source\sfmlOperators.cpp" />
     <ClCompile Include="Source\tb_random.cpp" />
   </ItemGroup>
