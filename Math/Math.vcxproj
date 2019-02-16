@@ -85,6 +85,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>MATH_EXPORTS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -96,6 +97,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>MATH_EXPORTS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -109,6 +111,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>MATH_EXPORTS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -124,6 +127,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>MATH_EXPORTS</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -132,6 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Include\tb_math_defines.h" />
     <ClInclude Include="Include\tb_math_prerequisites.h" />
     <ClInclude Include="Include\tb_Matrix3.h" />
     <ClInclude Include="Include\tb_Matrix4.h" />
@@ -140,6 +145,7 @@
     <ClInclude Include="Include\tb_Vector4.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\tb_math_defines.cpp" />
     <ClCompile Include="Source\tb_Matrix3.cpp" />
     <ClCompile Include="Source\tb_Matrix4.cpp" />
     <ClCompile Include="Source\tb_Vector2.cpp" />
