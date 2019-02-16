@@ -12,7 +12,7 @@ SwapChainD3D12::~SwapChainD3D12() {
 
 void
 SwapChainD3D12::create(const Device* device, const SwapChainDesc& desc, void* hwnd) {
-  const DeviceD3D12* devd3d12 = reinterpret_cast<const DeviceD3D12*>(&device);
+  const DeviceD3D12* devd3d12 = reinterpret_cast<const DeviceD3D12*>(device);
   ID3D12Device* dev = devd3d12->m_device;
 
   // Describe and create the swap chain.

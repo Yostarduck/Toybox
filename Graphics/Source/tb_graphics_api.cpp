@@ -1,13 +1,14 @@
 #include "tb_graphics_api.h"
 
+#include <tb_types.h>
+#include <tb_string_utils.h>
+
 #include "tb_device.h"
 #include "tb_swap_chain.h"
 #include "tb_render_target.h"
 
 #include "tb_d3d12_device.h"
-#include "tb_d3d12_swap_chain.h""
-#include "tb_d3d12_render_target.h"
-
+#include "tb_d3d12_shader.h"
 
 namespace toyboxSDK {
 
@@ -78,10 +79,13 @@ GraphicsAPI::init(UInt32 w,
   td.height = 720;
   td.Format = TB_FORMAT::kR32G32B32A32_FLOAT;
   
-  RenderTarget* RTTest = new RenderTargetD3D12;
-  RTTest->create(m_device.get(), td, 3);
-
   //m_swapChain = m_device->CreateSwapChain(swapDesc, hwnd);
+
+  WString wshader_path = _T("Hola");
+  String str = StringUtils::toString(wshader_path);
+  
+  Shader* cpShder = new ShaderD3D12();
+  cpShder->create(wshader_path, TB_SHADER_TYPE::E::kCompute);
 
   //Create a device and its context.
   //m_device->createDeviceAndDeviceContext(*m_deviceContext);

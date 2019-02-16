@@ -2,6 +2,7 @@
 
 #include "tb_graphics_prerequisites.h"
 #include "tb_graphics_defines.h"
+#include <tb_types.h>
 
 namespace toyboxSDK {
 
@@ -31,7 +32,7 @@ class TB_GRAPHICS_EXPORT Shader {
   *   successfully compiled.
   */
   virtual bool
-  create(String filepath,
+  create(WString filepath,
          TB_SHADER_TYPE::E type) = 0;
 
   /**

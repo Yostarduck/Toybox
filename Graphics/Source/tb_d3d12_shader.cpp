@@ -7,7 +7,7 @@
 namespace toyboxSDK {
 
 bool
-ShaderD3D12::create(String filepath, TB_SHADER_TYPE::E type) {
+ShaderD3D12::create(WString filepath, TB_SHADER_TYPE::E type) {
   
 #if TB_DEBUG_MODE
   // Enable better shader debugging with the graphics debugging tools.
@@ -54,7 +54,7 @@ ShaderD3D12::create(String filepath, TB_SHADER_TYPE::E type) {
     break;
   }
 
-  HRESULT HRShader = D3DCompileFromFile(StringUtils::toWString(filepath).c_str(),
+  HRESULT HRShader = D3DCompileFromFile(filepath.c_str(),
                                         nullptr,
                                         D3D_COMPILE_STANDARD_FILE_INCLUDE,
                                         "main",

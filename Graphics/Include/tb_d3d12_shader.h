@@ -4,6 +4,8 @@
 #include "tb_graphics_defines.h"
 #include "tb_shader.h"
 
+#include <d3d12.h>
+
 namespace toyboxSDK {
 
 /**
@@ -25,7 +27,7 @@ class TB_GRAPHICS_EXPORT ShaderD3D12 : public Shader {
   * Inherited via Shader
   */
   bool
-  create(String filepath,
+  create(WString filepath,
          TB_SHADER_TYPE::E type) override;
 
   /**

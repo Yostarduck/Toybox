@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tb_utils_prerequisites.h"
+
 #include <sstream>
 #include <type_traits>
 #include <iostream>
@@ -12,7 +13,7 @@ namespace toyboxSDK {
 struct TB_UTIL_EXPORT StringUtils
 {
   /**
-  * Converts string into a utf-8 string.
+  * Converts tstring into a utf-8 string.
   * 
   * @param tstring
   *  The string dependent on the character set selected for the project.
@@ -20,27 +21,22 @@ struct TB_UTIL_EXPORT StringUtils
   * @return
   *   The utf-8 string.
   */
+ 
+  /*static String
+  toString(const TString& tstring);*/
+
   static String
   toString(const String& string) {
     return string;
   }
   
-  /**
-  * Converts wstring into a utf-8 string.
-  *
-  * @param tstring
-  *  The string dependent on the character set selected for the project.
-  *
-  * @return
-  *   The utf-8 string.
-  */
   static FORCEINLINE String
   toString(const WString& wstring) {
     return std::wstring_convert<std::codecvt_utf8_utf16<WChar>>().to_bytes(wstring);
   }
 
   /**
-  * Converts wstring into a utf-16 string.
+  * Converts tstring into a utf-16 string.
   * 
   * @param tstring
   *  The string dependent on the character set selected for the project.
@@ -48,20 +44,15 @@ struct TB_UTIL_EXPORT StringUtils
   * @return 
   *   The utf-16 string.
   */
+
+  /*static WString
+  toWString(const TString& tstring);*/
   static FORCEINLINE WString
-  toWString(const WString& wstring) {
+  toWString(const WString& wstring)
+  {
     return wstring;
   }
 
-  /**
-  * Converts wstring into a utf-16 string.
-  *
-  * @param tstring
-  *  The string dependent on the character set selected for the project.
-  *
-  * @return
-  *   The utf-16 string.
-  */
   static FORCEINLINE WString
   toWString(const String& string) {
     return std::wstring_convert<std::codecvt_utf8_utf16<WChar>>().from_bytes(string);
@@ -77,7 +68,8 @@ struct TB_UTIL_EXPORT StringUtils
            std::streamsize precision,
            std::streamsize width = 0,
            String::value_type fill = 0, 
-           std::ios::fmtflags flags = 0) {
+           std::ios::fmtflags flags = 0) 
+  {
     return toStringBase<String::value_type>(value, 
                                             precision, 
                                             width, 
@@ -94,7 +86,8 @@ struct TB_UTIL_EXPORT StringUtils
   toString(Integer value, 
            std::streamsize width = 0,
            String::value_type fill = 0, 
-           std::ios::fmtflags flags = 0)  {
+           std::ios::fmtflags flags = 0) 
+  {
     return toStringBase<String::value_type>(value, 0, width, fill, flags);
   }
 
@@ -118,7 +111,7 @@ struct TB_UTIL_EXPORT StringUtils
   }
 
   /**
-  * Converts an integer number into a WString.
+  * Converts an integer number into a wstring.
   */
   template<typename Integer, 
            typename = typename std::enable_if<std::is_integral<Integer>::value>::type>
@@ -132,7 +125,7 @@ struct TB_UTIL_EXPORT StringUtils
   }
   
   /**
-  * Converts a real number into a TString (depends on character set of project).
+  * Converts a real number into a tstring(depends on character set of project).
   */
   template<typename Real, 
            typename = typename std::enable_if<std::is_floating_point<Real>::value>::type>
@@ -147,7 +140,7 @@ struct TB_UTIL_EXPORT StringUtils
   }
 
   /**
-  * Converts an integer number into a TString(depends on character set of project).
+  * Converts an integer number into a tstring(depends on character set of project).
   */
   template<typename Integer, 
            typename = typename std::enable_if<std::is_integral<Integer>::value>::type>
@@ -185,7 +178,8 @@ struct TB_UTIL_EXPORT StringUtils
            typename CharType,
            typename = typename std::enable_if<std::is_integral<IntType>::value>::type>
   static FORCEINLINE IntType 
-  toInt(const std::basic_string<CharType>& string) {
+  toInt(const std::basic_string<CharType>& string) 
+  {
     return toNumber<IntType>(string);
   }
 
@@ -196,7 +190,8 @@ struct TB_UTIL_EXPORT StringUtils
            typename CharType,
            typename = typename std::enable_if<std::is_floating_point<RealType>::value>::type>
   static FORCEINLINE RealType 
-  toReal(const std::basic_string<CharType>& string) {
+  toReal(const std::basic_string<CharType>& string) 
+  {
     return toNumber<RealType>(string);
   }
 
@@ -209,7 +204,8 @@ struct TB_UTIL_EXPORT StringUtils
                std::streamsize precision,
                std::streamsize width = 0,
                typename std::basic_string<CharType>::value_type fill = 0, 
-               std::ios::fmtflags flags = 0) {
+               std::ios::fmtflags flags = 0) 
+  {
     std::basic_ostringstream<CharType> stream;
     stream.precision(precision);
     stream.width(width);
@@ -222,7 +218,8 @@ struct TB_UTIL_EXPORT StringUtils
   template<typename NumberType,
            typename CharType>
   static FORCEINLINE NumberType
-  toNumber(const std::basic_string<CharType>& string) {
+  toNumber(const std::basic_string<CharType>& string)
+  {
     std::basic_istringstream<CharType> stream(string);
     NumberType temp;
     stream >> temp;
