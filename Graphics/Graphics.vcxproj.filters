@@ -42,6 +42,9 @@
     <ClCompile Include="Source\tb_d3d12_texture.cpp">
       <Filter>Archivos de origen\D3D12</Filter>
     </ClCompile>
+    <ClCompile Include="Source\tb_d3d12_shader.cpp">
+      <Filter>Archivos de origen\D3D12</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\tb_graphics_api.h">
@@ -79,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="Include\tb_shader.h">
       <Filter>Archivos de encabezado\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_d3d12_shader.h">
+      <Filter>Archivos de encabezado\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

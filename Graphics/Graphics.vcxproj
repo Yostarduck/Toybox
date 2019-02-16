@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClCompile Include="Source\tb_d3d12_device.cpp" />
     <ClCompile Include="Source\tb_d3d12_render_target.cpp" />
+    <ClCompile Include="Source\tb_d3d12_shader.cpp" />
     <ClCompile Include="Source\tb_d3d12_swap_chain.cpp" />
     <ClCompile Include="Source\tb_d3d12_texture.cpp" />
     <ClCompile Include="Source\tb_graphics_api.cpp" />
@@ -153,6 +154,7 @@
   <ItemGroup>
     <ClInclude Include="Include\tb_d3d12_device.h" />
     <ClInclude Include="Include\tb_d3d12_render_target.h" />
+    <ClInclude Include="Include\tb_d3d12_shader.h" />
     <ClInclude Include="Include\tb_d3d12_swap_chain.h" />
     <ClInclude Include="Include\tb_d3d12_texture.h" />
     <ClInclude Include="Include\tb_device.h" />

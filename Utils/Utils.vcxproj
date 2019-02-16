@@ -25,6 +25,7 @@
     <ClInclude Include="Include\tb_pointer.h" />
     <ClInclude Include="Include\tb_module.h" />
     <ClInclude Include="Include\tb_random.h" />
+    <ClInclude Include="Include\tb_string_utils.h" />
     <ClInclude Include="Include\tb_types.h" />
     <ClInclude Include="Include\tb_utils_prerequisites.h" />
     <ClInclude Include="Include\tileResources.h" />
