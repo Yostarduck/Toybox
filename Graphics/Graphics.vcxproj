@@ -89,7 +89,7 @@
       <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d3d11.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;Utilsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;Utilsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -103,7 +103,7 @@
       <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include;$(SolutionDir)Utils/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>d3d11.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;Utilsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;Utilsd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -121,7 +121,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>d3d11.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;Utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;Utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -139,20 +139,22 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>d3d11.lib;d3d12.lib;dxgi.lib;d3dcompiler.lib;Utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d12.lib;dxgi.lib;d3dcompiler.lib;Utils.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(TOYBOX_DEPENDENCIES)Lib\$(PlatformTarget);$(SolutionDir)Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Include\tb_d3d12_render_target.cpp" />
-    <ClCompile Include="Include\tb_d3d12_texture.cpp" />
     <ClCompile Include="Source\tb_d3d12_device.cpp" />
+    <ClCompile Include="Source\tb_d3d12_render_target.cpp" />
+    <ClCompile Include="Source\tb_d3d12_shader.cpp" />
     <ClCompile Include="Source\tb_d3d12_swap_chain.cpp" />
+    <ClCompile Include="Source\tb_d3d12_texture.cpp" />
     <ClCompile Include="Source\tb_graphics_api.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\tb_d3d12_device.h" />
     <ClInclude Include="Include\tb_d3d12_render_target.h" />
+    <ClInclude Include="Include\tb_d3d12_shader.h" />
     <ClInclude Include="Include\tb_d3d12_swap_chain.h" />
     <ClInclude Include="Include\tb_d3d12_texture.h" />
     <ClInclude Include="Include\tb_device.h" />
@@ -160,6 +162,7 @@
     <ClInclude Include="Include\tb_graphics_defines.h" />
     <ClInclude Include="Include\tb_graphics_prerequisites.h" />
     <ClInclude Include="Include\tb_render_target.h" />
+    <ClInclude Include="Include\tb_shader.h" />
     <ClInclude Include="Include\tb_swap_chain.h" />
     <ClInclude Include="Include\tb_texture.h" />
   </ItemGroup>

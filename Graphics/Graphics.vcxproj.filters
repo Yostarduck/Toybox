@@ -36,11 +36,14 @@
     <ClCompile Include="Source\tb_d3d12_swap_chain.cpp">
       <Filter>Archivos de origen\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Include\tb_d3d12_texture.cpp">
-      <Filter>Archivos de origen</Filter>
+    <ClCompile Include="Source\tb_d3d12_render_target.cpp">
+      <Filter>Archivos de origen\D3D12</Filter>
     </ClCompile>
-    <ClCompile Include="Include\tb_d3d12_render_target.cpp">
-      <Filter>Archivos de origen</Filter>
+    <ClCompile Include="Source\tb_d3d12_texture.cpp">
+      <Filter>Archivos de origen\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_d3d12_shader.cpp">
+      <Filter>Archivos de origen\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,6 +78,12 @@
       <Filter>Archivos de encabezado\D3D12</Filter>
     </ClInclude>
     <ClInclude Include="Include\tb_d3d12_texture.h">
+      <Filter>Archivos de encabezado\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_shader.h">
+      <Filter>Archivos de encabezado\Wrapper</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_d3d12_shader.h">
       <Filter>Archivos de encabezado\D3D12</Filter>
     </ClInclude>
   </ItemGroup>
