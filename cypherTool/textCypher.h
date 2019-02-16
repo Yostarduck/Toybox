@@ -67,9 +67,10 @@ public:
     //Gets the int corresponding to the char
     for (i = 0; i < original.size(); ++i) {
       if (first == original[i]) {
-        return caesarDecrypt(input, i, alphabet);
+        break;
       }
     }
+    return caesarDecrypt(input, i, alphabet);
 
   }
 
@@ -117,6 +118,9 @@ public:
 
     return output;
   }
+
+
+
 
   static map<WString, vector<WChar>> m_alphabetMap;
 
