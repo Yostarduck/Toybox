@@ -39,12 +39,18 @@
     <ClInclude Include="Include\tb_pointer.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Include\tb_utils_defines.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_random.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="Source\sfmlOperators.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_utils_defines.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>

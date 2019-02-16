@@ -2,6 +2,7 @@
 
 #include <tb_defines.h>
 #include <tb_types.h>
+#include <tb_utils_defines.h>
 
 #include <cassert>
 
