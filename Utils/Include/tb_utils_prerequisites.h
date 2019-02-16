@@ -14,13 +14,13 @@
 # if defined(TB_STATIC_LIB)
 #   define TB_API_EXPORT
 # else
-#	if defined(UTIL_EXPORTS)
-#   define TB_UTIL_EXPORT __declspec(dllexport)
+#	if defined(UTILS_EXPORTS)
+#   define TB_UTILS_EXPORT __declspec(dllexport)
 #   else
 #     if defined(__MINGW32__)
-#       define TB_UTIL_EXPORT              //Linux systems don't need this
+#       define TB_UTILS_EXPORT              //Linux systems don't need this
 #     else
-#       define TB_UTIL_EXPORT __declspec(dllimport)
+#       define TB_UTILS_EXPORT __declspec(dllimport)
 #     endif
 #   endif
 # endif
@@ -35,9 +35,9 @@
 #if TB_PLATFORM == TB_PLATFORM_LINUX || TB_PLATFORM == TB_PLATFORM_OSX
 //Enable GCC symbol visibility
 # if defined(TB_GCC_VISIBILITY)
-#   define TB_UTIL_EXPORT  __attribute__ ((visibility("default")))
+#   define TB_UTILS_EXPORT  __attribute__ ((visibility("default")))
 # else
-#   define TB_UTIL_EXPORT
+#   define TB_UTILS_EXPORT
 # endif
 
 # if TB_COMPILER == TB_COMPILER_INTEL

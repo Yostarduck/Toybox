@@ -17,10 +17,10 @@ namespace toyboxSDK {
 *																	                                    *
 **********************************************************************/
 
-using  UInt8  = uint8_t;  //8-bit  unsigned.
-using  UInt16 = uint16_t; //16-bit unsigned.
-using  UInt32 = uint32_t; //32-bit unsigned.
-using  UInt64 = uint64_t; //64-bit unsigned.
+using UInt8  = uint8_t;  //8-bit  unsigned.
+using UInt16 = uint16_t; //16-bit unsigned.
+using UInt32 = uint32_t; //32-bit unsigned.
+using UInt64 = uint64_t; //64-bit unsigned.
 
 /**********************************************************************
 *																	                                    *

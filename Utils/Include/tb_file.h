@@ -16,7 +16,7 @@ namespace toyboxSDK {
 * sampleName.write(nByte, text);
 * sampleName.close();
 */
-class TB_UTIL_EXPORT File
+class TB_UTILS_EXPORT File
 {
  public:
   

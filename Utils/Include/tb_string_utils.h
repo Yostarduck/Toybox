@@ -8,9 +8,12 @@
 #include <locale>
 #include <codecvt>
 
+#ifdef UTILS_EXPORTS
+#endif
+
 namespace toyboxSDK {
 
-struct TB_UTIL_EXPORT StringUtils
+struct TB_UTILS_EXPORT StringUtils
 {
   /**
   * Converts tstring into a utf-8 string.
@@ -25,7 +28,7 @@ struct TB_UTIL_EXPORT StringUtils
   /*static String
   toString(const TString& tstring);*/
 
-  static String
+  static FORCEINLINE String
   toString(const String& string) {
     return string;
   }
