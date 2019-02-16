@@ -33,7 +33,6 @@ TextureD3D12::CreateFromMemory(const Device& device,
 void
 TextureD3D12::CreateEmpty(const Device& device, const TextureDesc& desc) {
   /*
-  */
   const DeviceD3D12* devd3d12 = reinterpret_cast<const DeviceD3D12*>(&device);
   ID3D12Device* dev = devd3d12->m_device;
 
@@ -117,6 +116,7 @@ TextureD3D12::CreateEmpty(const Device& device, const TextureDesc& desc) {
                                   &srvDesc,
                                   srvAlloc.Handles[i]);
   }
+  */
 }
 
 }

@@ -2,7 +2,9 @@
 
 #include "tb_graphics_prerequisites.h"
 #include "tb_graphics_defines.h"
+
 #include <tb_module.h>
+#include <tb_pointer.h>
 
 namespace toyboxSDK {
 
@@ -73,8 +75,8 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   }
 
  protected:
-  std::unique_ptr<Device*> m_device;
-  std::unique_ptr<SwapChain*> m_swapChain;
+  SimpleUnique<Device> m_device;
+  SimpleUnique<SwapChain> m_swapChain;
 
   /**
   /* Inherited via Module.

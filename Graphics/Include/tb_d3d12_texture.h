@@ -36,7 +36,7 @@ class TB_GRAPHICS_EXPORT TextureD3D12 : public Texture {
  protected:
 
  private:
-   ID3D12Resource* texture2D;
+   //ID3D12Resource* texture2D;
 };
 
 }

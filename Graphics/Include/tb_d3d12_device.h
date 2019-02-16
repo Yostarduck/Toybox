@@ -4,8 +4,6 @@
 #include "tb_graphics_defines.h"
 #include "tb_device.h"
 
-#include <memory>
-
 #include <d3d12.h>
 #include <dxgi1_4.h>
 

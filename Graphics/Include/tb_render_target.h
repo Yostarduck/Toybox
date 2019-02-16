@@ -7,9 +7,8 @@
 
 namespace toyboxSDK {
 
-class Texture;
+//class Texture;
 class Device;
-class DepthStencil;
 
 /**
 *
@@ -30,19 +29,19 @@ class TB_GRAPHICS_EXPORT RenderTarget {
   *
   */
   virtual void
-  create(const Device& device, const TextureDesc& desc, UInt32 numRTs) = 0;
+  create(const Device* device, const TextureDesc& desc, UInt32 numRTs) = 0;
   
   /**
   *
   */
   virtual void
-  create(const Device& device, const std::vector<TextureDesc>& desc, UInt32 numRTs) = 0;
+  create(const Device* device, const std::vector<TextureDesc>& desc, UInt32 numRTs) = 0;
 
   /**
   *
   */
-  virtual void
-  create(const Device& device, const std::vector<Texture*>& textures) = 0;
+  //virtual void
+  //create(const Device& device, const std::vector<Texture*>& textures) = 0;
 
  protected:
 

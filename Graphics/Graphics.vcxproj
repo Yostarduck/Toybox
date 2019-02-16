@@ -160,6 +160,7 @@
     <ClInclude Include="Include\tb_graphics_defines.h" />
     <ClInclude Include="Include\tb_graphics_prerequisites.h" />
     <ClInclude Include="Include\tb_render_target.h" />
+    <ClInclude Include="Include\tb_shader.h" />
     <ClInclude Include="Include\tb_swap_chain.h" />
     <ClInclude Include="Include\tb_texture.h" />
   </ItemGroup>

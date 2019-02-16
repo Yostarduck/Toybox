@@ -36,7 +36,7 @@ class TB_GRAPHICS_EXPORT SwapChainD3D12 : public SwapChain
   *   Return a TB_GRAPHICS_ERROR code, ERROR_NONE means all went well.
   */
   void
-  create(const Device& device, const SwapChainDesc& desc, void* hwnd) override;
+  create(const Device* device, const SwapChainDesc& desc, void* hwnd) override;
 
   ///**
   //* Get the back buffer.

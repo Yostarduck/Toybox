@@ -7,8 +7,8 @@ namespace toyboxSDK {
 namespace TB_GRAPHICS_API
 {
 enum class E {
-  kD3D11,
   kD3D12,
+  kD3D11,
   kGL3,
   kVK_LG,
   kNone
@@ -271,7 +271,7 @@ enum class E {
 };
 }
 
-namespace TB_SHADER_TYPE_FLAG {
+namespace TB_SHADER_TYPE {
 enum class E {
   //Common pipeline
   kVertex     = 1 << 0,
@@ -287,6 +287,8 @@ enum class E {
   kCompute    = 1 << 8,
   //Strange unknown shader
   kTexture    = 1 << 9,
+
+  kNone    = 1 << 10,
 };
 }
 

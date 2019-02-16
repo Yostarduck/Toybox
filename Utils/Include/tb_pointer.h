@@ -2,9 +2,10 @@
 
 #include "tb_utils_prerequisites.h"
 
+#include <memory>
 #include <functional>
 
-namespace toyboxSDK {
+namespace toyboxSDK{
 
 template<class T, class... Args>
 std::unique_ptr<T>
@@ -38,6 +39,7 @@ tb_shared_custom(T* ptr, Deleter deleter) {
 ///////////////////////////////////////////
 //Simple version of custom smart pointers//
 ///////////////////////////////////////////
+
 
 template<class T>
 using SimpleUnique = std::unique_ptr<T, std::function<void(T*)>>;

@@ -73,7 +73,7 @@ DeviceD3D12::CreateDevice() {
 SwapChain*
 DeviceD3D12::CreateSwapChain(const SwapChainDesc& desc, void* hwnd) const {
   SwapChain* swapChain = new SwapChainD3D12;
-  swapChain->create(*this, desc, hwnd);
+  swapChain->create(this, desc, hwnd);
   return swapChain;
 }
 

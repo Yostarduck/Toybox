@@ -77,5 +77,8 @@
     <ClInclude Include="Include\tb_d3d12_texture.h">
       <Filter>Archivos de encabezado\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Include\tb_shader.h">
+      <Filter>Archivos de encabezado\Wrapper</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

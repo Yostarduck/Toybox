@@ -35,7 +35,7 @@ class TB_GRAPHICS_EXPORT SwapChain
   *   Return a TB_GRAPHICS_ERROR code, ERROR_NONE means all went well.
   */
   virtual void
-  create(const Device& device, const SwapChainDesc& desc, void* hwnd) = 0;
+  create(const Device* device, const SwapChainDesc& desc, void* hwnd) = 0;
   
   ///**
   //* Get the back buffer.

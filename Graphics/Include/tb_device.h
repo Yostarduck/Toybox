@@ -16,7 +16,7 @@ class TB_GRAPHICS_EXPORT Device {
   /**
   * Default class constructor.
   */
-  Device() :m_useCPU(false) {};
+  Device() : m_useCPU(false) {};
 
   /**
   * Default class destructor.
