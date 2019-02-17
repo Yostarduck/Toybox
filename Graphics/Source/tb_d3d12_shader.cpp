@@ -1,7 +1,5 @@
 #include "tb_d3d12_shader.h"
 
-#include <tb_string_utils.h>
-
 #include <D3Dcompiler.h>
 
 namespace toyboxSDK {

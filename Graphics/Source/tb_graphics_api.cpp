@@ -1,7 +1,7 @@
 #include "tb_graphics_api.h"
 
 #include <tb_types.h>
-#include <tb_string_utils.h>
+#include <tb_string_conversions.h>
 
 #include "tb_device.h"
 #include "tb_swap_chain.h"
@@ -82,7 +82,7 @@ GraphicsAPI::init(UInt32 w,
   //m_swapChain = m_device->CreateSwapChain(swapDesc, hwnd);
 
   WString wshader_path = _T("Hola");
-  String str = StringUtils::toString(wshader_path);
+  String str = StringConversion::toString(wshader_path);
   
   Shader* cpShder = new ShaderD3D12();
   cpShder->create(wshader_path, TB_SHADER_TYPE::E::kCompute);
