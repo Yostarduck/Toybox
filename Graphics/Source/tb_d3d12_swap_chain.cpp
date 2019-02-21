@@ -40,6 +40,7 @@ SwapChainD3D12::create(const Device* device, const SwapChainDesc& desc, void* hw
     throw std::exception();
   }
 
+  //This is for fullscreen, maybe not necessary.
   HRESULT HRWindowAssociation = factory->MakeWindowAssociation(static_cast<HWND>(hwnd),
                                                                DXGI_MWA_NO_ALT_ENTER);
 
@@ -60,7 +61,7 @@ SwapChainD3D12::create(const Device* device, const SwapChainDesc& desc, void* hw
   swapChain->Release();
 
   //////////////////////////////////////////////////////////////////////////////
-  
+  /*
   TextureDesc backDesc;
   backDesc.dimension = TB_DIMENSION::E::k2D;
   backDesc.width = desc.width;
@@ -72,20 +73,22 @@ SwapChainD3D12::create(const Device* device, const SwapChainDesc& desc, void* hw
   backDesc.bindFlags = TB_BIND_FLAGS::E::kSHADER_RESOURCE |
                        TB_BIND_FLAGS::E::kRENDER_TARGET;
 
-  m_renderTargets[0] = tb_simple_unique<RenderTarget>(new RenderTargetD3D12);
-  m_renderTargets[1] = tb_simple_unique<RenderTarget>(new RenderTargetD3D12);
+  m_renderTargets.resize(desc.bufferCount);
 
-  m_renderTargets[0]->create(device, backDesc, 1);
+  for (auto& rt : m_renderTargets) {
+    rt = tb_simple_unique<RenderTarget>(new RenderTargetD3D12);
+    rt->create(device, backDesc, 1);
+  }
+  */
 
 
   //////////////////////////////////////////////////////////////////////////////
   //Create Front
-  /*
   // Create descriptor heaps.
   {
     // Describe and create a render target view (RTV) descriptor heap.
     D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-    rtvHeapDesc.NumDescriptors = 2;
+    rtvHeapDesc.NumDescriptors = desc.bufferCount;
     rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
     rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
     HRESULT HRDescriptorHeap = dev->CreateDescriptorHeap(&rtvHeapDesc,
@@ -96,16 +99,15 @@ SwapChainD3D12::create(const Device* device, const SwapChainDesc& desc, void* hw
       std::exception();
     }
 
-    m_rtvDescriptorSz = dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+    m_rtvDescriptorSize = dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
   }
 
   // Create frame resources.
   {
-    CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
+    D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
 
     // Create a RTV for each frame.
-    for (UInt32 n = 0; n < 2; ++n)
-    {
+    for (UInt32 n = 0; n < 2; ++n) {
       HRESULT HRGetBuffer = m_swapChain->GetBuffer(n,
                                                    __uuidof(**(&m_renderTargets[n])),
                                                    (void**)&m_renderTargets[n]);
@@ -113,19 +115,13 @@ SwapChainD3D12::create(const Device* device, const SwapChainDesc& desc, void* hw
         std::exception();
       }
 
-      dev->CreateRenderTargetView(m_renderTargets[n].Get(), nullptr, rtvHandle);
-      rtvHandle.Offset(1, m_rtvDescriptorSz);
+      RenderTargetD3D12* currentRT = reinterpret_cast<RenderTargetD3D12*>(&m_renderTargets[n]);
+
+      dev->CreateRenderTargetView(m_renderTargets[n], nullptr, rtvHandle);
+
+      rtvHandle.ptr += m_rtvDescriptorSize;
     }
   }
-
-  HRESULT HRCommandAlloc = dev->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT,
-                                                       __uuidof(**(&m_commandAllocator)),
-                                                       (void**)&m_commandAllocator);
-
-  if (FAILED(HRCommandAlloc)) {
-    std::exception();
-  }
-  */
 }
 
 }

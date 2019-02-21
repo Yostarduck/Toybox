@@ -13,7 +13,7 @@
 
 namespace toyboxSDK {
 
-struct TB_UTILS_EXPORT StringUtils
+struct StringUtils
 {
   /**
   * Converts tstring into a utf-8 string.

@@ -87,6 +87,9 @@ class TB_GRAPHICS_EXPORT SwapChainD3D12 : public SwapChain
  private:
    IDXGISwapChain3* m_swapChain;
    UInt32 m_frameIndex;
+
+   ID3D12DescriptorHeap* m_rtvHeap;
+   UInt32 m_rtvDescriptorSize;
 };
 
 }

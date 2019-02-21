@@ -81,7 +81,7 @@ GraphicsAPI::init(UInt32 w,
   
   //m_swapChain = m_device->CreateSwapChain(swapDesc, hwnd);
 
-  WString wshader_path = _T("Hola");
+  WString wshader_path = _T("D:\\Users\\F_A_R\\sources\\repos\\Toybox\\Bin\\x64\\Resources\\Shaders\\BasicCS.hlsl");
   String str = StringUtils::toString(wshader_path);
   
   Shader* cpShder = new ShaderD3D12();

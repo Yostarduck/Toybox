@@ -3,6 +3,7 @@
 #include "tb_graphics_prerequisites.h"
 #include "tb_graphics_defines.h"
 #include <tb_pointer.h>
+#include <vector>
 
 namespace toyboxSDK {
 
@@ -83,7 +84,7 @@ class TB_GRAPHICS_EXPORT SwapChain
  protected:
   SwapChainDesc m_descriptor;
 
-  SimpleUnique<RenderTarget> m_renderTargets[2];
+  std::vector<SimpleUnique<RenderTarget>> m_renderTargets;
 
  private:
 };
