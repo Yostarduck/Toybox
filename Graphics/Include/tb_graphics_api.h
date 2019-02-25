@@ -6,6 +6,10 @@
 #include <tb_module.h>
 #include <tb_pointer.h>
 
+//Hardcoded headers
+#include <d3d12.h>
+#include <dxgi1_4.h>
+
 namespace toyboxSDK {
 
 //TODO: Implement this classes.
@@ -75,8 +79,8 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   }
 
  protected:
-  SimpleUnique<Device> m_device;
-  SimpleUnique<SwapChain> m_swapChain;
+  //SimpleUnique<Device> m_device;
+  //SimpleUnique<SwapChain> m_swapChain;
 
   /**
   /* Inherited via Module.
@@ -94,6 +98,20 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
 
  private:
   TB_GRAPHICS_API::E m_SelectedGraphicAPI;
+
+  //Hardcoded stuff
+
+  //Required Flow
+  void CreateDevice();
+  void CreateCommandQueue();
+
+  //Utilities
+  IDXGIFactory4* GetFactory(UInt32 flags = 0);
+  void GetHardwareAdapter(IDXGIFactory4* pFactory, IDXGIAdapter1** ppAdapter);
+
+  bool m_bUseCPU;
+  ID3D12Device* m_device; //Device
+  ID3D12CommandQueue* m_commandQueue; //Command Queue
 };
 
 }

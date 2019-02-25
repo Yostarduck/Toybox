@@ -108,16 +108,16 @@ SwapChainD3D12::create(const Device* device, const SwapChainDesc& desc, void* hw
 
     // Create a RTV for each frame.
     for (UInt32 n = 0; n < 2; ++n) {
-      HRESULT HRGetBuffer = m_swapChain->GetBuffer(n,
-                                                   __uuidof(**(&m_renderTargets[n])),
-                                                   (void**)&m_renderTargets[n]);
-      if (FAILED(HRGetBuffer)) {
-        std::exception();
-      }
+      //HRESULT HRGetBuffer = m_swapChain->GetBuffer(n,
+      //                                             __uuidof(**(&m_renderTargets[n])),
+      //                                             (void**)&m_renderTargets[n]);
+      //if (FAILED(HRGetBuffer)) {
+      //  std::exception();
+      //}
+      //
+      //RenderTargetD3D12* currentRT = reinterpret_cast<RenderTargetD3D12*>(&m_renderTargets[n]);
 
-      RenderTargetD3D12* currentRT = reinterpret_cast<RenderTargetD3D12*>(&m_renderTargets[n]);
-
-      dev->CreateRenderTargetView(m_renderTargets[n], nullptr, rtvHandle);
+      //dev->CreateRenderTargetView(m_renderTargets[n], nullptr, rtvHandle);
 
       rtvHandle.ptr += m_rtvDescriptorSize;
     }

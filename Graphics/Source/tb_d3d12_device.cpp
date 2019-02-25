@@ -114,7 +114,6 @@ DeviceD3D12::GetFactory(UInt32 flags) const {
 void
 DeviceD3D12::GetHardwareAdapter(IDXGIFactory4* pFactory,
                                 IDXGIAdapter1** ppAdapter) {
-  
 	IDXGIAdapter1* adapter;
 	*ppAdapter = nullptr;
 
