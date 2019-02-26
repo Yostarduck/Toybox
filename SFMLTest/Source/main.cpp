@@ -109,7 +109,7 @@ main() {
       sf::Vector2f contentSz = ImGui::GetWindowContentRegionMax();
       contentSz.y -= titleBarHeight;
 
-      std::cout << ImGui::GetIO().MouseWheel << std::endl;
+      //std::cout << ImGui::GetIO().MouseWheel << std::endl;
       if (ImGui::IsWindowHovered()) {
         if (ImGui::GetIO().MouseWheel != 0) {
           if (-ImGui::GetIO().MouseWheel > 0.5f) {
