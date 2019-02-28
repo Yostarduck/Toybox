@@ -14,8 +14,8 @@
 # if defined(TB_STATIC_LIB)
 #   define TB_API_EXPORT
 # else
-#	if defined(UTILS_EXPORTS)
-#   define TB_UTILS_EXPORT __declspec(dllexport)
+#	  if defined(UTILS_EXPORTS)
+#     define TB_UTILS_EXPORT __declspec(dllexport)
 #   else
 #     if defined(__MINGW32__)
 #       define TB_UTILS_EXPORT              //Linux systems don't need this

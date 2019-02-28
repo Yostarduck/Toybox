@@ -1,7 +1,7 @@
 #include "tb_graphics_api.h"
 
 #include <tb_types.h>
-#include <tb_string_utils.h>
+#include <tb_string_conversions.h>
 
 //#include "tb_device.h"
 //#include "tb_swap_chain.h"
@@ -218,7 +218,7 @@ GraphicsAPI::CreateSwapChain() {
       m_device->CreateRenderTargetView(m_renderTargets[n], nullptr, handle);
 
       WString name;
-      name = _T("RenderTarget") + StringUtils::toWString(n);
+      name = _T("RenderTarget") + StringConversion::toWString(n);
 
       m_renderTargets[n]->SetName(name.c_str());
     }

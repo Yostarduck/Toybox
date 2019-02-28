@@ -138,19 +138,19 @@
   <ItemGroup>
     <ClInclude Include="Include\tb_math_defines.h" />
     <ClInclude Include="Include\tb_math_prerequisites.h" />
-    <ClInclude Include="Include\tb_Matrix3.h" />
-    <ClInclude Include="Include\tb_Matrix4.h" />
-    <ClInclude Include="Include\tb_Vector2.h" />
-    <ClInclude Include="Include\tb_Vector3.h" />
-    <ClInclude Include="Include\tb_Vector4.h" />
+    <ClInclude Include="Include\tb_matrix3x3.h" />
+    <ClInclude Include="Include\tb_matrix4x4.h" />
+    <ClInclude Include="Include\tb_vector2.h" />
+    <ClInclude Include="Include\tb_vector3.h" />
+    <ClInclude Include="Include\tb_vector4.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_math_defines.cpp" />
-    <ClCompile Include="Source\tb_Matrix3.cpp" />
-    <ClCompile Include="Source\tb_Matrix4.cpp" />
-    <ClCompile Include="Source\tb_Vector2.cpp" />
-    <ClCompile Include="Source\tb_Vector3.cpp" />
-    <ClCompile Include="Source\tb_Vector4.cpp" />
+    <ClCompile Include="Source\tb_matrix3x3.cpp" />
+    <ClCompile Include="Source\tb_matrix4x4.cpp" />
+    <ClCompile Include="Source\tb_vector2.cpp" />
+    <ClCompile Include="Source\tb_vector3.cpp" />
+    <ClCompile Include="Source\tb_vector4.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
