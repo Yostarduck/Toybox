@@ -84,7 +84,7 @@ class TB_GRAPHICS_EXPORT SwapChain
  protected:
   SwapChainDesc m_descriptor;
 
-  std::vector<SimpleUnique<RenderTarget>> m_renderTargets;
+  //std::vector<SimpleUnique<RenderTarget>> m_renderTargets;
 
  private:
 };
