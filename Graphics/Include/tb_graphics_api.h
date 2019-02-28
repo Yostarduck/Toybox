@@ -4,6 +4,9 @@
 #include "tb_graphics_defines.h"
 
 #include <tb_matrix4x4.h>
+#include <tb_Vector2.h>
+#include <tb_Vector4.h>
+
 #include <tb_module.h>
 #include <tb_pointer.h>
 
@@ -118,6 +121,8 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   void CreateCommandList();
   void CreateShaders();
   void CreateConstantBuffer();
+  void CreateQuadVB();
+  void CreateQuadIB();
 
   //Utilities
   bool m_bUseCPU;
@@ -154,6 +159,13 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
 
   ID3D12Resource* m_CB;
 
+  ID3D12Resource* m_QuadVB;
+  ID3D12Resource* m_QuadIB;
+
+  D3D12_VERTEX_BUFFER_VIEW m_QuadVBView;
+  D3D12_INDEX_BUFFER_VIEW m_QuadIBView;
+
+
   //GBuffer Shader
   //Vertex
   ID3DBlob* GBufferVSShaderBlob;
@@ -168,6 +180,11 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
     Matrix4x4 World;
     Matrix4x4 View;
     Matrix4x4 Projection;
+  };
+
+  struct ScreenQuadVertex {
+    Vector4 position;
+    Vector2 texcoord;
   };
 };
 

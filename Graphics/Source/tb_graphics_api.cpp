@@ -20,7 +20,6 @@ GraphicsAPI::GraphicsAPI() {
 GraphicsAPI::~GraphicsAPI() {
 }
 
-
 void
 GraphicsAPI::init(UInt32 w,
                   UInt32 h,
@@ -37,13 +36,16 @@ GraphicsAPI::init(UInt32 w,
 
   CreateSwapChain();
 
-  //PIXBeginEvent(m_commandQueue, 0, L"Setup");
   const UInt32 PIX_EVENT_UNICODE_VERSION = 0;
-  m_commandQueue->BeginEvent(PIX_EVENT_UNICODE_VERSION, _T("Setup"), (wcslen(_T("Setup")) + 1) * sizeof(_T("Setup")));
+  m_commandQueue->BeginEvent(PIX_EVENT_UNICODE_VERSION,
+                             _T("Setup"),
+                             (wcslen(_T("Setup")) + 1) * sizeof(_T("Setup")));
   {
     CreateCommandList();
     CreateShaders();
     CreateConstantBuffer();
+    CreateQuadVB();
+    CreateQuadIB();
   }
 }
 
@@ -295,6 +297,117 @@ GraphicsAPI::CreateConstantBuffer() {
   if (FAILED(HRCBCR)) {
     std::exception();
   }
+}
+
+void
+GraphicsAPI::CreateQuadVB() {
+  ScreenQuadVertex QuadVerts[] =
+  {
+		{ { -1.0f,  1.0f, 0.0f, 1.0f }, { 0.0f, 0.0f } },
+		{ {  1.0f,  1.0f, 0.0f, 1.0f }, { 1.0f, 0.0f } },
+		{ { -1.0f, -1.0f, 0.0f, 1.0f }, { 0.0f, 1.0f } },
+	  { {  1.0f, -1.0f, 0.0f, 1.0f }, { 1.0f, 1.0f } }
+	};
+
+  D3D12_HEAP_PROPERTIES heapProperty;
+  heapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
+  heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+  heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+  heapProperty.CreationNodeMask = 1;
+  heapProperty.VisibleNodeMask = 1;
+
+	D3D12_RESOURCE_DESC resourceDesc;
+	ZeroMemory(&resourceDesc, sizeof(resourceDesc));
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	resourceDesc.Alignment = 0;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.SampleDesc.Quality = 0;
+	resourceDesc.MipLevels = 1;
+	resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.Width = sizeof(QuadVerts);
+	resourceDesc.Height = 1;
+	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+	HRESULT HRVBCR = m_device->CreateCommittedResource(&heapProperty,
+                                                     D3D12_HEAP_FLAG_NONE,
+                                                     &resourceDesc,
+                                                     D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                     nullptr,
+                                                     __uuidof(**(&m_QuadVB)),
+                                                     (void**)(&m_QuadVB));
+	
+  if (FAILED(HRVBCR)) {
+    std::exception();
+  }
+
+	UInt8* VBDataBegin;
+	HRESULT HRMapVB = m_QuadVB->Map(0, nullptr, reinterpret_cast<void**>(&VBDataBegin));
+  if (FAILED(HRMapVB)) {
+    std::exception();
+  }
+	memcpy(VBDataBegin, QuadVerts, sizeof(QuadVerts));
+	m_QuadVB->Unmap(0, nullptr);
+
+	m_QuadVBView.BufferLocation = m_QuadVB->GetGPUVirtualAddress();
+	m_QuadVBView.StrideInBytes = sizeof(ScreenQuadVertex);
+	m_QuadVBView.SizeInBytes = sizeof(QuadVerts);
+}
+
+void
+GraphicsAPI::CreateQuadIB() {
+  std::vector<Int32> indexes;
+  indexes.resize(6);
+  indexes[0] = 2;
+  indexes[1] = 1;
+  indexes[2] = 0;
+  indexes[3] = 3;
+  indexes[4] = 1;
+  indexes[5] = 2;
+
+  D3D12_HEAP_PROPERTIES heapProperty;
+  heapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
+  heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+  heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+  heapProperty.CreationNodeMask = 1;
+  heapProperty.VisibleNodeMask = 1;
+
+  D3D12_RESOURCE_DESC resourceDesc;
+  ZeroMemory(&resourceDesc, sizeof(resourceDesc));
+  resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+  resourceDesc.Alignment = 0;
+  resourceDesc.SampleDesc.Count = 1;
+  resourceDesc.SampleDesc.Quality = 0;
+  resourceDesc.MipLevels = 1;
+  resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+  resourceDesc.DepthOrArraySize = 1;
+  resourceDesc.Width = sizeof(UInt32) * 6;
+  resourceDesc.Height = 1;
+  resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+  HRESULT HRIDCR = m_device->CreateCommittedResource(&heapProperty,
+                                                     D3D12_HEAP_FLAG_NONE,
+                                                     &resourceDesc,
+                                                     D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                     nullptr,
+                                                     __uuidof(**(&m_QuadIB)),
+                                                     (void**)(&m_QuadIB));
+
+  if (FAILED(HRIDCR)) {
+    std::exception();
+  }
+
+  UInt8* IBDataBegin;
+  HRESULT HRIB = m_QuadIB->Map(0, nullptr, reinterpret_cast<void**>(&IBDataBegin));
+  if (FAILED(HRIB)) {
+    std::exception();
+  }
+  memcpy(IBDataBegin, &indexes[0], sizeof(UInt32) * indexes.size());
+  m_QuadIB->Unmap(0, nullptr);
+
+  m_QuadIBView.BufferLocation = m_QuadIB->GetGPUVirtualAddress();
+  m_QuadIBView.Format = DXGI_FORMAT_R32_UINT;
+  m_QuadIBView.SizeInBytes = sizeof(UInt32) * indexes.size();
 }
 
 void
