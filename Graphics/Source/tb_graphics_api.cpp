@@ -43,6 +43,7 @@ GraphicsAPI::init(UInt32 w,
   {
     CreateCommandList();
     CreateShaders();
+    CreateConstantBuffer();
   }
 }
 
@@ -262,6 +263,41 @@ GraphicsAPI::CreateShaders() {
 }
 
 void
+GraphicsAPI::CreateConstantBuffer() {
+  D3D12_HEAP_PROPERTIES heapProperty;
+  heapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
+  heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+  heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+  heapProperty.CreationNodeMask = 1;
+  heapProperty.VisibleNodeMask = 1;
+
+  D3D12_RESOURCE_DESC resourceDesc;
+  ZeroMemory(&resourceDesc, sizeof(resourceDesc));
+  resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+  resourceDesc.Alignment = 0;
+  resourceDesc.SampleDesc.Count = 1;
+  resourceDesc.SampleDesc.Quality = 0;
+  resourceDesc.MipLevels = 1;
+  resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+  resourceDesc.DepthOrArraySize = 1;
+  resourceDesc.Width = sizeof(CBuffer);
+  resourceDesc.Height = 1;
+  resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+  HRESULT HRCBCR = m_device->CreateCommittedResource(&heapProperty,
+                                                     D3D12_HEAP_FLAG_NONE,
+                                                     &resourceDesc,
+                                                     D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                     nullptr,
+                                                     __uuidof(**(&m_CB)),
+                                                     (void**)(&m_CB));
+
+  if (FAILED(HRCBCR)) {
+    std::exception();
+  }
+}
+
+void
 GraphicsAPI::CompileShader(WString filepath,
                            TB_SHADER_TYPE::E type,
                            ID3DBlob** shaderBlobOut,
@@ -311,8 +347,6 @@ GraphicsAPI::CompileShader(WString filepath,
   default:
     break;
   }
-
-  SizeT bytecodeSz;
 
   ID3DBlob* errorBlob = nullptr;
 

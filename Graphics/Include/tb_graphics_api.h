@@ -3,7 +3,7 @@
 #include "tb_graphics_prerequisites.h"
 #include "tb_graphics_defines.h"
 
-#include <tb_Matrix4.h>
+#include <tb_matrix4x4.h>
 #include <tb_module.h>
 #include <tb_pointer.h>
 
@@ -117,6 +117,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   void CreateSwapChain();
   void CreateCommandList();
   void CreateShaders();
+  void CreateConstantBuffer();
 
   //Utilities
   bool m_bUseCPU;
@@ -151,11 +152,14 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
 
   ID3D12GraphicsCommandList* m_commandList;
 
+  ID3D12Resource* m_CB;
+
   //GBuffer Shader
+  //Vertex
   ID3DBlob* GBufferVSShaderBlob;
   void* GBufferVSBytecodePtr;
   SizeT GBufferVSbytecodeSz;
-
+  //Fragment
   ID3DBlob* GBufferPSShaderBlob;
   void* GBufferPSBytecodePtr;
   SizeT GBufferPSbytecodeSz;

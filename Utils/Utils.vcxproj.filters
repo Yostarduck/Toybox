@@ -27,9 +27,6 @@
     <ClInclude Include="Include\tb_command.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Include\tb_random.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Include\tb_utils_prerequisites.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
@@ -47,9 +44,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\tb_random.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="Source\tb_file.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>

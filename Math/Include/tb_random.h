@@ -1,23 +1,12 @@
-/*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
-/**
- * @file h
- * @author Marco "Swampy" Millan
- * @date 2018/10/17 2018
- * @brief Random number generator classes, father and children:
- *  Ziggurat, Montecarlo and BoxMueller
- * 
- */
-/*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
 #pragma once
 
 #include "tb_utils_prerequisites.h"
-
 #include <time.h>
 
 namespace toyboxSDK {
 
 /**
- * nauRandom
+ * Random
  * Description:
  * 	Random father class
  * Sample usage:
@@ -44,7 +33,7 @@ class Random
    * @return 
    *
    */
-  void
+  FORCEINLINE void
   initialize() { m_seed = static_cast<float>(time(0)); }
 
   /**
@@ -67,7 +56,7 @@ class Random
 
 
 /**
- * nauRandomZ
+ * RandomZ
  * Description:
  * 	Ziggurat algorithm random number generator
  * Sample usage:

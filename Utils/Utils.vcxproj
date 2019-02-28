@@ -24,7 +24,6 @@
     <ClInclude Include="Include\tb_file.h" />
     <ClInclude Include="Include\tb_pointer.h" />
     <ClInclude Include="Include\tb_module.h" />
-    <ClInclude Include="Include\tb_random.h" />
     <ClInclude Include="Include\tb_string_conversions.h" />
     <ClInclude Include="Include\tb_types.h" />
     <ClInclude Include="Include\tb_utils_prerequisites.h" />
@@ -32,7 +31,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_file.cpp" />
-    <ClCompile Include="Source\tb_random.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
