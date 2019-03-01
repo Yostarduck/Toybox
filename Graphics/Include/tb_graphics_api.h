@@ -18,9 +18,24 @@
 
 namespace toyboxSDK {
 
+static void
+AddResourceBarrier(ID3D12GraphicsCommandList* command,
+                   ID3D12Resource* pResource,
+                   D3D12_RESOURCE_STATES before,
+                   D3D12_RESOURCE_STATES after) {
+  D3D12_RESOURCE_BARRIER desc;
+  ZeroMemory(&desc, sizeof(desc));
+  desc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+  desc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+  desc.Transition.pResource = pResource;
+  desc.Transition.StateBefore = before;
+  desc.Transition.StateAfter = after;
+  command->ResourceBarrier(1, &desc);
+};
+
 //TODO: Implement this classes.
-class Device;
-class SwapChain;
+//class Device;
+//class SwapChain;
 //class Texture;
 //class RenderTarget;
 //class BlendState;
@@ -73,6 +88,15 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
        void* hwnd,
        TB_GRAPHICS_API::E api = TB_GRAPHICS_API::E::kD3D12);
 
+  void
+  Render();
+
+  void
+  PresentFrame();
+
+  void
+  WaitForGPU();
+
   /**
   * Returns which graphic is being used.
   * 
@@ -82,6 +106,43 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   FORCEINLINE const TB_GRAPHICS_API::E
   selectedGraphicAPI() const {
     return m_SelectedGraphicAPI;
+  }
+
+  FORCEINLINE ID3D12CommandQueue*
+  GetCommandQueue() {
+    return m_commandQueue;
+  }
+
+  FORCEINLINE ID3D12CommandAllocator*
+  GetCommandAllocator() {
+    return m_commandAllocators[m_iCurrentFrame];
+  }
+
+  FORCEINLINE ID3D12GraphicsCommandList*
+  GetCommandList() {
+    return m_commandList;
+  }
+
+  FORCEINLINE ID3D12Resource*
+  GetBackBuffer() {
+    return m_renderTargets[m_iCurrentFrame];
+  }
+
+  FORCEINLINE D3D12_CPU_DESCRIPTOR_HANDLE
+  GetRenderTargetView() const {
+    D3D12_CPU_DESCRIPTOR_HANDLE handle;
+    handle.ptr = m_rtvHeap->GetCPUDescriptorHandleForHeapStart().ptr + (m_rtvDescriptorSize * m_iCurrentFrame);
+    return handle;
+  }
+
+  FORCEINLINE D3D12_VIEWPORT
+  GetScreenViewport() const {
+    return m_viewport;
+  }
+
+  FORCEINLINE ID3D12PipelineState*
+  GetPSO() const {
+    return m_PSOForward;
   }
 
  protected:
@@ -116,13 +177,17 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   void CreateCommandQueue();
   void CreateSwapChainCommanAllocators();
   void CreateFences();
-  //Set variables
+  ///Set variables
   void CreateSwapChain();
   void CreateCommandList();
   void CreateShaders();
   void CreateConstantBuffer();
   void CreateQuadVB();
   void CreateQuadIB();
+  void CreateShaderHeap();
+  void CreateRootSignature();
+  void CreateForwardPSO();
+  void CreateDSV();
 
   //Utilities
   bool m_bUseCPU;
@@ -165,6 +230,15 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   D3D12_VERTEX_BUFFER_VIEW m_QuadVBView;
   D3D12_INDEX_BUFFER_VIEW m_QuadIBView;
 
+  //Shader Heap
+  ID3D12DescriptorHeap* m_ShaderDHPtr;
+  D3D12_CPU_DESCRIPTOR_HANDLE m_ShaderCPUHeapStartHandle;
+  D3D12_GPU_DESCRIPTOR_HANDLE m_ShaderGPUHeapStartHandle;
+  UInt32 m_SHandleIncrementSize;
+
+  ID3D12RootSignature* m_rootSignature;
+
+  ID3D12PipelineState* m_PSOForward;
 
   //GBuffer Shader
   //Vertex
@@ -175,6 +249,13 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ID3DBlob* GBufferPSShaderBlob;
   void* GBufferPSBytecodePtr;
   SizeT GBufferPSbytecodeSz;
+
+  //Depth Stencil Texture
+  ID3D12Resource* m_DSTexture;
+  ID3D12DescriptorHeap* m_DSDHPtr;
+  D3D12_CPU_DESCRIPTOR_HANDLE m_DSCPUHeapStartHandle;
+  D3D12_GPU_DESCRIPTOR_HANDLE m_DSGPUHeapStartHandle;
+  UINT m_DSHandleIncrementSize;
 
   struct CBuffer {
     Matrix4x4 World;
