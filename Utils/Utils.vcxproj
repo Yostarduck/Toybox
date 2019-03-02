@@ -22,6 +22,7 @@
     <ClInclude Include="Include\tb_command.h" />
     <ClInclude Include="Include\tb_defines.h" />
     <ClInclude Include="Include\tb_file.h" />
+    <ClInclude Include="Include\tb_file_system.h" />
     <ClInclude Include="Include\tb_pointer.h" />
     <ClInclude Include="Include\tb_module.h" />
     <ClInclude Include="Include\tb_string_conversions.h" />
@@ -31,6 +32,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_file.cpp" />
+    <ClCompile Include="Source\tb_file_system.cpp" />
+    <ClCompile Include="Source\tb_file_system_linux.cpp" />
+    <ClCompile Include="Source\tb_file_system_win.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

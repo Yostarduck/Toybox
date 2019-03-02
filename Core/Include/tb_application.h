@@ -9,36 +9,36 @@ class SDL_Window;
 
 namespace toyboxSDK {
 
-/*
+/**
 *
 */
 class TB_CORE_EXPORT Application
 {
  public:
 
-  /*
+  /**
   * 
   */
-  Application(bool _usesWindow = true);
+  Application(bool usesWindow = true);
   
-  /*
+  /**
   *
   */
-  virtual ~Application() {}
+  virtual ~Application();
   
-  /*
+  /**
   *
   */
   Int32
-  run(const Viewport& _viewport);
+  run(const Viewport& viewport);
 
-  /*
+  /**
   *
   */
   static void
-  setViewport(const Viewport& _viewport);
+  setViewport(const Viewport& viewport);
 
-  /*
+  /**
   *
   */
   static Viewport
@@ -46,31 +46,31 @@ class TB_CORE_EXPORT Application
 
  protected:
   
-  /*
+  /**
   *
   */
   virtual void
   postInit() = 0;
 
-  /*
+  /**
   *
   */
   virtual void
   postUpdate() = 0;
 
-  /*
+  /**
   *
   */
   virtual void
   postRender() = 0;
 
-  /*
+  /**
   *
   */
   virtual void
   postDestroy() = 0;
 
-  /*
+  /**
   *
   */
   virtual void
@@ -78,31 +78,31 @@ class TB_CORE_EXPORT Application
 
  private:
   
-  /*
+  /**
   *
   */
   void
   init();
 
-  /*
+  /**
   *
   */
   void
   createWindow();
 
-  /*
+  /**
   *
   */
   void
   update();
 
-  /*
+  /**
   *
   */
   void
   render();
 
-  /*
+  /**
   *
   */
   void
@@ -115,15 +115,18 @@ class TB_CORE_EXPORT Application
 
  private:
   
-  /*
+  /**
   *
   */
   static Application&
   getApplication();
 
   static Application* application;
-  SDL_Window* m_window;
+  TString m_AppName;
+  TString m_AppPath;
+
   bool m_usesWindow;
+  SDL_Window* m_window;
 };
 
 }

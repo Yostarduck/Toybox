@@ -9,19 +9,22 @@ namespace toyboxSDK {
 
 Application* Application::application;
 
-Application::Application(bool _usesWindow)
-  : m_usesWindow(_usesWindow) {
+Application::Application(bool usesWindow)
+  :  m_usesWindow(usesWindow) {
+}
+
+Application::~Application() {
 }
 
 Int32
-Application::run(const Viewport& _viewport) {
+Application::run(const Viewport& viewport) {
   if (Application::application) {
     std::cout << "Application already running" << std::endl;
     return 0;
   }
 
   Application::application = this;
-  m_viewport = _viewport;
+  m_viewport = viewport;
 
   init();
 
@@ -35,16 +38,16 @@ Application::run(const Viewport& _viewport) {
   return 0;
 }
 
+void
+Application::setViewport(const Viewport& viewport) {
+  Application& app = getApplication();
+  app.m_viewport = viewport;
+  SDL_SetWindowSize(app.m_window, app.m_viewport.width, app.m_viewport.height);
+}
+
 Viewport
 Application::getViewPort() {
   return getApplication().m_viewport;
-}
-
-void
-Application::setViewport(const Viewport& _viewport) {
-  Application& app = getApplication();
-  app.m_viewport = _viewport;
-  SDL_SetWindowSize(app.m_window, app.m_viewport.width, app.m_viewport.height);
 }
 
 void 

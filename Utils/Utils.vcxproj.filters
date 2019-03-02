@@ -42,9 +42,21 @@
     <ClInclude Include="Include\tb_string_conversions.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Include\tb_file_system.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_file.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_file_system.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_file_system_linux.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_file_system_win.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
