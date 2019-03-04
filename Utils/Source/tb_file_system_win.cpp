@@ -10,19 +10,19 @@ namespace toyboxSDK
 
 TString
 FileSystem::GetWorkingPath() {
-  String fullpath;
-  ANSIChar cCurrentPath[FILENAME_MAX];
+  TString fullpath;
+  UNIChar cCurrentPath[FILENAME_MAX];
 
-  GetModuleFileNameA(NULL, cCurrentPath, MAX_PATH);
+  GetModuleFileName(NULL, cCurrentPath, MAX_PATH);
 
   fullpath.append(cCurrentPath, sizeof(cCurrentPath) - 1);
 
   SizeT backslash = fullpath.find_last_of('\\');
   TB_ASSERT(String::npos != backslash);
   fullpath.erase(fullpath.begin() + backslash, fullpath.end());
-  fullpath.append("\\");
+  fullpath.append(_T("\\"));
 
-  return StringConversion::toTString(fullpath);
+  return fullpath;
 }
 
 TString

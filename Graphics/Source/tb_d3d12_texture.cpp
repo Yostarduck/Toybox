@@ -72,7 +72,7 @@ TextureD3D12::CreateEmpty(const Device& device, const TextureDesc& desc) {
                                                            (void**)(&texture2D));
 
   if (FAILED(HRCreatedResource)) {
-    std::exception();
+    throw std::exception();
   }
 
 

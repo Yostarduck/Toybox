@@ -4,6 +4,7 @@
 #include <Windows.h>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_syswm.h>
 
 namespace toyboxSDK {
 
@@ -84,17 +85,18 @@ Application::createWindow() {
 void 
 Application::update() {
   if (m_usesWindow) {
-    SDL_Event event;
+    SDL_Event SDLEvent;
 
-    while (SDL_PollEvent(&event)) {
-      if (event.type == SDL_QUIT) {
+    while (SDL_PollEvent(&SDLEvent)) {
+
+      if (SDLEvent.type == SDL_QUIT) {
         m_running = false;
       }
-      if (event.type == SDL_WINDOWEVENT) {
-        if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+      if (SDLEvent.type == SDL_WINDOWEVENT) {
+        if (SDLEvent.window.event == SDL_WINDOWEVENT_RESIZED) {
           std::cout << "Resize" << std::endl;
-          m_viewport.width = event.window.data1;
-          m_viewport.height = event.window.data2;
+          m_viewport.width = SDLEvent.window.data1;
+          m_viewport.height = SDLEvent.window.data2;
           onResize();
         }
       }

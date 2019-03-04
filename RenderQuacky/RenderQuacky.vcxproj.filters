@@ -18,12 +18,12 @@
     <ClCompile Include="Source\main.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Source\TestApplication.cpp">
+    <ClCompile Include="Source\RQApplication.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\TestApplication.h">
+    <ClInclude Include="Include\RQApplication.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

@@ -141,10 +141,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Source\main.cpp" />
-    <ClCompile Include="Source\TestApplication.cpp" />
+    <ClCompile Include="Source\RQApplication.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\TestApplication.h" />
+    <ClInclude Include="Include\RQApplication.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

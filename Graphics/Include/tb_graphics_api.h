@@ -89,7 +89,10 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
        TB_GRAPHICS_API::E api = TB_GRAPHICS_API::E::kD3D12);
 
   void
-  Render();
+  ApplyGBuffer();
+
+  void
+  ApplyForward();
 
   void
   PresentFrame();
@@ -141,8 +144,13 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   }
 
   FORCEINLINE ID3D12PipelineState*
-  GetPSO() const {
-    return m_PSOForward;
+    GetGPSOGBuffer() const {
+    return m_GPSOGBuffer;
+  }
+
+  FORCEINLINE ID3D12PipelineState*
+  GetGPSOForward() const {
+    return m_GPSOForward;
   }
 
  protected:
@@ -185,9 +193,12 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   void CreateQuadVB();
   void CreateQuadIB();
   void CreateShaderHeap();
-  void CreateRootSignature();
-  void CreateForwardPSO();
+  void CreateGBufferRootSignature();
+  void CreateForwardRootSignature();
+  void CreateGPSOGBuffer();
+  void CreateGPSOForward();
   void CreateDSV();
+  void CreateRTV();
 
   //Utilities
   bool m_bUseCPU;
@@ -236,9 +247,12 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   D3D12_GPU_DESCRIPTOR_HANDLE m_ShaderGPUHeapStartHandle;
   UInt32 m_SHandleIncrementSize;
 
-  ID3D12RootSignature* m_rootSignature;
+  ID3D12RootSignature* m_GBufferRootSignature;
+  ID3D12RootSignature* m_ForwardRootSignature;
 
-  ID3D12PipelineState* m_PSOForward;
+  ID3D12PipelineState* m_GPSOGBuffer;
+
+  ID3D12PipelineState* m_GPSOForward;
 
   //GBuffer Shader
   //Vertex
@@ -249,6 +263,15 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ID3DBlob* GBufferPSShaderBlob;
   void* GBufferPSBytecodePtr;
   SizeT GBufferPSbytecodeSz;
+  //Forward Shader
+  //Vertex
+  ID3DBlob* ForwardVSShaderBlob;
+  void* ForwardVSBytecodePtr;
+  SizeT ForwardVSbytecodeSz;
+  //Fragment
+  ID3DBlob* ForwardPSShaderBlob;
+  void* ForwardPSBytecodePtr;
+  SizeT ForwardPSbytecodeSz;
 
   //Depth Stencil Texture
   ID3D12Resource* m_DSTexture;
@@ -256,6 +279,13 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   D3D12_CPU_DESCRIPTOR_HANDLE m_DSCPUHeapStartHandle;
   D3D12_GPU_DESCRIPTOR_HANDLE m_DSGPUHeapStartHandle;
   UINT m_DSHandleIncrementSize;
+
+  //RTV Texture
+  std::vector<ID3D12Resource*> m_RTTexture;
+  ID3D12DescriptorHeap* m_RTDHPtr;
+  D3D12_CPU_DESCRIPTOR_HANDLE m_RTCPUHeapStartHandle;
+  D3D12_GPU_DESCRIPTOR_HANDLE m_RTGPUHeapStartHandle;
+  UINT m_RTHandleIncrementSize;
 
   struct CBuffer {
     Matrix4x4 World;

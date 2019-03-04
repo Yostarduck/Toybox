@@ -30,7 +30,7 @@ RenderTargetD3D12::create(const Device* device,
                                                    (void**)(&m_rtvHeap));
 
     if (FAILED(HRDescHeap)) {
-      std::exception();
+      throw std::exception();
     }
 
     m_RTHCPUHeapStart = m_rtvHeap->GetCPUDescriptorHandleForHeapStart();
@@ -52,7 +52,7 @@ RenderTargetD3D12::create(const Device* device,
                                               __uuidof(**(&m_srvHeap)),
                                               (void**)&m_srvHeap);
     if (FAILED(HRSRV)) {
-      std::exception();
+      throw std::exception();
     }
 
     m_SRHCPUHeapStart = m_srvHeap->GetCPUDescriptorHandleForHeapStart();
@@ -106,7 +106,7 @@ RenderTargetD3D12::create(const Device* device,
                                                          (void**)(&m_renderTarget[n]));
 
       if (FAILED(HRCommitted)) {
-        std::exception();
+        throw std::exception();
       }
     }
 
