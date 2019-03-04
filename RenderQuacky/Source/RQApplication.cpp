@@ -70,7 +70,6 @@ RenderQuackyApp::postRender() {
     commandList->RSSetViewports(1, &GraphicAPI.GetScreenViewport());
 
     GraphicAPI.ApplyGBuffer();
-
     GraphicAPI.ApplyForward();
 
     AddResourceBarrier(commandList, GraphicAPI.GetBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);

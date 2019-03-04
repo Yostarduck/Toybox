@@ -407,27 +407,27 @@ GraphicsAPI::CreateShaders() {
   FileSystem FSys;
   TString path = FSys.GetWorkingPath();
 
-  CompileShader(path + _T("Resources\\Shaders\\GBuffer_vs.hlsl"),
-                TB_SHADER_TYPE::E::kVertex,
-                &GBufferVSShaderBlob,
-                &GBufferVSBytecodePtr,
-                &GBufferVSbytecodeSz);
-  CompileShader(path + _T("Resources\\Shaders\\GBuffer_ps.hlsl"),
-                TB_SHADER_TYPE::E::kFragment,
-                &GBufferPSShaderBlob,
-                &GBufferPSBytecodePtr,
-                &GBufferPSbytecodeSz);
+  CompileShaderFromFile(path + _T("Resources\\Shaders\\GBuffer_vs.hlsl"),
+                        TB_SHADER_TYPE::E::kVertex,
+                        &GBufferVSShaderBlob,
+                        &GBufferVSBytecodePtr,
+                        &GBufferVSbytecodeSz);
+  CompileShaderFromFile(path + _T("Resources\\Shaders\\GBuffer_ps.hlsl"),
+                        TB_SHADER_TYPE::E::kFragment,
+                        &GBufferPSShaderBlob,
+                        &GBufferPSBytecodePtr,
+                        &GBufferPSbytecodeSz);
 
-  CompileShader(path + _T("Resources\\Shaders\\Forward_vs.hlsl"),
-                TB_SHADER_TYPE::E::kVertex,
-                &ForwardVSShaderBlob,
-                &ForwardVSBytecodePtr,
-                &ForwardVSbytecodeSz);
-  CompileShader(path + _T("Resources\\Shaders\\Forward_ps.hlsl"),
-                TB_SHADER_TYPE::E::kFragment,
-                &ForwardPSShaderBlob,
-                &ForwardPSBytecodePtr,
-                &ForwardPSbytecodeSz);
+  CompileShaderFromFile(path + _T("Resources\\Shaders\\Forward_vs.hlsl"),
+                        TB_SHADER_TYPE::E::kVertex,
+                        &ForwardVSShaderBlob,
+                        &ForwardVSBytecodePtr,
+                        &ForwardVSbytecodeSz);
+  CompileShaderFromFile(path + _T("Resources\\Shaders\\Forward_ps.hlsl"),
+                        TB_SHADER_TYPE::E::kFragment,
+                        &ForwardPSShaderBlob,
+                        &ForwardPSBytecodePtr,
+                        &ForwardPSbytecodeSz);
 }
 
 void
@@ -1010,21 +1010,21 @@ GraphicsAPI::CreateDSV() {
 
 void
 GraphicsAPI::CreateRTV() {
-  const Int32 RTSize = 4;
+  const Int32 GBufferRTSize = 4;
   //Create deferred buffers
   //1.WorldPosition
   //2.Metallic
 	//3.Roughness
 	//4.Emissive
 
-  D3D12_DESCRIPTOR_HEAP_DESC HeapDesc;
+  D3D12_DESCRIPTOR_HEAP_DESC RTHeapDesc;
   
-  HeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-  HeapDesc.NumDescriptors = RTSize;
-  HeapDesc.NodeMask = 0;
-  HeapDesc.Flags = (D3D12_DESCRIPTOR_HEAP_FLAGS)0;
+  RTHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+  RTHeapDesc.NumDescriptors = GBufferRTSize;
+  RTHeapDesc.NodeMask = 0;
+  RTHeapDesc.Flags = (D3D12_DESCRIPTOR_HEAP_FLAGS)0;
 
-  HRESULT HRRTDH = m_device->CreateDescriptorHeap(&HeapDesc,
+  HRESULT HRRTDH = m_device->CreateDescriptorHeap(&RTHeapDesc,
                                                   __uuidof(ID3D12DescriptorHeap),
                                                   (void**)&m_RTDHPtr);
   
@@ -1034,7 +1034,7 @@ GraphicsAPI::CreateRTV() {
 
   m_RTCPUHeapStartHandle = m_RTDHPtr->GetCPUDescriptorHandleForHeapStart();
   m_RTGPUHeapStartHandle.ptr = 0;
-  m_RTHandleIncrementSize = m_device->GetDescriptorHandleIncrementSize(HeapDesc.Type);
+  m_RTHandleIncrementSize = m_device->GetDescriptorHandleIncrementSize(RTHeapDesc.Type);
 
   D3D12_HEAP_PROPERTIES RTVHeapProperty;
   RTVHeapProperty.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -1063,8 +1063,8 @@ GraphicsAPI::CreateRTV() {
 	clearVal.Color[2] = 0.0f;
 	clearVal.Color[3] = 0.0f;
 
-  m_RTTexture.resize(RTSize);
-	for (Int32 i = 0; i < RTSize; ++i) {
+  m_RTTexture.resize(GBufferRTSize);
+	for (Int32 i = 0; i < GBufferRTSize; ++i) {
     RTVResourceDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 		clearVal.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
     HRESULT HRCR = m_device->CreateCommittedResource(&RTVHeapProperty,
@@ -1091,16 +1091,16 @@ GraphicsAPI::CreateRTV() {
 
   RTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 	
-	for (Int32 i = 0; i < RTSize; ++i) {
+	for (Int32 i = 0; i < GBufferRTSize; ++i) {
     RTVDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 
-    D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorhandle;
-    CPUDescriptorhandle.ptr = m_RTCPUHeapStartHandle.ptr +
-      (static_cast<SizeT>(m_SHandleIncrementSize) * i);
+    D3D12_CPU_DESCRIPTOR_HANDLE RTCPUDescriptorhandle;
+    RTCPUDescriptorhandle.ptr = m_RTCPUHeapStartHandle.ptr +
+                                (static_cast<SizeT>(m_SHandleIncrementSize) * i);
 
 		m_device->CreateRenderTargetView(m_RTTexture[i],
                                      &RTVDesc,
-                                     CPUDescriptorhandle);
+                                     RTCPUDescriptorhandle);
 	}
 
 	//Create SRV for RTs
@@ -1114,7 +1114,7 @@ GraphicsAPI::CreateRTV() {
 	RTVDescSRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	RTVDescSRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-	for (int i = 0; i < RTSize; ++i) {
+	for (int i = 0; i < GBufferRTSize; ++i) {
     RTVDescSRV.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 
     D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorhandle;
@@ -1128,11 +1128,11 @@ GraphicsAPI::CreateRTV() {
 }
 
 void
-GraphicsAPI::CompileShader(WString filepath,
-                           TB_SHADER_TYPE::E type,
-                           ID3DBlob** shaderBlobOut,
-                           void** bytecodePtrOut,
-                           SizeT* bytecodeSzOut) {
+GraphicsAPI::CompileShaderFromFile(WString filepath,
+                                   TB_SHADER_TYPE::E type,
+                                   ID3DBlob** shaderBlobOut,
+                                   void** bytecodePtrOut,
+                                   SizeT* bytecodeSzOut) {
 #if TB_DEBUG_MODE
   // Enable better shader debugging with the graphics debugging tools.
   UInt32 compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -1189,6 +1189,79 @@ GraphicsAPI::CompileShader(WString filepath,
                                         0,
                                         &(*shaderBlobOut),
                                         &errorBlob);
+
+  if (FAILED(HRShader)) {
+    throw std::exception();
+  }
+
+  (*bytecodePtrOut) = (*shaderBlobOut)->GetBufferPointer();
+  (*bytecodeSzOut) = (*shaderBlobOut)->GetBufferSize();
+}
+
+void
+GraphicsAPI::CompileShaderFromBuffer(WString code,
+                                     TB_SHADER_TYPE::E type,
+                                     ID3DBlob** shaderBlobOut,
+                                     void** bytecodePtrOut,
+                                     SizeT* bytecodeSzOut) {
+#if TB_DEBUG_MODE
+  // Enable better shader debugging with the graphics debugging tools.
+  UInt32 compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+  UInt32 compileFlags = 0;
+#endif
+  String shaderModel;
+  switch (type)
+  {
+  case toyboxSDK::TB_SHADER_TYPE::E::kVertex:
+    shaderModel = "vs_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kHull:
+    shaderModel = "hs_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kTeselation:
+    exit(666); //This doesn't exist in directx.
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kDomain:
+    shaderModel = "ds_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kGeometry:
+    shaderModel = "gs_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kFragment:
+    shaderModel = "ps_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kMesh:
+    exit(666); //This doesn't exists yet in directx.
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kRaytracing:
+    exit(666); //This isn't a shader yet.
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kCompute:
+    shaderModel = "cs_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kTexture:
+    exit(666); //This never has existed.
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kNone:
+    break;
+  default:
+    break;
+  }
+
+  ID3DBlob* errorBlob = nullptr;
+
+  HRESULT HRShader = D3DCompile(code.c_str(),
+                                code.size(),
+                                nullptr,
+                                nullptr,
+                                D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                                "main",
+                                shaderModel.c_str(),
+                                compileFlags,
+                                0,
+                                &(*shaderBlobOut),
+                                &errorBlob);
 
   if (FAILED(HRShader)) {
     throw std::exception();

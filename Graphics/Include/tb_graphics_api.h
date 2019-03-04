@@ -18,7 +18,7 @@
 
 namespace toyboxSDK {
 
-static void
+void
 AddResourceBarrier(ID3D12GraphicsCommandList* command,
                    ID3D12Resource* pResource,
                    D3D12_RESOURCE_STATES before,
@@ -206,11 +206,18 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   Int32 m_iCurrentFrame;
 
   void
-  CompileShader(WString filepath,
-                TB_SHADER_TYPE::E type,
-                ID3DBlob** shaderBlobOut,
-                void** bytecodePtrOut,
-                SizeT* bytecodeSzOut);
+  CompileShaderFromFile(WString filepath,
+                        TB_SHADER_TYPE::E type,
+                        ID3DBlob** shaderBlobOut,
+                        void** bytecodePtrOut,
+                        SizeT* bytecodeSzOut);
+
+  void
+  CompileShaderFromBuffer(WString code,
+                          TB_SHADER_TYPE::E type,
+                          ID3DBlob** shaderBlobOut,
+                          void** bytecodePtrOut,
+                          SizeT* bytecodeSzOut);
 
   IDXGIFactory4* GetFactory(UInt32 flags = 0);
   void GetHardwareAdapter(IDXGIFactory4* pFactory, IDXGIAdapter1** ppAdapter);

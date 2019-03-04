@@ -1,5 +1,6 @@
 #include "RQApplication.h"
 #include <tb_types.h>
+#include <iostream>
 
 toyboxSDK::Int32
 main(toyboxSDK::Int32 argc, toyboxSDK::ANSIChar* argv[]) {
@@ -27,7 +28,7 @@ main(toyboxSDK::Int32 argc, toyboxSDK::ANSIChar* argv[]) {
   */
 
   if (argc < 2) {
-    //std::cout << "App path: " << argv[0] << std::endl;
+    std::cout << "App path: " << argv[0] << std::endl;
   }
   else {
     /*
