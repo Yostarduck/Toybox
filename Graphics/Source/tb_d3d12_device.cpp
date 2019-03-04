@@ -57,7 +57,7 @@ DeviceD3D12::CreateDevice() {
                                                         (void**)(&m_commandQueue));
 
   if (FAILED(HRCommandQueue)) {
-    std::exception();
+    throw std::exception();
   }
 
   //Create command allocator
@@ -66,7 +66,7 @@ DeviceD3D12::CreateDevice() {
                                                                 (void**)(&m_commandAlloc));
 
   if (FAILED(HRCommandAllocator)) {
-    std::exception();
+    throw std::exception();
   }
 }
 

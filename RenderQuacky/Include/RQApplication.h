@@ -2,7 +2,20 @@
 
 #include <tb_application.h>
 
+//#include <assimp/Importer.hpp>
+//#include <FreeImage/FreeImage.h>
+
 namespace toyboxSDK {
+
+
+enum Inputs
+{
+  kMouse_Left = 0,
+  //kMouse_Right,
+  //kMouse_X,
+  //kMouse_Y
+  kKey_Q
+};
 
 /*
 *
@@ -50,6 +63,7 @@ class RenderQuackyApp : public Application
   */
   virtual void
   onResize() override;
+
 };
 
 }

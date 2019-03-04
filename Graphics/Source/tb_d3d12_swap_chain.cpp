@@ -96,7 +96,7 @@ SwapChainD3D12::create(const Device* device, const SwapChainDesc& desc, void* hw
                                                          (void**)&m_rtvHeap);
 
     if (FAILED(HRDescriptorHeap)) {
-      std::exception();
+      throw std::exception();
     }
 
     m_rtvDescriptorSize = dev->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
@@ -112,7 +112,7 @@ SwapChainD3D12::create(const Device* device, const SwapChainDesc& desc, void* hw
       //                                             __uuidof(**(&m_renderTargets[n])),
       //                                             (void**)&m_renderTargets[n]);
       //if (FAILED(HRGetBuffer)) {
-      //  std::exception();
+      //  throw std::exception();
       //}
       //
       //RenderTargetD3D12* currentRT = reinterpret_cast<RenderTargetD3D12*>(&m_renderTargets[n]);

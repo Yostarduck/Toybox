@@ -63,7 +63,7 @@ ShaderD3D12::create(WString filepath, TB_SHADER_TYPE::E type) {
                                         &errorBlob);
 
   if (FAILED(HRShader)) {
-    std::exception();
+    throw std::exception();
     return false;
   }
 

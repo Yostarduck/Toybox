@@ -1,7 +1,8 @@
 #include "tb_graphics_api.h"
 
-#include <tb_types.h>
+#include <tb_file_system.h>
 #include <tb_string_conversions.h>
+#include <tb_types.h>
 
 //#include "tb_device.h"
 //#include "tb_swap_chain.h"
@@ -47,13 +48,16 @@ GraphicsAPI::init(UInt32 w,
     CreateQuadVB();
     CreateQuadIB();
     CreateShaderHeap();
-    CreateRootSignature();
-    CreateForwardPSO();
+    CreateGBufferRootSignature();
+    CreateForwardRootSignature();
+    CreateGPSOGBuffer();
+    CreateGPSOForward();
     CreateDSV();
+    CreateRTV();
 
     HRESULT HRCommandClose = m_commandList->Close();
     if (FAILED(HRCommandClose)) {
-      std::exception();
+      throw std::exception();
     }
 
     ID3D12CommandList* ppCommandLists[] = { m_commandList };
@@ -65,27 +69,68 @@ GraphicsAPI::init(UInt32 w,
 }
 
 void
-GraphicsAPI::Render() {
-  /*
-  for (int i = 0; i < numRTV; i++) {
-    AddResourceBarrier(m_commandList, mRtvTexture[i].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ);
+GraphicsAPI::ApplyGBuffer() {
+  const Int32 RTSize = 4;
+  float mClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+  for (Int32 i = 0; i < RTSize; ++i) {
+    AddResourceBarrier(m_commandList, m_RTTexture[i], D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_RENDER_TARGET);
   }
-  */
+
+  AddResourceBarrier(m_commandList, m_DSTexture, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
   ID3D12DescriptorHeap* ppHeaps[1] = { m_ShaderDHPtr };
 
-  //AddResourceBarrier(m_commandList, m_DSTexture, D3D12_RESOURCE_STATE_DEPTH_READ, D3D12_RESOURCE_STATE_GENERIC_READ);
+  m_commandList->SetPipelineState(m_GPSOGBuffer);
 
-  m_commandList->SetPipelineState(m_PSOForward);
+  for (Int32 i = 0; i < RTSize; ++i) {
+    D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorhandle;
+    CPUDescriptorhandle.ptr = m_RTCPUHeapStartHandle.ptr +
+                              (static_cast<SizeT>(m_SHandleIncrementSize) * i);
 
-  D3D12_GPU_DESCRIPTOR_HANDLE handleOffset;
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + m_SHandleIncrementSize;
+    m_commandList->ClearRenderTargetView(CPUDescriptorhandle, mClearColor, 0, nullptr);
+  }
 
   m_commandList->ClearDepthStencilView(m_DSCPUHeapStartHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0xff, 0, nullptr);
 
+  D3D12_GPU_DESCRIPTOR_HANDLE handleOffset;
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr;
+
+  m_commandList->OMSetRenderTargets(RTSize, &m_RTCPUHeapStartHandle, true, &m_DSCPUHeapStartHandle);
+  m_commandList->SetDescriptorHeaps(1, ppHeaps);
+  m_commandList->SetGraphicsRootSignature(m_GBufferRootSignature);
+  m_commandList->SetGraphicsRootDescriptorTable(0, m_ShaderGPUHeapStartHandle);
+
+  m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+  m_commandList->IASetIndexBuffer(&m_QuadIBView);
+  m_commandList->IASetVertexBuffers(0, 1, &m_QuadVBView);
+  m_commandList->DrawInstanced(4, 1, 0, 0);
+}
+
+void
+GraphicsAPI::ApplyForward() {
+  const Int32 RTSize = 4;
+  float mClearColor[4] = { 0.0, 0.0f, 0.0f, 1.0f };
+
+  for (Int32 i = 0; i < RTSize; ++i) {
+    AddResourceBarrier(m_commandList, m_RTTexture[i], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ);
+  }
+
+  AddResourceBarrier(m_commandList, m_DSTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
+
+  ID3D12DescriptorHeap* ppHeaps[1] = { m_ShaderDHPtr };
+
+  m_commandList->SetPipelineState(m_GPSOForward);
+
+  D3D12_GPU_DESCRIPTOR_HANDLE handleOffset;
+
   m_commandList->OMSetRenderTargets(1, &GetRenderTargetView(), true, nullptr);
   m_commandList->SetDescriptorHeaps(1, ppHeaps);
-  m_commandList->SetGraphicsRootSignature(m_rootSignature);
-  m_commandList->SetGraphicsRootDescriptorTable(0, m_ShaderGPUHeapStartHandle);
+  m_commandList->SetGraphicsRootSignature(m_ForwardRootSignature);
+
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 1); //RTs
+  m_commandList->SetGraphicsRootDescriptorTable(0, handleOffset);
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 5); //Ds
   m_commandList->SetGraphicsRootDescriptorTable(1, handleOffset);
 
   m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
@@ -109,7 +154,7 @@ GraphicsAPI::PresentFrame() {
 	}
 	else {
     if (FAILED(HRPresent)) {
-      std::exception();
+      throw std::exception();
     }
 
     {
@@ -117,7 +162,7 @@ GraphicsAPI::PresentFrame() {
       const UInt64 currentFenceValue = m_fenceValues[m_iCurrentFrame];
       HRESULT HRSignal = m_commandQueue->Signal(m_fence, currentFenceValue);
       if (FAILED(HRSignal)) {
-        std::exception();
+        throw std::exception();
       }
 
       // Advance the frame index.
@@ -127,7 +172,7 @@ GraphicsAPI::PresentFrame() {
       if (m_fence->GetCompletedValue() < m_fenceValues[m_iCurrentFrame]) {
         HRESULT HRSEC = m_fence->SetEventOnCompletion(m_fenceValues[m_iCurrentFrame], m_fenceEvent);
         if (FAILED(HRSEC)) {
-          std::exception();
+          throw std::exception();
         }
         WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
       }
@@ -143,13 +188,13 @@ GraphicsAPI::WaitForGPU() {
   // Schedule a Signal command in the queue.
   HRESULT HRCommandSignal = m_commandQueue->Signal(m_fence, m_fenceValues[m_iCurrentFrame]);
   if (FAILED(HRCommandSignal)) {
-    std::exception();
+    throw std::exception();
   }
 
   // Wait until the fence has been crossed.
   HRESULT HRSEOC = m_fence->SetEventOnCompletion(m_fenceValues[m_iCurrentFrame], m_fenceEvent);
   if (FAILED(HRSEOC)) {
-    std::exception();
+    throw std::exception();
   }
   WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
 
@@ -221,7 +266,7 @@ GraphicsAPI::CreateCommandQueue() {
                                                         (void**)(&m_commandQueue));
 
   if (FAILED(HRCommandQueue)) {
-    std::exception();
+    throw std::exception();
   }
 }
 
@@ -235,7 +280,7 @@ GraphicsAPI::CreateSwapChainCommanAllocators() {
                                                               (void**)(&m_commandAllocators[n]));
 
     if (FAILED(HRCommandAlloc)) {
-      std::exception();
+      throw std::exception();
     }
   }
 }
@@ -249,7 +294,7 @@ GraphicsAPI::CreateFences() {
                                           (void**)(&m_fence));
 
   if (FAILED(HRFence)) {
-    std::exception();
+    throw std::exception();
   }
 
   m_fenceValues[m_iCurrentFrame]++;
@@ -284,7 +329,7 @@ GraphicsAPI::CreateSwapChain() {
   	            	                                      &m_swapChain);
   
   if (FAILED(HRSwapChain)) {
-    std::exception();
+    throw std::exception();
   }
 
   factory->Release();
@@ -300,7 +345,7 @@ GraphicsAPI::CreateSwapChain() {
                                                     (void**)(&m_rtvHeap));
 
     if (FAILED(HRHeap)) {
-      std::exception();
+      throw std::exception();
     }
 
     m_rtvHeap->SetName(L"RTV Descriptor Heap");
@@ -323,13 +368,12 @@ GraphicsAPI::CreateSwapChain() {
                                              (void**)(&m_renderTargets[n]));
 
       if (FAILED(HRRTV)) {
-        std::exception();
+        throw std::exception();
       }
 
       m_device->CreateRenderTargetView(m_renderTargets[n], nullptr, handle);
 
-      WString name;
-      name = _T("RenderTarget") + StringConversion::toWString(n);
+      WString name = _T("SwapChain RT(") + StringConversion::toWString(n) + _T(")");
 
       m_renderTargets[n]->SetName(name.c_str());
     }
@@ -354,22 +398,36 @@ GraphicsAPI::CreateCommandList() {
                                                       (void**)(&m_commandList));
 
   if (FAILED(HRCommandList)) {
-    std::exception();
+    throw std::exception();
   }
 }
 
 void
 GraphicsAPI::CreateShaders() {
-  CompileShader(_T("D:\\Users\\F_A_R\\sources\\repos\\Toybox\\Bin\\x64\\Resources\\Shaders\\GBuffer_vs.hlsl"),
-                TB_SHADER_TYPE::E::kVertex,
-                &GBufferVSShaderBlob,
-                &GBufferVSBytecodePtr,
-                &GBufferVSbytecodeSz);
-  CompileShader(_T("D:\\Users\\F_A_R\\sources\\repos\\Toybox\\Bin\\x64\\Resources\\Shaders\\GBuffer_ps.hlsl"),
-                TB_SHADER_TYPE::E::kFragment,
-                &GBufferPSShaderBlob,
-                &GBufferPSBytecodePtr,
-                &GBufferPSbytecodeSz);
+  FileSystem FSys;
+  TString path = FSys.GetWorkingPath();
+
+  CompileShaderFromFile(path + _T("Resources\\Shaders\\GBuffer_vs.hlsl"),
+                        TB_SHADER_TYPE::E::kVertex,
+                        &GBufferVSShaderBlob,
+                        &GBufferVSBytecodePtr,
+                        &GBufferVSbytecodeSz);
+  CompileShaderFromFile(path + _T("Resources\\Shaders\\GBuffer_ps.hlsl"),
+                        TB_SHADER_TYPE::E::kFragment,
+                        &GBufferPSShaderBlob,
+                        &GBufferPSBytecodePtr,
+                        &GBufferPSbytecodeSz);
+
+  CompileShaderFromFile(path + _T("Resources\\Shaders\\Forward_vs.hlsl"),
+                        TB_SHADER_TYPE::E::kVertex,
+                        &ForwardVSShaderBlob,
+                        &ForwardVSBytecodePtr,
+                        &ForwardVSbytecodeSz);
+  CompileShaderFromFile(path + _T("Resources\\Shaders\\Forward_ps.hlsl"),
+                        TB_SHADER_TYPE::E::kFragment,
+                        &ForwardPSShaderBlob,
+                        &ForwardPSBytecodePtr,
+                        &ForwardPSbytecodeSz);
 }
 
 void
@@ -404,7 +462,7 @@ GraphicsAPI::CreateConstantBuffer() {
                                                      (void**)(&m_CB));
 
   if (FAILED(HRCBCR)) {
-    std::exception();
+    throw std::exception();
   }
 }
 
@@ -447,13 +505,13 @@ GraphicsAPI::CreateQuadVB() {
                                                      (void**)(&m_QuadVB));
 	
   if (FAILED(HRVBCR)) {
-    std::exception();
+    throw std::exception();
   }
 
 	UInt8* VBDataBegin;
 	HRESULT HRMapVB = m_QuadVB->Map(0, nullptr, reinterpret_cast<void**>(&VBDataBegin));
   if (FAILED(HRMapVB)) {
-    std::exception();
+    throw std::exception();
   }
 	memcpy(VBDataBegin, QuadVerts, sizeof(QuadVerts));
 	m_QuadVB->Unmap(0, nullptr);
@@ -503,13 +561,13 @@ GraphicsAPI::CreateQuadIB() {
                                                      (void**)(&m_QuadIB));
 
   if (FAILED(HRIDCR)) {
-    std::exception();
+    throw std::exception();
   }
 
   UInt8* IBDataBegin;
   HRESULT HRIB = m_QuadIB->Map(0, nullptr, reinterpret_cast<void**>(&IBDataBegin));
   if (FAILED(HRIB)) {
-    std::exception();
+    throw std::exception();
   }
   memcpy(IBDataBegin, &indexes[0], sizeof(UInt32) * indexes.size());
   m_QuadIB->Unmap(0, nullptr);
@@ -523,11 +581,15 @@ void
 GraphicsAPI::CreateShaderHeap() {
   //m_cbvsrvHeap.Create(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 10, true);
 
+  //CBv = 1 (0)
+  //RTv = 4 (1 - 4)
+  //DSv = 1 (5)
+
   //Start of create GPU Heap
   D3D12_DESCRIPTOR_HEAP_DESC GPUHDesc;
   GPUHDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
   GPUHDesc.NodeMask = 0;
-  GPUHDesc.NumDescriptors = 2;
+  GPUHDesc.NumDescriptors = 6;
   GPUHDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
 
@@ -535,8 +597,10 @@ GraphicsAPI::CreateShaderHeap() {
                                               __uuidof(ID3D12DescriptorHeap),
                                               (void**)&m_ShaderDHPtr);
   if (FAILED(hr)) {
-    std::exception();
+    throw std::exception();
   }
+
+  m_ShaderDHPtr->SetName(_T("Shader heap"));
 
   m_ShaderCPUHeapStartHandle = m_ShaderDHPtr->GetCPUDescriptorHandleForHeapStart();
   m_ShaderGPUHeapStartHandle = m_ShaderDHPtr->GetGPUDescriptorHandleForHeapStart();
@@ -560,28 +624,74 @@ GraphicsAPI::CreateShaderHeap() {
 }
 
 void
-GraphicsAPI::CreateRootSignature() {
+GraphicsAPI::CreateGBufferRootSignature() {
   //Init descriptor tables
 
-  D3D12_DESCRIPTOR_RANGE range[2];
+  D3D12_DESCRIPTOR_RANGE range[1];
   //CBV (The camera one)
-  //range[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
   range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
   range[0].NumDescriptors = 1;
   range[0].BaseShaderRegister = 0;
   range[0].RegisterSpace = 0;
   range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+  D3D12_ROOT_PARAMETER rootParameters[1];
+  rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+  rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+  rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
+  rootParameters[0].DescriptorTable.pDescriptorRanges = &range[0];
+
+  D3D12_ROOT_SIGNATURE_DESC descRootSignature;
+  descRootSignature.NumParameters = 1;
+  descRootSignature.pParameters = &rootParameters[0];
+  descRootSignature.NumStaticSamplers = 0;
+  descRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+  ID3DBlob* rootSigBlob;
+  ID3DBlob* errorBlob;
+
+  HRESULT HRRootSerialize = D3D12SerializeRootSignature(&descRootSignature,
+                                                        D3D_ROOT_SIGNATURE_VERSION_1,
+                                                        &rootSigBlob,
+                                                        &errorBlob);
+
+  if (FAILED(HRRootSerialize)) {
+    throw std::exception();
+  }
+
+  HRESULT HRRootSignature = m_device->CreateRootSignature(0,
+                                                          rootSigBlob->GetBufferPointer(),
+                                                          rootSigBlob->GetBufferSize(),
+                                                          __uuidof(**(&m_GBufferRootSignature)),
+                                                          (void**)(&m_GBufferRootSignature));
+  if (FAILED(HRRootSignature)) {
+    throw std::exception();
+  }
+}
+
+
+void
+GraphicsAPI::CreateForwardRootSignature() {
+  //Init descriptor tables
+
+  D3D12_DESCRIPTOR_RANGE range[2];
+
+  //SRV (GBuffer RTs)
+  range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+  range[0].NumDescriptors = 4;
+  range[0].BaseShaderRegister = 0;
+  range[0].RegisterSpace = 0;
+  range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
   //SRV (The depth stencil)
-  //range[2].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0);
   range[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
   range[1].NumDescriptors = 1;
-  range[1].BaseShaderRegister = 0;
+  range[1].BaseShaderRegister = 4;
   range[1].RegisterSpace = 0;
   range[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 
   D3D12_ROOT_PARAMETER rootParameters[2];
-  //rootParameters.InitAsDescriptorTable(1, &range[0], D3D12_SHADER_VISIBILITY_ALL);
+  //
   rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
   rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
   rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
@@ -593,25 +703,26 @@ GraphicsAPI::CreateRootSignature() {
   rootParameters[1].DescriptorTable.pDescriptorRanges = &range[1];
 
   D3D12_STATIC_SAMPLER_DESC StaticSamplers;
-  //StaticSamplers.Init(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-  StaticSamplers.ShaderRegister = 0;
-  StaticSamplers.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-  StaticSamplers.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-  StaticSamplers.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-  StaticSamplers.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-  StaticSamplers.MipLODBias = 0;
-  StaticSamplers.MaxAnisotropy = 16;
-  StaticSamplers.ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-  StaticSamplers.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
-  StaticSamplers.MinLOD = 0.f;
-  StaticSamplers.MaxLOD = D3D12_FLOAT32_MAX;
-  StaticSamplers.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-  StaticSamplers.RegisterSpace = 0;
+  {
+    StaticSamplers.ShaderRegister = 0;
+    StaticSamplers.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    StaticSamplers.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    StaticSamplers.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    StaticSamplers.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    StaticSamplers.MipLODBias = 0;
+    StaticSamplers.MaxAnisotropy = 16;
+    StaticSamplers.ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+    StaticSamplers.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+    StaticSamplers.MinLOD = 0.f;
+    StaticSamplers.MaxLOD = D3D12_FLOAT32_MAX;
+    StaticSamplers.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    StaticSamplers.RegisterSpace = 0;
+  }
 
   D3D12_ROOT_SIGNATURE_DESC descRootSignature;
   //descRootSignature.Init(3, rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
   descRootSignature.NumParameters = 2;
-  descRootSignature.pParameters = rootParameters;
+  descRootSignature.pParameters = &rootParameters[0];
   descRootSignature.NumStaticSamplers = 1;
   descRootSignature.pStaticSamplers = &StaticSamplers;
   descRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -625,16 +736,16 @@ GraphicsAPI::CreateRootSignature() {
                                                         &errorBlob);
 
   if (FAILED(HRRootSerialize)) {
-    std::exception();
+    throw std::exception();
   }
 
   HRESULT HRRootSignature = m_device->CreateRootSignature(0,
                                                           rootSigBlob->GetBufferPointer(),
                                                           rootSigBlob->GetBufferSize(),
-                                                          __uuidof(**(&m_rootSignature)),
-                                                          (void**)(&m_rootSignature));
+                                                          __uuidof(**(&m_ForwardRootSignature)),
+                                                          (void**)(&m_ForwardRootSignature));
   if (FAILED(HRRootSignature)) {
-    std::exception();
+    throw std::exception();
   }
 }
 
@@ -644,7 +755,88 @@ static D3D12_INPUT_ELEMENT_DESC VertexDesc[] = {
 };
 
 void
-GraphicsAPI::CreateForwardPSO() {
+GraphicsAPI::CreateGPSOGBuffer() {
+  D3D12_DEPTH_STENCIL_DESC DepthStencilDefault;
+  {
+    DepthStencilDefault.DepthEnable = TRUE;
+    DepthStencilDefault.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+    DepthStencilDefault.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+    DepthStencilDefault.StencilEnable = FALSE;
+    DepthStencilDefault.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
+    DepthStencilDefault.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
+    const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp =
+    {
+      D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_STENCIL_OP_KEEP, D3D12_COMPARISON_FUNC_ALWAYS
+    };
+    DepthStencilDefault.FrontFace = defaultStencilOp;
+    DepthStencilDefault.BackFace = defaultStencilOp;
+  }
+  D3D12_BLEND_DESC BlendStateDefault;
+  {
+    BlendStateDefault.AlphaToCoverageEnable = FALSE;
+    BlendStateDefault.IndependentBlendEnable = FALSE;
+    const D3D12_RENDER_TARGET_BLEND_DESC defaultRenderTargetBlendDesc =
+    {
+      FALSE,FALSE,
+      D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+      D3D12_BLEND_ONE, D3D12_BLEND_ZERO, D3D12_BLEND_OP_ADD,
+      D3D12_LOGIC_OP_NOOP,
+      D3D12_COLOR_WRITE_ENABLE_ALL,
+    };
+    for (UInt32 i = 0; i < D3D12_SIMULTANEOUS_RENDER_TARGET_COUNT; ++i) {
+      BlendStateDefault.RenderTarget[i] = defaultRenderTargetBlendDesc;
+    }
+  }
+  D3D12_RASTERIZER_DESC RasterizerDefault;
+  {
+    RasterizerDefault.FillMode = D3D12_FILL_MODE_SOLID;
+    RasterizerDefault.CullMode = D3D12_CULL_MODE_BACK;
+    RasterizerDefault.FrontCounterClockwise = FALSE;
+    RasterizerDefault.DepthBias = D3D12_DEFAULT_DEPTH_BIAS;
+    RasterizerDefault.DepthBiasClamp = D3D12_DEFAULT_DEPTH_BIAS_CLAMP;
+    RasterizerDefault.SlopeScaledDepthBias = D3D12_DEFAULT_SLOPE_SCALED_DEPTH_BIAS;
+    RasterizerDefault.DepthClipEnable = TRUE;
+    RasterizerDefault.MultisampleEnable = FALSE;
+    RasterizerDefault.AntialiasedLineEnable = FALSE;
+    RasterizerDefault.ForcedSampleCount = 0;
+    RasterizerDefault.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+  }
+
+  D3D12_GRAPHICS_PIPELINE_STATE_DESC descPipelineState;
+  ZeroMemory(&descPipelineState, sizeof(descPipelineState));
+
+  descPipelineState.VS = { GBufferVSBytecodePtr, GBufferVSbytecodeSz };
+  //descPipelineState.DS = { GBufferDSBytecodePtr, GBufferDSbytecodeSz };
+  //descPipelineState.HS = { GBufferHSBytecodePtr, GBufferHSbytecodeSz };
+  //descPipelineState.GS = { GBufferGSBytecodePtr, GBufferGSbytecodeSz };
+  descPipelineState.PS = { GBufferPSBytecodePtr, GBufferPSbytecodeSz };
+  descPipelineState.InputLayout.pInputElementDescs = VertexDesc;
+  descPipelineState.InputLayout.NumElements = _countof(VertexDesc);
+  descPipelineState.pRootSignature = m_GBufferRootSignature;
+  descPipelineState.DepthStencilState = DepthStencilDefault;
+  descPipelineState.DepthStencilState.DepthEnable = false;
+  descPipelineState.BlendState = BlendStateDefault;
+  descPipelineState.RasterizerState = RasterizerDefault;
+  descPipelineState.RasterizerState.DepthClipEnable = false;
+  descPipelineState.SampleMask = UINT_MAX;
+  descPipelineState.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+  descPipelineState.NumRenderTargets = 4;
+  descPipelineState.RTVFormats[0] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  descPipelineState.RTVFormats[1] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  descPipelineState.RTVFormats[2] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  descPipelineState.RTVFormats[3] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  descPipelineState.SampleDesc.Count = 1;
+
+  HRESULT HRPSO = m_device->CreateGraphicsPipelineState(&descPipelineState,
+                                                        __uuidof(**(&m_GPSOGBuffer)),
+                                                        (void**)(&m_GPSOGBuffer));
+  if (FAILED(HRPSO)) {
+    throw std::exception();
+  }
+}
+
+void
+GraphicsAPI::CreateGPSOForward() {
   D3D12_DEPTH_STENCIL_DESC DepthStencilDefault;
   {
     DepthStencilDefault.DepthEnable = TRUE;
@@ -700,14 +892,14 @@ GraphicsAPI::CreateForwardPSO() {
   //ShaderObject* gs = g_ShaderManager.getShaderObj("ScreenQuadGS");
   //ShaderObject* ps = g_ShaderManager.getShaderObj("ScreenQuadPS");
 
-  descPipelineState.VS = { GBufferVSBytecodePtr, GBufferVSbytecodeSz };
+  descPipelineState.VS = { ForwardVSBytecodePtr, ForwardVSbytecodeSz };
   //descPipelineState.DS = { GBufferDSBytecodePtr, GBufferDSbytecodeSz };
   //descPipelineState.HS = { GBufferHSBytecodePtr, GBufferHSbytecodeSz };
   //descPipelineState.GS = { GBufferGSBytecodePtr, GBufferGSbytecodeSz };
-  descPipelineState.PS = { GBufferPSBytecodePtr, GBufferPSbytecodeSz };
+  descPipelineState.PS = { ForwardPSBytecodePtr, ForwardPSbytecodeSz };
   descPipelineState.InputLayout.pInputElementDescs = VertexDesc;
   descPipelineState.InputLayout.NumElements = _countof(VertexDesc);
-  descPipelineState.pRootSignature = m_rootSignature;
+  descPipelineState.pRootSignature = m_ForwardRootSignature;
   descPipelineState.DepthStencilState = DepthStencilDefault;
   descPipelineState.DepthStencilState.DepthEnable = false;
   descPipelineState.BlendState = BlendStateDefault;
@@ -716,15 +908,14 @@ GraphicsAPI::CreateForwardPSO() {
   descPipelineState.SampleMask = UINT_MAX;
   descPipelineState.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
   descPipelineState.NumRenderTargets = 1;
-  //descPipelineState.RTVFormats[0] = mRtvFormat[0];
   descPipelineState.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; //Swapchain desc
   descPipelineState.SampleDesc.Count = 1;
 
   HRESULT HRPSO = m_device->CreateGraphicsPipelineState(&descPipelineState,
-                                                        __uuidof(**(&m_PSOForward)),
-                                                        (void**)(&m_PSOForward));
+                                                        __uuidof(**(&m_GPSOForward)),
+                                                        (void**)(&m_GPSOForward));
   if (FAILED(HRPSO)) {
-    std::exception();
+    throw std::exception();
   }
 }
 
@@ -743,7 +934,7 @@ GraphicsAPI::CreateDSV() {
                                               (void**)&m_DSDHPtr);
   
   if (FAILED(hr)) {
-    std::exception();
+    throw std::exception();
   }
 
   m_DSCPUHeapStartHandle = m_DSDHPtr->GetCPUDescriptorHandleForHeapStart();
@@ -777,14 +968,17 @@ GraphicsAPI::CreateDSV() {
 	HRESULT HRCR = m_device->CreateCommittedResource(&heapProperty,
                                                    D3D12_HEAP_FLAG_NONE,
                                                    &resourceDesc,
-                                                   D3D12_RESOURCE_STATE_DEPTH_WRITE,
+                                                   //D3D12_RESOURCE_STATE_DEPTH_WRITE,
+                                                   D3D12_RESOURCE_STATE_GENERIC_READ,
                                                    &clearVal,
                                                    __uuidof(**(&m_DSTexture)),
                                                    (void**)(&m_DSTexture));
 
   if (FAILED(HRCR)) {
-    std::exception();
+    throw std::exception();
   }
+
+  m_DSTexture->SetName(_T("DepthStencilTexture"));
 
 	D3D12_DEPTH_STENCIL_VIEW_DESC DSVdesc;
 	ZeroMemory(&DSVdesc, sizeof(DSVdesc));
@@ -809,17 +1003,136 @@ GraphicsAPI::CreateDSV() {
 
   D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorhandle;
   CPUDescriptorhandle.ptr = m_ShaderCPUHeapStartHandle.ptr +
-                            static_cast<SIZE_T>(m_SHandleIncrementSize);
+                            (static_cast<SizeT>(m_SHandleIncrementSize) * 5);
 
 	m_device->CreateShaderResourceView(m_DSTexture, &descSRV, CPUDescriptorhandle);
 }
 
 void
-GraphicsAPI::CompileShader(WString filepath,
-                           TB_SHADER_TYPE::E type,
-                           ID3DBlob** shaderBlobOut,
-                           void** bytecodePtrOut,
-                           SizeT* bytecodeSzOut) {
+GraphicsAPI::CreateRTV() {
+  const Int32 GBufferRTSize = 4;
+  //Create deferred buffers
+  //1.WorldPosition
+  //2.Metallic
+	//3.Roughness
+	//4.Emissive
+
+  D3D12_DESCRIPTOR_HEAP_DESC RTHeapDesc;
+  
+  RTHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+  RTHeapDesc.NumDescriptors = GBufferRTSize;
+  RTHeapDesc.NodeMask = 0;
+  RTHeapDesc.Flags = (D3D12_DESCRIPTOR_HEAP_FLAGS)0;
+
+  HRESULT HRRTDH = m_device->CreateDescriptorHeap(&RTHeapDesc,
+                                                  __uuidof(ID3D12DescriptorHeap),
+                                                  (void**)&m_RTDHPtr);
+  
+  if (FAILED(HRRTDH)) {
+    throw std::exception();
+  }
+
+  m_RTCPUHeapStartHandle = m_RTDHPtr->GetCPUDescriptorHandleForHeapStart();
+  m_RTGPUHeapStartHandle.ptr = 0;
+  m_RTHandleIncrementSize = m_device->GetDescriptorHandleIncrementSize(RTHeapDesc.Type);
+
+  D3D12_HEAP_PROPERTIES RTVHeapProperty;
+  RTVHeapProperty.Type = D3D12_HEAP_TYPE_DEFAULT;
+  RTVHeapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+  RTVHeapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+  RTVHeapProperty.CreationNodeMask = 1;
+  RTVHeapProperty.VisibleNodeMask = 1;
+
+	D3D12_RESOURCE_DESC RTVResourceDesc;
+	ZeroMemory(&RTVResourceDesc, sizeof(RTVResourceDesc));
+	RTVResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	RTVResourceDesc.Alignment = 0;
+	RTVResourceDesc.SampleDesc.Count = 1;
+	RTVResourceDesc.SampleDesc.Quality = 0;
+	RTVResourceDesc.MipLevels = 1;
+	
+	RTVResourceDesc.DepthOrArraySize = 1;
+	RTVResourceDesc.Width = m_w;
+	RTVResourceDesc.Height = m_h;
+	RTVResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	RTVResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+	D3D12_CLEAR_VALUE clearVal;
+	clearVal.Color[0] = 0.0f;
+	clearVal.Color[1] = 0.0f;
+	clearVal.Color[2] = 0.0f;
+	clearVal.Color[3] = 0.0f;
+
+  m_RTTexture.resize(GBufferRTSize);
+	for (Int32 i = 0; i < GBufferRTSize; ++i) {
+    RTVResourceDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		clearVal.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+    HRESULT HRCR = m_device->CreateCommittedResource(&RTVHeapProperty,
+                                                    D3D12_HEAP_FLAG_NONE,
+                                                    &RTVResourceDesc,
+                                                    //D3D12_RESOURCE_STATE_RENDER_TARGET,
+                                                    D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                    &clearVal,
+                                                    __uuidof(**(&m_RTTexture[i])),
+                                                    (void**)(&m_RTTexture[i]));
+
+    WString name = _T("GBuffer RT(") + StringConversion::toTString(i) + _T(")");
+
+    m_RTTexture[i]->SetName(name.c_str());
+    if (FAILED(HRCR)) {
+      throw std::exception();
+    }
+	}
+
+	D3D12_RENDER_TARGET_VIEW_DESC RTVDesc;
+	ZeroMemory(&RTVDesc, sizeof(RTVDesc));
+	RTVDesc.Texture2D.MipSlice = 0;
+	RTVDesc.Texture2D.PlaneSlice = 0;
+
+  RTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+	
+	for (Int32 i = 0; i < GBufferRTSize; ++i) {
+    RTVDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+
+    D3D12_CPU_DESCRIPTOR_HANDLE RTCPUDescriptorhandle;
+    RTCPUDescriptorhandle.ptr = m_RTCPUHeapStartHandle.ptr +
+                                (static_cast<SizeT>(m_SHandleIncrementSize) * i);
+
+		m_device->CreateRenderTargetView(m_RTTexture[i],
+                                     &RTVDesc,
+                                     RTCPUDescriptorhandle);
+	}
+
+	//Create SRV for RTs
+
+	D3D12_SHADER_RESOURCE_VIEW_DESC RTVDescSRV;
+
+	ZeroMemory(&RTVDescSRV, sizeof(RTVDescSRV));
+	RTVDescSRV.Texture2D.MipLevels = RTVResourceDesc.MipLevels;
+	RTVDescSRV.Texture2D.MostDetailedMip = 0;
+	RTVDescSRV.Format = RTVResourceDesc.Format;
+	RTVDescSRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	RTVDescSRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+
+	for (int i = 0; i < GBufferRTSize; ++i) {
+    RTVDescSRV.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+
+    D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorhandle;
+    CPUDescriptorhandle.ptr = m_ShaderCPUHeapStartHandle.ptr +
+                              (static_cast<SizeT>(m_SHandleIncrementSize) * (1 + i));
+
+		m_device->CreateShaderResourceView(m_RTTexture[i],
+                                       &RTVDescSRV,
+                                       CPUDescriptorhandle);
+	}
+}
+
+void
+GraphicsAPI::CompileShaderFromFile(WString filepath,
+                                   TB_SHADER_TYPE::E type,
+                                   ID3DBlob** shaderBlobOut,
+                                   void** bytecodePtrOut,
+                                   SizeT* bytecodeSzOut) {
 #if TB_DEBUG_MODE
   // Enable better shader debugging with the graphics debugging tools.
   UInt32 compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -878,7 +1191,80 @@ GraphicsAPI::CompileShader(WString filepath,
                                         &errorBlob);
 
   if (FAILED(HRShader)) {
-    std::exception();
+    throw std::exception();
+  }
+
+  (*bytecodePtrOut) = (*shaderBlobOut)->GetBufferPointer();
+  (*bytecodeSzOut) = (*shaderBlobOut)->GetBufferSize();
+}
+
+void
+GraphicsAPI::CompileShaderFromBuffer(WString code,
+                                     TB_SHADER_TYPE::E type,
+                                     ID3DBlob** shaderBlobOut,
+                                     void** bytecodePtrOut,
+                                     SizeT* bytecodeSzOut) {
+#if TB_DEBUG_MODE
+  // Enable better shader debugging with the graphics debugging tools.
+  UInt32 compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+#else
+  UInt32 compileFlags = 0;
+#endif
+  String shaderModel;
+  switch (type)
+  {
+  case toyboxSDK::TB_SHADER_TYPE::E::kVertex:
+    shaderModel = "vs_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kHull:
+    shaderModel = "hs_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kTeselation:
+    exit(666); //This doesn't exist in directx.
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kDomain:
+    shaderModel = "ds_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kGeometry:
+    shaderModel = "gs_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kFragment:
+    shaderModel = "ps_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kMesh:
+    exit(666); //This doesn't exists yet in directx.
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kRaytracing:
+    exit(666); //This isn't a shader yet.
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kCompute:
+    shaderModel = "cs_5_0";
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kTexture:
+    exit(666); //This never has existed.
+    break;
+  case toyboxSDK::TB_SHADER_TYPE::E::kNone:
+    break;
+  default:
+    break;
+  }
+
+  ID3DBlob* errorBlob = nullptr;
+
+  HRESULT HRShader = D3DCompile(code.c_str(),
+                                code.size(),
+                                nullptr,
+                                nullptr,
+                                D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                                "main",
+                                shaderModel.c_str(),
+                                compileFlags,
+                                0,
+                                &(*shaderBlobOut),
+                                &errorBlob);
+
+  if (FAILED(HRShader)) {
+    throw std::exception();
   }
 
   (*bytecodePtrOut) = (*shaderBlobOut)->GetBufferPointer();

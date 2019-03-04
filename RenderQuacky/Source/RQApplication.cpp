@@ -1,5 +1,7 @@
-#include "TestApplication.h"
+#include "RQApplication.h"
 #include <tb_graphics_api.h>
+
+#include <iostream>
 
 namespace toyboxSDK {
 
@@ -12,14 +14,13 @@ RenderQuackyApp::~RenderQuackyApp() {
 void
 RenderQuackyApp::postInit() {
   GraphicsAPI::startUp();
-  GraphicsAPI::instance().init(1280, 720, m_hwnd);
+  GraphicsAPI::instance().init(m_viewport.width, m_viewport.height, m_hwnd);
 }
 
 void
 RenderQuackyApp::postUpdate() {
   auto commandQueue = GraphicsAPI::instance().GetCommandQueue();
 
-  //PIXBeginEvent(commandQueue, 0, L"Update");
   const UInt32 PIX_EVENT_UNICODE_VERSION = 0;
   commandQueue->BeginEvent(PIX_EVENT_UNICODE_VERSION,
                            _T("Update"),
@@ -50,9 +51,8 @@ RenderQuackyApp::postRender() {
     if (FAILED(HRCAReset)) {
       std::exception();
     }
-    /*
-    */
-    HRESULT HRCLReset = commandList->Reset(commandAllocator, GraphicAPI.GetPSO());
+
+    HRESULT HRCLReset = commandList->Reset(commandAllocator, GraphicAPI.GetGPSOGBuffer());
     if (FAILED(HRCLReset)) {
       std::exception();
     }
@@ -69,11 +69,8 @@ RenderQuackyApp::postRender() {
     commandList->RSSetScissorRects(1, &rect);
     commandList->RSSetViewports(1, &GraphicAPI.GetScreenViewport());
 
-    //mDeferredTech.ApplyGBufferPSO(commandList);
-    //mSphereRenderer.Render(commandList);
-
-    GraphicAPI.Render();
-    //mDeferredTech.ApplyLightingPSO(commandList);
+    GraphicAPI.ApplyGBuffer();
+    GraphicAPI.ApplyForward();
 
     AddResourceBarrier(commandList, GraphicAPI.GetBackBuffer(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
