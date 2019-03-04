@@ -86,7 +86,7 @@ GraphicsAPI::ApplyGBuffer() {
   for (Int32 i = 0; i < RTSize; ++i) {
     D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorhandle;
     CPUDescriptorhandle.ptr = m_RTCPUHeapStartHandle.ptr +
-                              (static_cast<SizeT>(m_SHandleIncrementSize) * i);
+                              (static_cast<SizeT>(m_RTHandleIncrementSize) * i);
 
     m_commandList->ClearRenderTargetView(CPUDescriptorhandle, mClearColor, 0, nullptr);
   }
@@ -274,7 +274,7 @@ void
 GraphicsAPI::CreateSwapChainCommanAllocators() {
   m_commandAllocators.resize(m_iFrameBuffers);
 
-  for (UInt32 n = 0; n < m_iFrameBuffers; ++n) {
+  for (Int32 n = 0; n < m_iFrameBuffers; ++n) {
     HRESULT HRCommandAlloc = m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, 
                                                               __uuidof(**(&m_commandAllocators[n])),
                                                               (void**)(&m_commandAllocators[n]));
@@ -1096,7 +1096,7 @@ GraphicsAPI::CreateRTV() {
 
     D3D12_CPU_DESCRIPTOR_HANDLE RTCPUDescriptorhandle;
     RTCPUDescriptorhandle.ptr = m_RTCPUHeapStartHandle.ptr +
-                                (static_cast<SizeT>(m_SHandleIncrementSize) * i);
+                                (m_RTHandleIncrementSize * static_cast<SizeT>(i));
 
 		m_device->CreateRenderTargetView(m_RTTexture[i],
                                      &RTVDesc,
@@ -1114,16 +1114,16 @@ GraphicsAPI::CreateRTV() {
 	RTVDescSRV.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 	RTVDescSRV.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-	for (int i = 0; i < GBufferRTSize; ++i) {
+	for (Int32 i = 0; i < GBufferRTSize; ++i) {
     RTVDescSRV.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 
-    D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorhandle;
-    CPUDescriptorhandle.ptr = m_ShaderCPUHeapStartHandle.ptr +
-                              (static_cast<SizeT>(m_SHandleIncrementSize) * (1 + i));
+    D3D12_CPU_DESCRIPTOR_HANDLE SHCPUDescriptorhandle;
+    SHCPUDescriptorhandle.ptr = m_ShaderCPUHeapStartHandle.ptr +
+                                (static_cast<SizeT>(m_SHandleIncrementSize) * (1 + i));
 
 		m_device->CreateShaderResourceView(m_RTTexture[i],
                                        &RTVDescSRV,
-                                       CPUDescriptorhandle);
+                                       SHCPUDescriptorhandle);
 	}
 }
 

@@ -252,7 +252,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ID3D12DescriptorHeap* m_ShaderDHPtr;
   D3D12_CPU_DESCRIPTOR_HANDLE m_ShaderCPUHeapStartHandle;
   D3D12_GPU_DESCRIPTOR_HANDLE m_ShaderGPUHeapStartHandle;
-  UInt32 m_SHandleIncrementSize;
+  UInt64 m_SHandleIncrementSize;
 
   ID3D12RootSignature* m_GBufferRootSignature;
   ID3D12RootSignature* m_ForwardRootSignature;
@@ -285,14 +285,14 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ID3D12DescriptorHeap* m_DSDHPtr;
   D3D12_CPU_DESCRIPTOR_HANDLE m_DSCPUHeapStartHandle;
   D3D12_GPU_DESCRIPTOR_HANDLE m_DSGPUHeapStartHandle;
-  UINT m_DSHandleIncrementSize;
+  SizeT m_DSHandleIncrementSize;
 
   //RTV Texture
   std::vector<ID3D12Resource*> m_RTTexture;
   ID3D12DescriptorHeap* m_RTDHPtr;
   D3D12_CPU_DESCRIPTOR_HANDLE m_RTCPUHeapStartHandle;
   D3D12_GPU_DESCRIPTOR_HANDLE m_RTGPUHeapStartHandle;
-  UINT m_RTHandleIncrementSize;
+  SizeT m_RTHandleIncrementSize;
 
   struct CBuffer {
     Matrix4x4 World;

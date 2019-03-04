@@ -7,16 +7,6 @@
 
 namespace toyboxSDK {
 
-
-enum Inputs
-{
-  kMouse_Left = 0,
-  //kMouse_Right,
-  //kMouse_X,
-  //kMouse_Y
-  kKey_Q
-};
-
 /*
 *
 */
