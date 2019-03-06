@@ -21,7 +21,9 @@ RenderQuackyApp::postInit() {
   String workingPath = StringConversion::toString(FSys.GetWorkingPath());
   String path = workingPath + "Resources\\Textures\\";
 
-  FIBITMAP *tgaImg = FreeImage_Load(FIF_TARGA, (path + "256_Checker_Diffuse.tga").c_str(), TARGA_DEFAULT);
+  FIBITMAP *tgaImg = FreeImage_Load(FIF_TARGA,
+                                    (path + "256_Checker_Diffuse.tga").c_str(),
+                                    TARGA_DEFAULT);
   FREE_IMAGE_TYPE tgaType = FreeImage_GetImageType(tgaImg);
   UInt32 tgaWidth = FreeImage_GetWidth(tgaImg);
   UInt32 tgaHeight = FreeImage_GetHeight(tgaImg);
@@ -33,7 +35,6 @@ RenderQuackyApp::postInit() {
 
   //FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS, (path + "256_Checker_Diffuse.tga").c_str(), DDS_DEFAULT);
   //if (ddsImg) { FreeImage_Unload(ddsImg); }
-
 
   GraphicsAPI::startUp();
   GraphicsAPI::instance().init(m_viewport.width, m_viewport.height, m_hwnd);
