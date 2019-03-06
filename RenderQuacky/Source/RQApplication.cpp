@@ -1,7 +1,11 @@
 #include "RQApplication.h"
+
+#include <tb_file_system.h>
 #include <tb_graphics_api.h>
+#include <tb_string_conversions.h>
 
 #include <iostream>
+#include <FreeImage/FreeImage.h>
 
 namespace toyboxSDK {
 
@@ -13,6 +17,24 @@ RenderQuackyApp::~RenderQuackyApp() {
 
 void
 RenderQuackyApp::postInit() {
+  FileSystem FSys;
+  String workingPath = StringConversion::toString(FSys.GetWorkingPath());
+  String path = workingPath + "Resources\\Textures\\";
+
+  FIBITMAP *tgaImg = FreeImage_Load(FIF_TARGA, (path + "256_Checker_Diffuse.tga").c_str(), TARGA_DEFAULT);
+  FREE_IMAGE_TYPE tgaType = FreeImage_GetImageType(tgaImg);
+  UInt32 tgaWidth = FreeImage_GetWidth(tgaImg);
+  UInt32 tgaHeight = FreeImage_GetHeight(tgaImg);
+  UInt32 tgaLine = FreeImage_GetLine(tgaImg);
+  UInt32 tgaPitch = FreeImage_GetPitch(tgaImg);
+  SizeT tgaSize = FreeImage_GetMemorySize(tgaImg);
+
+  if (tgaImg) { FreeImage_Unload(tgaImg); }
+
+  //FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS, (path + "256_Checker_Diffuse.tga").c_str(), DDS_DEFAULT);
+  //if (ddsImg) { FreeImage_Unload(ddsImg); }
+
+
   GraphicsAPI::startUp();
   GraphicsAPI::instance().init(m_viewport.width, m_viewport.height, m_hwnd);
 }
