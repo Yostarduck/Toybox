@@ -1,272 +1,224 @@
-/*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
-/**
- * @file tb_Vector3.cpp
- * @author Marco "Swampy" Millan
- * @date 2019/02/13 2019
- * @brief Vector implementation
- *
- */
- /*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
+#pragma once
+
 #include "tb_vector3.h"
+#include "tb_vector4.h"
+
 
 namespace toyboxSDK {
 
-using std::isnan;
-using std::isinf;
-using std::pow;
-using std::sqrt;
+Vector3::Vector3(Math::FORCE_INIT k) {
+  if (Math::FORCE_INIT::kZero == k) {
+    x = 0.0f;
+    y = 0.0f;
+    z = 0.0f;
+  }
+  else {
+    x = 1.0f;
+    y = 1.0f;
+    z = 1.0f;
+  }
+}
+
+Vector3::Vector3(const Vector3& V) : x(V.x), y(V.y), z(V.z) {}
+
+Vector3::Vector3(const Vector4& V) : x(V.x), y(V.y), z(V.z) {}
+
+Vector3::Vector3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+
+Vector3::~Vector3() {}
+
+float
+Vector3::dot(const Vector3& B) const {
+  return (x*B.x) + (y*B.y) + (z*B.z);
+} 
+
+Vector3
+Vector3::cross(const Vector3& B) const {
+  return Vector3(y*B.z - z*B.y, z*B.x - x*B.z, x*B.y - y*B.x);
+}
+
+float
+Vector3::length() const {
+  return Math::sqrt(dot(*this));
+}
+
+float
+Vector3::lengthSqr() const {
+  return dot(*this);
+}
+
+Vector3&
+Vector3::normalize() {
+  TB_ASSERT(length() != 0.0f);
+  *this /= length();
+  return *this;
+}
+
+float
+Vector3::distance(const Vector3& otherVector) const {
+  return (otherVector - *this).length();
+}
+
+float
+Vector3::distanceSqr(const Vector3& otherVector) const {
+  return (otherVector - *this).lengthSqr();
+}
+
+bool
+Vector3::equals(const Vector3& otherVector, float errorRange) const {
+  return (Math::abs(x - otherVector.x) < errorRange) &&
+         (Math::abs(y - otherVector.y) < errorRange) &&
+         (Math::abs(z - otherVector.z) < errorRange);
+}
+
+float
+Vector3::sqrDistSegment(const Vector3& pointA, const Vector3& pointB) const {
+  Vector3 AB = pointB - pointA;
+  Vector3 AC = *this - pointA;
+  Vector3 BC = *this - pointB;
+  float e = AC.dot(AB);
+
+  if (e <= 0.0f) {
+   return AC.dot(AC);
+  }
+
+  float f = AB.dot(AB);
+  
+  if (e >= f) {
+   return BC.dot(BC);
+  }
+  
+  return AC.dot(AC) - (e * e / f);
+}
+
+float*
+Vector3::ptr() {
+  return &data[0];
+}
+
+const float*
+Vector3::ptr() const {
+  return &data[0];
+}
 
 float&
-Vector3::operator[](UInt32 index) {
-  return (&x)[index];
+Vector3::operator[](const SizeT index){
+  TB_ASSERT(index < 3);
+  return data[index];
+}
+
+const float&
+Vector3::operator[](const SizeT index) const {
+  TB_ASSERT(index < 3);
+  return data[index];
 }
 
 float
-Vector3::operator[](UInt32 index) const {
-  return (&x)[index];
+Vector3::operator|(const Vector3& B) const {
+  return dot(B);
 }
 
 Vector3
-Vector3::operator+(const Vector3& v) const {
-  return Vector3(x + v.x, y + v.y, z + v.z);
+Vector3::operator^(const Vector3& B) const {
+  return cross(B);
+}
+
+Vector3&
+Vector3::operator=(const Vector3& A) {
+  x = A.x;
+  y = A.y;
+  z = A.z;
+  return *this;
+}
+
+Vector3&
+Vector3::operator=(const Vector4& A) {
+  x = A.x;
+  y = A.y;
+  z = A.z;
+  return *this;
 }
 
 Vector3
-Vector3::operator-(const Vector3& v) const {
-  return Vector3(x - v.x, y - v.y, z - v.z);
+Vector3::operator+(const Vector3& A) const {
+  return Vector3(x + A.x, y + A.y, z + A.z);
+}
+
+Vector3&
+Vector3::operator+=(const Vector3& A) {
+  x += A.x;
+  y += A.y;
+  z += A.z;
+  return *this;
 }
 
 Vector3
-Vector3::operator*(const Vector3& v) const {
-  return Vector3(x * v.x, y * v.y, z * v.z);
+Vector3::operator-(const Vector3& A) const {
+  return Vector3(x - A.x, y - A.y, z - A.z);
+}
+
+Vector3&
+Vector3::operator-=(const Vector3& A) {
+  x -= A.x;
+  y -= A.y;
+  z -= A.z;
+  return *this;
 }
 
 Vector3
-Vector3::operator/(const Vector3& v) const {
-  return Vector3(x / v.x, y / v.y, z / v.z);
+Vector3::operator*(const Vector3& A) const {
+  return Vector3(x*A.x, y*A.y, z*A.z);
+}
+
+Vector3&
+Vector3::operator*=(const Vector3& A) {
+  x *= A.x;
+  y *= A.y;
+  z *= A.z;
+  return *this;
 }
 
 Vector3
-Vector3::operator+(float plus) const {
-  return Vector3(x + plus, y + plus, z +plus);
+Vector3::operator*(const float scalar) const {
+  return Vector3(x*scalar, y*scalar, z*scalar);
+}
+
+Vector3&
+Vector3::operator*=(const float scalar) {
+  x *= scalar;
+  y *= scalar;
+  z *= scalar;
+  return *this;
 }
 
 Vector3
-Vector3::operator-(float minus) const {
-  return Vector3(x - minus, y - minus, z - minus);
-}
-Vector3
-Vector3::operator*(float times) const {
-  return Vector3(x * times, y * times, z * times);
-}
-Vector3
-Vector3::operator/(float under) const {
-  return Vector3(x / under, y / under, z / under);
-}
-float
-Vector3::operator|(const Vector3 v) const {
-  return x * v.x + y * v.y + z * v.z;
+Vector3::operator/(const float scalar) const {
+  TB_ASSERT(scalar != 0.0f);
+  return Vector3(x/ scalar, y/ scalar, z/ scalar);
 }
 
-Vector3
-Vector3::operator^(const Vector3 v) const {
-
-  Vector3 tmp;
-
-  tmp.x = (y*v.z) - (z*v.y);
-  tmp.y = (z*v.x) - (x*v.z);
-  tmp.z = (x*v.y) - (y*v.x);
-
-  return tmp;
+Vector3&
+Vector3::operator/=(const float scalar) {
+  TB_ASSERT(scalar != 0.0f);
+  x /= scalar;
+  y /= scalar;
+  z /= scalar;
+  return *this;
 }
 
 bool
-Vector3::operator==(const Vector3& v) const {
-  return x == v.x && y == v.y && z == v.z;
+Vector3::operator==(const Vector3& otherVector) const {
+  return ((x == otherVector.x) && (y == otherVector.y) && (z == otherVector.z));
 }
 
 bool
-Vector3::operator!=(const Vector3& v) const {
-  return x != v.x || y != v.y || z != v.z;
-}
-
-bool
-Vector3::operator<(const Vector3& v) const {
-  return x < v.x && y < v.y && z < v.z;
-}
-
-bool
-Vector3::operator>(const Vector3& v) const {
-  return x > v.x && y > v.y && z > v.z;
-}
-
-bool
-Vector3::operator<=(const Vector3& v) const {
-  return x <= v.x && y <= v.y && z <= v.z;
-}
-
-bool
-Vector3::operator>=(const Vector3& v) const {
-  return x >= v.x && y >= v.y && z >= v.z;
+Vector3::operator!=(const Vector3& otherVector) const {
+  return !((*this) == otherVector);
 }
 
 Vector3
 Vector3::operator-() const {
   return Vector3(-x, -y, -z);
 }
-
-Vector3&
-Vector3::operator+=(const Vector3& v) {
-  x += v.x;
-  y += v.y;
-  z += v.z;
-  return *this;
-}
-
-Vector3&
-Vector3::operator-=(const Vector3& v) {
-  x -= v.x;
-  y -= v.y;
-  z -= v.z;
-  return *this;
-}
-
-Vector3&
-Vector3::operator/=(const Vector3& v) {
-  x /= v.x;
-  y /= v.y;
-  z /= v.z;
-  return *this;
-}
-
-Vector3&
-Vector3::operator*=(const Vector3& v) {
-  x *= v.x;
-  y *= v.y;
-  z *= v.z;
-  return *this;
-}
-
-Vector3&
-Vector3::operator*=(float scale) {
-  x *= scale;
-  y *= scale;
-  z *= scale;
-  return *this;
-}
-
-Vector3&
-Vector3::operator/=(float scale) {
-  x /= scale;
-  y /= scale;
-  z /= scale;
-  return *this;
-}
-
-Vector3
-Vector3::cross(const Vector3& a, const Vector3& b) {
-  return a ^ b;
-}
-
-float
-Vector3::dot(const Vector3& a, const Vector3& b) {
-  return a | b;
-}
-
-float
-Vector3::dotScale(const Vector3& a, const Vector3& b) {
-  return (a | b) / a.magnitude();
-}
-
-float
-Vector3::sqrDistance(const Vector3& a, const Vector3& b) {
-  return pow(a.x - b.x, 2.0f) + pow(a.y - b.y, 2.0f) + pow(a.z - b.z, 2.0f);
-}
-
-float
-Vector3::distance(const Vector3& a, const Vector3& b) {
-  return sqrt(pow(a.x - b.x, 2.0f) + pow(a.y - b.y, 2.0f) + pow(a.z - b.z, 2.0f));
-
-}
-
-void
-Vector3::set(float newX, float newY, float newZ) {
-  x = newX;
-  y = newY;
-  z = newZ;
-}
-
-void
-Vector3::round() {
-  x = std::round(x);
-  y = std::round(y);
-  z = std::round(z);
-}
-
-float
-Vector3::magnitude() const {
-  return sqrt(x * x + y * y + z * z);
-}
-
-float
-Vector3::sqrMagnitude() const {
-  return (x * x + y * y + z * z);
-}
-
-Vector3
-Vector3::normalized() const {
-
-  TB_ASSERT(!isnan(x) &&
-            !isnan(y) &&
-            !isnan(z) &&
-            !isinf(x) &&
-            !isinf(y) &&
-            !isinf(z) &&
-            "Value X or Y or Z are either infinite or NAN");
-
-  float sqr = pow(x, 2.0f) + pow(y, 2.0f) + pow(z, 2.0f);
-
-  TB_ASSERT(sqr <= std::numeric_limits<float>::epsilon() &&
-    "Square is less than epsilon and that shit is wack");
-
-  TB_DEBUG_ONLY(sqrMagnitude());
-
-  float unit = 1.0f / sqrt(sqr);
-  return Vector3((x * unit), (y * unit), (z * unit));
-}
-
-void
-Vector3::normalize() {
-  TB_ASSERT(!isnan(x) &&
-            !isnan(y) &&
-            !isnan(z) &&
-            !isinf(x) &&
-            !isinf(y) &&
-            !isinf(z) &&
-            "Value X or Y or Z are either infinite or NAN");
-
-  float sqr = pow(x, 2.0f) + pow(y, 2.0f) + pow(z, 2.0f);
-
-  TB_ASSERT(sqr <= std::numeric_limits<float>::epsilon() &&
-            "Square is less than epsilon and that shit is wack");
-
-  TB_DEBUG_ONLY(sqrMagnitude());
-
-  float unit = 1.0f / sqrt(sqr);
-
-  x *= unit;
-  y *= unit;
-  z *= unit;
-}
-
-const Vector3 Vector3::ONES   = Vector3(1.0f, 1.0f, 1.0f);
-
-const Vector3 Vector3::ZERO   = Vector3(0.0f, 0.0f, 0.0f);
-
-const Vector3 Vector3::RIGHT  = Vector3(1.0f, 0.0f, 0.0f);
-
-const Vector3 Vector3::UP     = Vector3(0.0f, 1.0f, 0.0f);
-
-const Vector3 Vector3::FRONT  = Vector3(0.0f, 0.0f, 1.0f);
 
 }

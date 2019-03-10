@@ -1,429 +1,517 @@
-/*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
-/**
- * @file tb_Vector4.h
- * @author Marco "Swampy" Millan
- * @date 2019/02/13 2019
- * @brief Vector4 class for math purposes
- *
- */
- /*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
 #pragma once
 
 #include "tb_math_prerequisites.h"
-#include "tb_Vector3.h"
+#include "tb_math.h"
 
 namespace toyboxSDK {
 
-class Vector4
+class Vector2;
+class Vector3;
+class Matrix4x4;
+
+/**
+* Vector with 4 elements (x, y, z, w)
+*
+* Sample usage:
+* Vector3 vectorName;
+*/
+class TB_MATH_EXPORT Vector4
 {
  public:
-
-  //Constructors and destructors
+  /**
+  * Default constructor.
+  */
+  Vector4();
 
   /**
-   * Default constructor
-   */
-  Vector4() = default;
+  * Default constructor.
+  *
+  * @param k
+  *
+  * Values are initialized with 0.
+  */
+  explicit Vector4(Math::FORCE_INIT k);
 
   /**
-   * Vector3 Constructor
-   */
-  Vector4(Vector3 og);
+  * Move constructor.
+  */
+  Vector4(Vector4&& V) = default;
 
   /**
-   * Default destructor
-   */
-  ~Vector4() = default;
+  * Copy constructor.
+  */
+  Vector4(const Vector4& V);
 
   /**
-   * @brief constructor with parameters
-   * @param float x value float y value
-   * @return
-   *
-   */
-  Vector4(float newX, float newY, float newZ, float newW = 1.0f)
-    : x(newX),
-      y(newY),
-      z(newZ),
-      w(newW) {}
-
-  //A lot of operators
+  * Copy constructor for vec3 to vec4.
+  */
+  Vector4(const Vector3& V);
 
   /**
-   * @brief [] operator overload
-   * @param index of the object we wanna get
-   * @return value at index
-   *
-   */
-  float&
-  operator[](UInt32 index);
+  * Copy constructor for vec3 to vec4 with w value.
+  */
+  Vector4(const Vector3& V, float _w);
 
   /**
-   * @brief [] operator overload
-   * @param index of the object we wanna get
-   * @return value at index
-   *
-   */
+  * Copy constructor for two vec2 to vec4.
+  */
+  Vector4(const Vector2& V1, const Vector2& V2);
+
+  /**
+  * Initialize constructor with values.
+  *
+  * @param _x
+  *  The _x value of the vector
+  *
+  * @param _y
+  *  The _y value of the vector
+  *
+  * @param _z
+  *  The _z value of the vector
+  *
+  * @param _w
+  *  The _w value of the vector
+  */
+  Vector4(float _x, float _y, float _z, float _w);
+
+  /**
+  * Default destructor
+  */
+  ~Vector4();
+
+  /**
+  * Computes the dot product (excluding w) between this vector and the vector parameter.
+  * This operatios is commutative.
+  *
+  * @param B
+  *  The vector against which the dot product is calculated.
+  *
+  * @return
+  *   The sum of the products of the corresponding entries of the
+  *   vectors.
+  */
   float
-  operator[](UInt32 index) const;
+  dot3(const Vector4& B) const;
 
   /**
-   * @brief + operator overload
-   * @param b the other matrix to add
-   * @return a vector sum of *this and v
-   *
-   */
-  Vector4
-  operator+(const Vector4& v) const;
-
-  /**
-   * @brief - operator overload
-   * @param b the other matrix to substract
-   * @return a vector difference of *this and v
-   *
-   */
-  Vector4
-  operator-(const Vector4& v) const;
-
-  /**
-   * @brief * operator overload
-   * @param b the other matrix to multiply
-   * @return a vector multiplication of *this times v
-   *
-   */
-  Vector4
-  operator*(const Vector4& v) const;
-
-  /**
-   * @brief / operator overload
-   * @param b the other matrix to divide
-   * @return a vector division of *this divided by v
-   *
-   */
-  Vector4
-  operator/(const Vector4& v) const;
-
-  /**
-   * @brief + operator overload
-   * @param plus the float to add to all vector
-   * @return a vector sum of *this + plus
-   *
-   */
-  Vector4
-  operator+(float plus) const;
-
-  /**
-   * @brief - operator overload
-   * @param minus the float to subtract to all vector
-   * @return a vector difference of *this - minus
-   *
-   */
-  Vector4
-  operator-(float minus) const;
-
-  /**
-   * @brief * operator overload
-   * @param times the float to multiply all vector
-   * @return a vector multiplication of *this times times
-   *
-   */
-  Vector4
-  operator*(float times) const;
-
-  /**
-   * @brief / operator overload
-   * @param under the float to divide all vector
-   * @return a vector divided of *this divided by times
-   *
-   */
-  Vector4
-  operator/(float under) const;
-
-
-  /**
-   * @brief | operator overload for dot product
-   * @param the other vector
-   * @return dot product
-   *
-   */
+  * Computes the dot product between this vector and the vector parameter.
+  * This operatios is commutative.
+  *
+  * @param B
+  *  The vector against which the dot product is calculated.
+  *
+  * @return
+  *   The sum of the products of the corresponding entries of the
+  *   vectors.
+  */
   float
-  operator|(const Vector4 v) const;
+  dot(const Vector4& B) const;
 
   /**
-   * @brief ^ operator overload for cross product
-   * @param the other vector
-   * @return cross product
-   *
-   */
+  * Computes the cross product between this vector and the vector parameter.
+  * W value is not used, and it's final value will be 0.
+  * This operatios is NOT commutative.
+  *
+  * @param B
+  *  The vector against which the cross product is calculated.
+  *  B (vector parameter) is the rigth value of operation
+  *  AxB
+  *
+  * @return
+  *   Result vector of the cross product
+  */
   Vector4
-  operator^(const Vector4 v) const;
-
-
-  /**
-   * @brief == operator overload
-   * @param the other vector to compare
-   * @return true if this components are == to v components
-   *
-   */
-  bool
-  operator==(const Vector4& v) const;
+  cross(const Vector4& B) const;
 
   /**
-   * @brief != operator overload
-   * @param the other vector to compare
-   * @return true if this components are != to v components
-   *
-   */
-  bool
-  operator!=(const Vector4& v) const;
+  * Computes the length of this vector.
+  *
+  * @return
+  *   The length (or "size") of the vector.
+  */
+  float
+  length3() const;
 
   /**
-   * @brief < operator overload
-   * @param the other vector to compare
-   * @return true if this components are < to v components
-   *
-   */
-  bool
-  operator<(const Vector4& v) const;
+  * Computes the length of this vector.
+  *
+  * @return
+  *   The length (or "size") of the vector.
+  */
+  float
+  length() const;
 
   /**
-   * @brief > operator overload
-   * @param the other vector to compare
-   * @return true if this components are > to v components
-   *
-   */
-  bool
-  operator>(const Vector4& v) const;
+  * Computes the squared length of this vector.
+  *
+  * @return
+  *   The length (or "size") of the vector squared.
+  */
+  float
+  lengthSqr3() const;
 
   /**
-   * @brief <= operator overload
-   * @param the other vector to compare
-   * @return true if this components are <= to v components
-   *
-   */
-  bool
-  operator<=(const Vector4& v) const;
+  * Computes the squared length of this vector.
+  *
+  * @return
+  *   The length (or "size") of the vector squared.
+  */
+  float
+  lengthSqr() const;
 
   /**
-   * @brief >= operator overload
-   * @param the other vector to compare
-   * @return true if this components are >= to v components
-   *
-   */
-  bool
-  operator>=(const Vector4& v) const;
-
-  /**
-   * @brief - operator overload
-   * @param
-   * @return negative of vector
-   *
-   */
-  Vector4
-  operator-() const;
-
-  /**
-   * @brief += operator overload
-   * @param Vector difference
-   * @return this + vector
-   *
-   */
-  Vector4&
-  operator+=(const Vector4& v);
-
-  /**
-   * @brief -= operator overload
-   * @param Vector difference
-   * @return this minus vector
-   *
-   */
-  Vector4&
-  operator-=(const Vector4& v);
-
-  /**
-   * @brief /= operator overload
-   * @param Vector scale
-   * @return this divided by vector
-   *
-   */
-  Vector4&
-  operator/=(const Vector4& v);
-
-  /**
-   * @brief *= operator overload
-   * @param Vector scale
-   * @return this multiplied by vector
-   *
-   */
-  Vector4&
-  operator*=(const Vector4& v);
-
-  /**
-   * @brief *= operator overload
-   * @param float scale
-   * @return this multiplied by float
-   *
-   */
-  Vector4&
-  operator*=(float scale);
-
-  /**
-   * @brief /= operator overload
-   * @param float scale
-   * @return this divided by the float
-   *
-   */
-  Vector4&
-  operator/=(float scale);
-
-  //A lot functions
-
-  /**
-   * @brief the cross product of two vectors
-   * @param const vector a const vector b
-   * @return the vector perpendicular to the plane created by a and b
-   *
-   */
-  static Vector4
-  cross(const Vector4& a, const Vector4& b);
-
-  /**
-   * @brief the dot product of two vectors
-   * @param const vector a const vector b
-   * @return the sum of all values of a and b
-   *
-   */
-  static float
-  dot(const Vector4& a, const Vector4& b);
-
-  /**
-   * @brief gets the scale normalized of vector b over a
-   * @param vector a being the base and vector b being the reflection
-   * @return the scale normalized from 0 to 1
-   *
-   */
-  static float
-  dotScale(const Vector4& a, const Vector4& b);
-
-  /**
-   * @brief the square distance between two points
-   * @param const vector A const vector B
-   * @return
-   *
-   */
-  static float
-  sqrDistance(const Vector4& a, const Vector4& b);
-
-  /**
-   * @brief the distance between 2 points
-   * @param vector A vector B
-   * @return the distance between the points
-   *
-   */
-  static float
-  distance(const Vector4& a, const Vector4& b);
-
-  /**
-   * @brief sets the values of a vector
-   * @param
-   * @return
-   *
-   */
+  * Normalize the vector.
+  */
   void
-  set(float newX, float newY, float newZ, float newW);
+  normalize3();
 
   /**
-   * @brief rounds the values to the nearest integer
-   * @param
-   * @return
-   *
-   */
-  void
-  round();
-
-  /**
-   * @brief squares the values in the vector and gets the square root
-   * @param
-   * @return the square root of the components squared
-   *
-   */
-  float
-  magnitude() const;
-
-  /**
-   * @brief squares the values in the vector and sums it
-   * @param
-   * @return the square sum of the components
-   *
-   */
-  float
-  sqrMagnitude() const;
-
-  /**
-   * @brief creates the normalized vector
-   * @param
-   * @return returns the normalized vector
-   *
-   */
-  Vector4
-  normalized() const;
-
-  /**
-   * @brief normalizes the vector
-   * @param
-   * @return
-   *
-   */
+  * Normalize the vector.
+  */
   void
   normalize();
 
-  //A lot of constants
+  /**
+  * Computes the distance between two vectors.
+  *
+  * @param scalar
+  *   Vector to calculate the distance
+  *
+  * @return
+  *   Distance
+  */
+  float
+  distance3(const Vector4& otherVector) const;
 
   /**
-   * Vector filled with 1s
-   */
-  static const Vector4 ONES;
+  * Computes the distance between two vectors.
+  *
+  * @param scalar
+  *   Vector to calculate the distance
+  *
+  * @return
+  *   Distance
+  */
+  float
+  distance(const Vector4& otherVector) const;
 
   /**
-   * Vector filled with 0s
-   */
-  static const Vector4 ZERO;
+  * Computes the squared distance between two vectors.
+  *
+  * @param scalar
+  *   Vector to calculate the distance
+  *
+  * @return
+  *   Distance
+  */
+  float
+  distanceSqr3(const Vector4& otherVector) const;
 
   /**
-   * Vector with x value in 1
-   */
-  static const Vector4 RIGHT;
+  * Computes the squared distance between two vectors.
+  *
+  * @param scalar
+  *   Vector to calculate the distance
+  *
+  * @return
+  *   Distance
+  */
+  float
+  distanceSqr(const Vector4& otherVector) const;
 
   /**
-   * Vector with y value in 1
-   */
-  static const Vector4 UP;
+  * Check's if the other vector is equal to this vector with an error
+  * range.
+  *
+  * @param otherVector
+  *   Vector to compare with this vector.
+  *
+  * @param errorRange
+  *   The value of the error range.
+  *
+  * @return
+  *   bool expression of condition.
+  */
+  bool
+  equals(const Vector4& otherVector, float errorRange = Math::SMALL_NUMBER) const;
 
   /**
-   * Vector with z value in 1
-   */
-  static const Vector4 FRONT;
- public:
+  * Gets a pointer to the first element of the matrix.
+  *
+  * @return
+  *	  A pointer to the first element of the matrix.
+  */
+  float*
+  ptr();
 
   /**
-   * X float value of the vector
-   */
-  float x;
+  * Gets a constant pointer to the first element of the matrix.
+  *
+  * @return
+  *	  A constant pointer to the first element of the matrix.
+  */
+  const float*
+  ptr() const;
 
   /**
-   * Y float value of the vector
-   */
-  float y;
+  * Gets a reference to the specified element from the vector.
+  *
+  *	@param index
+  *	 The index of the element.
+  *
+  * @return
+  *	  A const reference to the element at the [index] position.
+  *
+  * @throws out_of_range
+  *	  If the index is greater than number of elements in the vector.
+  */
+  float&
+  operator[](const SizeT index);
 
   /**
-   * Z float value of the vector
-   */
-  float z;
+  * Gets a const reference to the specified element from the vector.
+  *
+  *	@param index
+  *	 The index of the element.
+  *
+  * @return
+  *	  A const reference to the element at the [index] position.
+  *
+  * @throws out_of_range
+  *	  If the index is greater than number of elements in the vector.
+  */
+  const float&
+  operator[](const SizeT index) const;
 
   /**
-   * W float value of the vector
-   */
-  float w;
+  * Computes the dot product between this vector and the vector parameter.
+  * This operatios is commutative.
+  *
+  * @param B
+  *  The vector against which the dot product is calculated.
+  *
+  * @return
+  *   The sum of the products of the corresponding entries of the
+  *   vectors.
+  */
+  float
+  operator|(const Vector4& B) const;
+
+  /**
+  * Computes the cross product between this vector and the vector parameter.
+  * This operatios is NOT commutative.
+  *
+  * @param B
+  *  The vector against which the cross product is calculated.
+  *  B (vector parameter) is the rigth value of operation
+  *  AxB
+  *
+  * @return
+  *   Result vector of the cross product
+  */
+  Vector4
+  operator^(const Vector4& B) const;
+
+  /**
+  * Set the x, y, z, w values of this vector
+  * with the x, y, z, w of the other vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector4&
+  operator=(const Vector4& A);
+
+  /**
+  * Set the x, y, z values of this vector
+  * with the x, y, z of the other vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector4&
+  operator=(const Vector3& A);
+
+  /**
+  * Adds elements of the vector with
+  * the elements of the other vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A vector with the result values.
+  */
+  Vector4
+  operator+(const Vector4& A) const;
+
+  /**
+  * Adds elements of the vector with
+  * the elements of the other vector
+  * and stores it in this vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector4&
+  operator+=(const Vector4& A);
+
+  /**
+  * Substracts elements of the vector with
+  * the elements of the other vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A vector with the result values.
+  */
+  Vector4
+  operator-(const Vector4& A) const;
+
+  /**
+  * Substracts elements of the vector with
+  * the elements of the other vector and
+  * stores it in this vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector4&
+  operator-=(const Vector4& A);
+
+  /**
+  * Multiplies elements of the vector with
+  * the elements of the other vector.
+  *
+  * @param A
+  *  The vector with the factors to use.
+  *
+  * @return
+  *   A vector with the result values.
+  */
+  Vector4
+  operator*(const Vector4& A) const;
+
+  /**
+  * Multiplies this vector with matrix.
+  *
+  * @param matrix
+  *  The matrix to multiply with.
+  *  Matrix is left param (transposed).
+  *
+  * @return
+  *   A vector with the result values.
+  */
+  Vector4
+  operator*(Matrix4x4 matrix) const;
+
+  /**
+  * Multiplies elements of the vector with
+  * the elements of the other vector, and stores
+  * the result in this vector.
+  *
+  * @param A
+  *  The vector with the factors to use.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector4&
+  operator*=(const Vector4& A);
+
+  /**
+  * Multiplies elements of the vector.
+  *
+  * @param scalar
+  *  The factor.
+  *
+  * @return
+  *   A vector with the result values.
+  */
+  Vector4
+  operator*(const float scalar) const;
+
+  /**
+  * Multiplies elements of the vector and stores it in the vector.
+  *
+  * @param scalar
+  *  The factor.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector4&
+  operator*=(const float scalar);
+
+  /**
+  * Divide elements of the vector.
+  *
+  * @param scalar
+  *  The dividend.
+  *
+  * @return
+  *   A vector with the result values.
+  */
+  Vector4
+  operator/(const float scalar) const;
+
+  /**
+  * Divide elements of the vector and stores it in the vector.
+  *
+  * @param scalar
+  *  The dividend.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector4&
+  operator/=(const float scalar);
+
+  /**
+  * Checks if the values of the vectors are equal.
+  *
+  * @return
+  *   Flag if vectors are equal.
+  */
+  bool
+  operator==(const Vector4& otherVector);
+
+  /**
+  * Checks if the values of the vectors aren't equal.
+  *
+  * @return
+  *   Flag if vectors aren't equal.
+  */
+  bool
+  operator!=(const Vector4& otherVector);
+
+  /**
+  * Returns this vector with negated values.
+  */
+  Vector4
+  operator-() const;
+
+  union
+  {
+    struct
+    {
+      float x, y, z, w;
+    };
+    float data[4];
+  };
 };
 
 }

@@ -1,12 +1,12 @@
 #include "tb_random.h"
-#include "tb_math_defines.h"
+#include "tb_math.h"
 
 namespace toyboxSDK {
 
 float 
 RandomZ::next() {
   float res =
-    (1.0f / std::sqrt(2.0f*Math::PI*m_deviation)) *
+    (1.0f / std::sqrt(2.0f * Math::PI * m_deviation)) *
     std::exp(-((m_seed - std::pow(m_mean,2.0f)) / 2.0f*m_deviation));
   m_seed = res;
   return res;

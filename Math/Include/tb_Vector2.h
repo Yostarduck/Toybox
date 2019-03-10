@@ -1,399 +1,406 @@
-/*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
-/**
- * @file tb_Vector2.h
- * @author Marco "Swampy" Millan
- * @date 2019/02/13 2019
- * @brief Vector2 class for math purposes
- * 
- */
-/*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
 #pragma once
 
 #include "tb_math_prerequisites.h"
+#include "tb_math.h"
 
 namespace toyboxSDK {
 
-class Vector2
+class TB_MATH_EXPORT Vector2
 {
  public:
-
-  //Constructors and destructors
+  /**
+  * Class default constructor.
+  */
+  Vector2();
 
   /**
-   * Default constructor
-   */
-  Vector2() = default;
+  * Initialize constructor.
+  * 
+  * @param k
+  *   Values are initialized with 0 if k is kZero.
+  *   Otherwise, values are initialized with 1.
+  */
+  explicit Vector2(Math::FORCE_INIT k);
 
   /**
-   * Default destructor
-   */
-  ~Vector2() = default;
+  * Move constructor.
+  */
+  Vector2(Vector2&& V) = default;
 
   /**
-   * @brief constructor with parameters
-   * @param float x value float y value
-   * @return 
-   *
-   */
-  Vector2(float newX, float newY)
-    : x(newX),
-      y(newY) {}
-
-  //A lot of operators
+  * Copy constructor.
+  */
+  Vector2(const Vector2& V);
 
   /**
-   * @brief [] operator overload
-   * @param index of the object we wanna get
-   * @return value at index
-   *
-   */
+  * Initialize constructor with values.
+  *
+  * @param _x
+  *  The x value of the vector.
+  *
+  * @param _y
+  *  The y value of the vector.
+  */
+  Vector2(float _x, float _y);
+
+  /**
+  * Default destructor.
+  */
+  ~Vector2();
+
+  /**
+  * Computes the dot product between this vector and the vector parameter.
+  * This operatios is commutative.
+  *
+  * @param B
+  *  The vector against which the dot product is calculated.
+  *
+  * @return
+  *   The sum of the products of the corresponding entries of the
+  *   vectors.
+  */
+  float
+  dot(const Vector2& B) const;
+
+  /**
+  * Computes the cross product between himself.
+  *
+  * @return
+  *   Result vector of the cross product
+  */
+  Vector2
+  cross() const;
+
+  /**
+  * Computes the length of this vector.
+  *
+  * @return
+  *   The length (or "size") of the vector.
+  */
+  float
+  length() const;
+
+  /**
+  * Computes the squared length of this vector.
+  *
+  * @return
+  *   The length (or "size") of the vector squared.
+  */
+  float
+  lengthSqr() const;
+
+  /**
+  * Normalize the vector.
+  */
+  Vector2&
+  normalize();
+
+  /**
+  * Computes the distance between two vectors.
+  *
+  * @param otherVector
+  *   Vector to calculate the distance.
+  *
+  * @return
+  *   Distance.
+  */
+  float
+  distance(const Vector2& otherVector) const;
+
+  /**
+  * Computes the squared distance between two vectors.
+  *
+  * @param otherVector
+  *   Vector to calculate the distance.
+  *
+  * @return
+  *   Distance.
+  */
+  float
+  distanceSqr(const Vector2& otherVector) const;
+
+  /**
+  * Check's if the other vector is equal to this vector with an error
+  * range.
+  *
+  * @param otherVector
+  *   Vector to compare with this vector.
+  *
+  * @param errorRange
+  *   The value of the error range.
+  *
+  * @return
+  *   bool expression of condition.
+  */
+  bool
+  equals(const Vector2& otherVector, float errorRange = Math::SMALL_NUMBER) const;
+
+  /**
+  * Compares the polar angle of 2 points.
+  *
+  * @param p1
+  *   Actual point.
+  * @param p2
+  *   Point to compare.
+  *
+  * @return
+  *   -1: If it's counter clockwise.
+  *   +1: If it's clockwise.
+  */
+  Int32
+  compare(const Vector2& p1, const Vector2& p2);
+
+  /**
+  * @param q
+  *   Point.
+  *
+  * @param r
+  *   Point.
+  *
+  * @return
+  *   0: p, q and r are colinear
+  *   1: Clockwise
+  *   2: Counterclockwise
+  */
+  Int32
+  orientation(const Vector2& q, const Vector2& r) const;
+
+  /**
+  * Gets a pointer to the first element of the matrix.
+  *
+  * @return
+  *	  A pointer to the first element of the matrix.
+  */
+  float*
+  ptr();
+
+  /**
+  * Gets a constant pointer to the first element of the matrix.
+  *
+  * @return
+  *	  A constant pointer to the first element of the matrix.
+  */
+  const float*
+  ptr() const;
+
+  /**
+  * Gets a reference to the specified element from the vector.
+  *
+  *	@param index
+  *	 The index of the element.
+  *
+  * @return
+  *	  A const reference to the element at the [index] position.
+  *
+  * @throws out_of_range
+  *	  If the index is greater than number of elements in the vector.
+  */
   float&
-  operator[](UInt32 index);
+  operator[](const SizeT index);
 
   /**
-   * @brief [] operator overload
-   * @param index of the object we wanna get
-   * @return value at index
-   *
-   */
+  * Gets a reference to the specified element from the vector.
+  *
+  *	@param index
+  *	 The index of the element.
+  *
+  * @return
+  *	  A const reference to the element at the [index] position.
+  *
+  * @throws out_of_range
+  *	  If the index is greater than number of elements in the vector.
+  */
+  const float&
+  operator[](const SizeT index) const;
+
+  /**
+  * Computes the dot product between this vector and the vector parameter.
+  * This operatios is commutative.
+  *
+  * @param B
+  *  The vector against which the dot product is calculated.
+  *
+  * @return
+  *   The sum of the products of the corresponding entries of the
+  *   vectors.
+  */
   float
-  operator[](UInt32 index) const;
+  operator|(const Vector2& B) const;
 
   /**
-   * @brief + operator overload
-   * @param b the other matrix to add
-   * @return a vector sum of *this and v
-   *
-   */
+  * Set the x, y values of this vector
+  * with the x, y of the other vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector2&
+  operator=(const Vector2& A);
+
+  /**
+  * Adds elements of the vector with
+  * the elements of the other vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A vector with the result values.
+  */
   Vector2
-  operator+(const Vector2& v) const;
+  operator+(const Vector2& A) const;
 
   /**
-   * @brief - operator overload
-   * @param b the other matrix to substract
-   * @return a vector difference of *this and v
-   *
-   */
+  * Adds elements of the vector with
+  * the elements of the other vector
+  * and stores it in this vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector2&
+  operator+=(const Vector2& A);
+
+  /**
+  * Substracts elements of the vector with
+  * the elements of the other vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A vector with the result values.
+  */
   Vector2
-  operator-(const Vector2& v) const;
+  operator-(const Vector2& A) const;
 
   /**
-   * @brief * operator overload
-   * @param b the other matrix to multiply
-   * @return a vector multiplication of *this times v
-   *
-   */
+  * Substracts elements of the vector with
+  * the elements of the other vector and
+  * stores it in this vector.
+  *
+  * @param A
+  *  The vector with the values to use.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector2&
+  operator-=(const Vector2& A);
+
+  /**
+  * Multiplies elements of the vector with
+  * the elements of the other vector.
+  *
+  * @param A
+  *  The vector with the factors to use.
+  *
+  * @return
+  *   A vector with the result values.
+  */
   Vector2
-  operator*(const Vector2& v) const;
+  operator*(const Vector2& A) const;
 
   /**
-   * @brief / operator overload
-   * @param b the other matrix to divide
-   * @return a vector division of *this divided by v
-   *
-   */
+  * Multiplies elements of the vector with
+  * the elements of the other vector, and stores
+  * the result in this vector.
+  *
+  * @param A
+  *  The vector with the factors to use.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector2&
+  operator*=(const Vector2& A);
+
+  /**
+  * Multiplies elements of the vector.
+  *
+  * @param scalar
+  *  The factor.
+  *
+  * @return
+  *   A vector with the result values.
+  */
   Vector2
-  operator/(const Vector2& v) const;
+  operator*(const float scalar) const;
 
   /**
-   * @brief + operator overload
-   * @param plus the float to add to all vector
-   * @return a vector sum of *this + plus
-   *
-   */
+  * Multiplies elements of the vector and stores it in the vector.
+  *
+  * @param scalar
+  *  The factor.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector2&
+  operator*=(const float scalar);
+
+  /**
+  * Divide elements of the vector.
+  *
+  * @param scalar
+  *  The dividend.
+  *
+  * @return
+  *   A vector with the result values.
+  */
   Vector2
-  operator+(float plus) const;
+  operator/(const float scalar) const;
 
   /**
-   * @brief - operator overload
-   * @param minus the float to subtract to all vector
-   * @return a vector difference of *this - minus
-   *
-   */
-  Vector2
-  operator-(float minus) const;
+  * Divide elements of the vector and stores it in the vector.
+  *
+  * @param scalar
+  *  The dividend.
+  *
+  * @return
+  *   A reference to this vector.
+  */
+  Vector2&
+  operator/=(const float scalar);
 
   /**
-   * @brief * operator overload
-   * @param times the float to multiply all vector
-   * @return a vector multiplication of *this times times
-   *
-   */
-  Vector2
-  operator*(float times) const;
-
-  /**
-   * @brief / operator overload
-   * @param under the float to divide all vector
-   * @return a vector divided of *this divided by times
-   *
-   */
-  Vector2
-  operator/(float under) const;
-
-
-  /**
-   * @brief | operator overload for dot product
-   * @param the other vector
-   * @return dot product
-   *
-   */
-  float
-  operator|(const Vector2 v) const;
-
-  /**
-   * @brief ^ operator overload for cross product
-   * @param the other vector
-   * @return cross product
-   *
-   */
-  float
-  operator^(const Vector2 v) const;
-
-  /**
-   * @brief == operator overload
-   * @param the other vector to compare
-   * @return true if this components are == to v components
-   *
-   */
+  * Checks if the values of the vectors are equal.
+  *
+  * @return
+  *   Flag if vectors are equal.
+  */
   bool
-  operator==(const Vector2& v) const;
+  operator==(const Vector2& otherVector);
 
   /**
-   * @brief != operator overload
-   * @param the other vector to compare
-   * @return true if this components are != to v components
-   *
-   */
+  * Checks if the values of the vectors aren't equal.
+  *
+  * @return
+  *   Flag if vectors aren't equal.
+  */
   bool
-  operator!=(const Vector2& v) const;
+  operator!=(const Vector2& otherVector);
 
   /**
-   * @brief < operator overload
-   * @param the other vector to compare
-   * @return true if this components are < to v components
-   *
-   */
-  bool
-  operator<(const Vector2& v) const;
-
-  /**
-   * @brief > operator overload
-   * @param the other vector to compare
-   * @return true if this components are > to v components
-   *
-   */
-  bool
-  operator>(const Vector2& v) const;
-
-  /**
-   * @brief <= operator overload
-   * @param the other vector to compare
-   * @return true if this components are <= to v components
-   *
-   */
-  bool
-  operator<=(const Vector2& v) const;
-
-  /**
-   * @brief >= operator overload
-   * @param the other vector to compare
-   * @return true if this components are >= to v components
-   *
-   */
-  bool
-  operator>=(const Vector2& v) const;
-
-  /**
-   * @brief - operator overload
-   * @param
-   * @return negative of vector
-   *
-   */
+  * Returns this vector with negated values.
+  */
   Vector2
   operator-() const;
 
-  /**
-   * @brief += operator overload
-   * @param Vector difference
-   * @return this + vector
-   *
-   */
-  Vector2&
-  operator+=(const Vector2& v);
-
-  /**
-   * @brief -= operator overload
-   * @param Vector difference
-   * @return this minus vector
-   *
-   */
-  Vector2&
-  operator-=(const Vector2& v);
-
-  /**
-   * @brief /= operator overload
-   * @param Vector scale
-   * @return this divided by vector
-   *
-   */
-  Vector2&
-  operator/=(const Vector2& v);
-
-  /**
-   * @brief *= operator overload
-   * @param Vector scale
-   * @return this multiplied by vector
-   *
-   */
-  Vector2&
-  operator*=(const Vector2& v);
-
-  /**
-   * @brief *= operator overload
-   * @param float scale
-   * @return this multiplied by float
-   *
-   */
-  Vector2&
-  operator*=(float scale);
-
-  /**
-   * @brief /= operator overload
-   * @param float scale
-   * @return this divided by the float
-   *
-   */
-  Vector2&
-  operator/=(float scale);
-
-  //A lot functions
-
-  /**
-   * @brief the cross product of two vectors
-   * @param const vector a const vector b
-   * @return the vector perpendicular to the plane created by a and b
-   *
-   */
-  static float
-  dot(const Vector2& a, const Vector2& b);
-
-  /**
-   * @brief gets the scale normalized of vector b over a
-   * @param vector a being the base and vector b being the reflection
-   * @return the scale normalized from 0 to 1
-   *
-   */
-  static float
-  dotScale(const Vector2& a, const Vector2& b);
-
-  /**
-   * @brief the square distance between two points
-   * @param const vector A const vector B
-   * @return 
-   *
-   */
-  static float
-  sqrDistance(const Vector2& a, const Vector2& b);
-
-  /**
-   * @brief the distance between 2 points
-   * @param vector A vector B
-   * @return the distance between the points
-   *
-   */
-  static float
-  distance(const Vector2& a, const Vector2& b);
-
-  /**
-   * @brief sets the values of a vector
-   * @param 
-   * @return 
-   *
-   */
-  void
-  set(float newX, float newY);
-
-  /**
-   * @brief rounds the values to the nearest integer
-   * @param 
-   * @return 
-   *
-   */
-  void
-  round();
-
-  /**
-   * @brief squares the values in the vector and gets the square root
-   * @param 
-   * @return the square root of the components squared
-   *
-   */
-  float
-  magnitude() const;
-
-  /**
-   * @brief squares the values in the vector and sums it
-   * @param 
-   * @return the square sum of the components 
-   *
-   */
-  float 
-  sqrMagnitude() const;
-
-  /**
-   * @brief creates the normalized vector
-   * @param 
-   * @return returns the normalized vector
-   *
-   */
-  Vector2
-  normalized() const;
-
-  /**
-   * @brief normalizes the vector
-   * @param 
-   * @return 
-   *
-   */
-  void
-  normalize();
-
-  //A lot of constants
-
-
-
-  /**
-   * Vector filled with 1s
-   */
-  static const Vector2 ONES;
-
-  /**
-   * Vector filled with 0s
-   */
-  static const Vector2 ZERO;
-
-  /**
-   * Vector with x value in 1
-   */
-  static const Vector2 RIGHT;
-
-  /**
-   * Vector with y value in 1
-   */
-  static const Vector2 UP;
-
- public:
-
-  /**
-   * X float value of the vector
-   */
-  float x;
-
-  /**
-   * Y float value of the vector
-   */
-  float y;
+  union
+  {
+    struct
+    {
+      float x, y;
+    };
+    float data[2];
+  };
 };
 
 }

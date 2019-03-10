@@ -1,244 +1,217 @@
-/*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
-/**
- * @file tb_Vector2.cpp
- * @author Marco "Swampy" Millan
- * @date 2019/02/13 2019
- * @brief Vector implementation
- * 
- */
-/*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
+#pragma once
+
 #include "tb_vector2.h"
 
 namespace toyboxSDK {
 
-using std::isnan;
-using std::isinf;
-using std::pow;
-using std::sqrt;
+Vector2::Vector2() {}
+
+Vector2::Vector2(Math::FORCE_INIT k) {
+  if (Math::FORCE_INIT::kZero == k) {
+    x = 0.0f;
+    y = 0.0f;
+  }
+  else {
+    x = 1.0f;
+    y = 1.0f;
+  }
+}
+
+Vector2::Vector2(const Vector2& V) : x(V.x), y(V.y) {}
+
+Vector2::Vector2(float _x, float _y) : x(_x), y(_y) {}
+
+Vector2::~Vector2() {}
+
+float
+Vector2::dot(const Vector2& B) const {
+  return (x*B.x) + (y*B.y);
+}
+
+Vector2
+Vector2::cross() const {
+  return Vector2(x, -y);
+}
+
+float
+Vector2::length() const {
+  return Math::sqrt(dot(*this));
+}
+
+float
+Vector2::lengthSqr() const {
+  return dot(*this);
+}
+
+Vector2&
+Vector2::normalize() {
+  TB_ASSERT(length() != 0.0f);
+  *this /= length();
+  return *this;
+}
+
+float
+Vector2::distance(const Vector2& otherVector) const {
+  return (otherVector - *this).length();
+}
+
+float
+Vector2::distanceSqr(const Vector2& otherVector) const {
+  return (otherVector - *this).lengthSqr();
+}
+
+bool
+Vector2::equals(const Vector2& otherVector, float errorRange) const {
+  return (Math::abs(x - otherVector.x) < errorRange) &&
+         (Math::abs(y - otherVector.y) < errorRange);
+}
+
+Int32
+Vector2::compare(const Vector2& p1, const Vector2& p2) {
+  Int32 compOrientation = orientation(p1, p2);
+
+  if (compOrientation == 0) {
+    if (distanceSqr(p1) < distanceSqr(p2)) {
+      return 1;
+    }
+    else {
+      return -1;
+    }
+  }
+
+  if (compOrientation == 2) {
+    return -1;
+  }
+  else {
+    return 1;
+  }
+}
+
+Int32
+Vector2::orientation(const Vector2& q, const Vector2& r) const {
+  float val = (q.y - y) * (r.x - q.x) - (q.x - x) * (r.y - q.y);
+
+  if (val == 0.0f) {
+    return 0;  //Colinear
+  }
+  else if (val > 0.0f) {
+    return 1;
+  }
+  else {
+    return 2; //Clock or counterclock wise
+  }
+}
+
+float*
+Vector2::ptr() {
+  return &data[0];
+}
+
+const float*
+Vector2::ptr() const {
+  return &data[0];
+}
 
 float&
-Vector2::operator[](UInt32 index) {
-  return (&x)[index];
+Vector2::operator[](const SizeT index){
+  TB_ASSERT(index < 2);
+  return data[index];
+}
+
+const float&
+Vector2::operator[](const SizeT index) const {
+  TB_ASSERT(index < 2);
+  return data[index];
 }
 
 float
-Vector2::operator[](UInt32 index) const {
-  return (&x)[index];
+Vector2::operator|(const Vector2& B) const {
+  return dot(B);
+}
+
+
+Vector2&
+Vector2::operator=(const Vector2& A) {
+  x = A.x;
+  y = A.y;
+  return *this;
 }
 
 Vector2
-Vector2::operator+(const Vector2& v) const {
-  return Vector2(x + v.x, y + v.y);
+Vector2::operator+(const Vector2& A) const {
+  return Vector2(x + A.x, y + A.y);
+}
+
+Vector2&
+Vector2::operator+=(const Vector2& A) {
+  x += A.x;
+  y += A.y;
+  return *this;
 }
 
 Vector2
-Vector2::operator-(const Vector2& v) const {
-  return Vector2(x - v.x, y - v.y);
+Vector2::operator-(const Vector2& A) const {
+  return Vector2(x - A.x, y - A.y);
+}
+
+Vector2&
+Vector2::operator-=(const Vector2& A) {
+  x -= A.x;
+  y -= A.y;
+  return *this;
 }
 
 Vector2
-Vector2::operator*(const Vector2& v) const {
-  return Vector2(x * v.x, y * v.y);
+Vector2::operator*(const Vector2& A) const {
+  return Vector2(x*A.x, y*A.y);
+}
+
+Vector2&
+Vector2::operator*=(const Vector2& A) {
+  x *= A.x;
+  y *= A.y;
+  return *this;
 }
 
 Vector2
-Vector2::operator/(const Vector2& v) const {
-  return Vector2(x / v.x, y / v.y);
+Vector2::operator*(const float scalar) const {
+  return Vector2(x*scalar, y*scalar);
+}
+
+Vector2&
+Vector2::operator*=(const float scalar) {
+  x *= scalar;
+  y *= scalar;
+  return *this;
 }
 
 Vector2
-Vector2::operator+(float plus) const {
-  return Vector2(x + plus, y + plus);
+Vector2::operator/(const float scalar) const {
+  TB_ASSERT(scalar != 0.0f);
+  return Vector2(x / scalar, y / scalar);
 }
 
-Vector2
-Vector2::operator-(float minus) const {
-  return Vector2(x - minus, y - minus);
-}
-Vector2
-Vector2::operator*(float times) const {
-  return Vector2(x * times, y * times);
-}
-Vector2
-Vector2::operator/(float under) const {
-  return Vector2(x / under, y / under);
-}
-float
-Vector2::operator|(const Vector2 v) const {
-  return x * v.x + y * v.y;
-}
-
-float
-Vector2::operator^(const Vector2 v) const {
-  return x * v.x - y * v.y;
+Vector2&
+Vector2::operator/=(const float scalar) {
+  TB_ASSERT(scalar != 0.0f);
+  x /= scalar;
+  y /= scalar;
+  return *this;
 }
 
 bool
-Vector2::operator==(const Vector2& v) const {
-  return x == v.x && y == v.y;
+Vector2::operator==(const Vector2& otherVector) {
+  return (x == otherVector.x) && (y == otherVector.y);
 }
 
 bool
-Vector2::operator!=(const Vector2& v) const {
-  return x != v.x || y != v.y;
-}
-
-bool
-Vector2::operator<(const Vector2& v) const {
-  return x < v.x && y < v.y;
-}
-
-bool
-Vector2::operator>(const Vector2& v) const {
-  return x > v.x && y > v.y;
-}
-
-bool
-Vector2::operator<=(const Vector2& v) const {
-  return x <= v.x && y <= v.y;
-}
-
-bool
-Vector2::operator>=(const Vector2& v) const {
-  return x >= v.x && y >= v.y;
+Vector2::operator!=(const Vector2& otherVector) {
+  return !((*this) == otherVector);
 }
 
 Vector2
 Vector2::operator-() const {
   return Vector2(-x, -y);
 }
-
-Vector2&
-Vector2::operator+=(const Vector2& v) {
-  x += v.x;
-  y += v.y;
-  return *this;
-}
-
-Vector2&
-Vector2::operator-=(const Vector2& v) {
-  x -= v.x;
-  y -= v.y;
-  return *this;
-}
-
-Vector2&
-Vector2::operator/=(const Vector2& v) {
-  x /= v.x;
-  y /= v.y;
-  return *this;
-}
-
-Vector2&
-Vector2::operator*=(const Vector2& v) {
-  x *= v.x;
-  y *= v.y;
-  return *this;
-}
-
-Vector2&
-Vector2::operator*=(float scale) {
-  x *= scale;
-  y *= scale;
-  return *this;
-}
-
-Vector2&
-Vector2::operator/=(float scale) {
-  x /= scale;
-  y /= scale;
-  return *this;
-}
-
-float
-Vector2::dot(const Vector2& a, const Vector2& b) {
-  return a | b;
-}
-
-float
-Vector2::dotScale(const Vector2& a, const Vector2& b) {
-  return (a | b) / a.magnitude();
-}
-
-float
-Vector2::sqrDistance(const Vector2& a, const Vector2& b) {
-  return pow(a.x - b.x, 2.0f) + pow(a.y - b.y, 2.0f);
-}
-
-float
-Vector2::distance(const Vector2& a, const Vector2& b) {
-  return sqrt(pow(a.x - b.x,2.0f) + pow(a.y - b.y, 2.0f));
-}
-
-void
-Vector2::set(float newX, float newY) {
-  x = newX;
-  y = newY;
-}
-
-void
-Vector2::round() {
-  x = std::round(x);
-  y = std::round(y);
-}
-
-float
-Vector2::magnitude() const {
-  return sqrt(x * x + y * y);
-}
-
-float
-Vector2::sqrMagnitude() const {
-  return (x * x + y * y);
-}
-
-Vector2
-Vector2::normalized() const {
-  
-  TB_ASSERT(!isnan(x) &&
-            !isnan(y) &&
-            !isinf(x) &&
-            !isinf(y) &&
-            "Value X or Y are either infinite or NAN");
-
-  float sqr = pow(x, 2.0f) + pow(y, 2.0f);
-
-  TB_ASSERT(sqr <= std::numeric_limits<float>::epsilon() &&
-            "Square is less than epsilon and that shit is wack");
-
-  TB_DEBUG_ONLY(sqrMagnitude());
-
-  float unit = 1.0f / sqrt(sqr);
-  return Vector2((x * unit), (y * unit));
-}
-
-void
-Vector2::normalize() {
-  TB_ASSERT(!isnan(x) &&
-            !isnan(y) &&
-            !isinf(x) &&
-            !isinf(y) &&
-            "Value X or Y are either infinite or NAN");
-
-  float sqr = pow(x, 2.0f) + pow(y, 2.0f);
-
-  TB_ASSERT(sqr <= std::numeric_limits<float>::epsilon() &&
-            "Square is less than epsilon and that shit is wack");
-
-  TB_DEBUG_ONLY(sqrMagnitude());
-
-  float unit = 1.0f / sqrt(sqr);
-
-  x *= unit;
-  y *= unit;
-}
-
-const Vector2 Vector2::ONES   = Vector2(1.0f, 1.0f);
-
-const Vector2 Vector2::ZERO   = Vector2(0.0f, 0.0f);
-
-const Vector2 Vector2::RIGHT  = Vector2(1.0f, 0.0f);
-
-const Vector2 Vector2::UP     = Vector2(0.0f, 1.0f);
 
 }

@@ -27,9 +27,6 @@
     <ClInclude Include="Include\tb_vector4.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Include\tb_math_defines.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Include\tb_matrix3x3.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
@@ -37,6 +34,9 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="Include\tb_random.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_math.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,9 +50,6 @@
     <ClCompile Include="Source\tb_vector4.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Source\tb_math_defines.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="Source\tb_matrix3x3.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
@@ -60,6 +57,9 @@
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="Source\tb_random.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_math.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>

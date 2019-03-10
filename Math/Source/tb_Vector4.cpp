@@ -1,296 +1,262 @@
-/*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
-/**
- * @file tb_Vector4.cpp
- * @author Marco "Swampy" Millan
- * @date 2019/02/13 2019
- * @brief Vector implementation
- *
- */
- /*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
 #include "tb_vector4.h"
+#include "tb_vector3.h"
+#include "tb_vector2.h"
+#include "tb_matrix4x4.h"
 
 namespace toyboxSDK {
 
-using std::isnan;
-using std::isinf;
-using std::pow;
-using std::sqrt;
+Vector4::Vector4() { }
 
-Vector4::Vector4(Vector3 og) {
-  x = og.x;
-  y = og.y;
-  z = og.z;
-  w = 1.0f;
+Vector4::Vector4(Math::FORCE_INIT k) {
+  if (Math::FORCE_INIT::kZero == k) {
+    x = 0.0f;
+    y = 0.0f;
+    z = 0.0f;
+    w = 0.0f;
+  }
+  else {
+    x = 0.0f;
+    y = 0.0f;
+    z = 0.0f;
+    w = 1.0f;
+  }
+}
+
+Vector4::Vector4(const Vector4& V) : x(V.x), y(V.y), z(V.z), w(V.w) {}
+
+Vector4::Vector4(const Vector3& V) : x(V.x), y(V.y), z(V.z) {
+}
+
+Vector4::Vector4(const Vector3& V, float _w) : x(V.x), y(V.y), z(V.z), w(_w) {
+}
+
+Vector4::Vector4(const Vector2& V1, const Vector2& V2)
+  : x(V1.x),
+    y(V1.y),
+    z(V2.x),
+    w(V2.y) {
+}
+
+Vector4::Vector4(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {
+}
+
+Vector4::~Vector4() {
+}
+
+float
+Vector4::dot3(const Vector4& B) const {
+  return (x*B.x) + (y*B.y) + (z*B.z);
+}
+
+float
+Vector4::dot(const Vector4& B) const {
+  return (x*B.x) + (y*B.y) + (z*B.z) + (w*B.w);
+}
+
+Vector4
+Vector4::cross(const Vector4& B) const {
+  return Vector4(y*B.z - z*B.y, z*B.x - x*B.z, x*B.y - y*B.x, 0.0f);
+}
+
+float Vector4::length3() const {
+  return Math::sqrt(dot3(*this));
+}
+
+float
+Vector4::length() const {
+  return Math::sqrt(dot(*this));
+}
+
+float Vector4::lengthSqr3() const {
+  return dot3(*this);
+}
+
+float
+Vector4::lengthSqr() const {
+  return dot(*this);
+}
+
+void Vector4::normalize3() {
+  TB_ASSERT(length() != 0);
+  float Length3 = length3();
+  x /= Length3;
+  y /= Length3;
+  z /= Length3;
+}
+
+void
+Vector4::normalize() {
+  TB_ASSERT(length() != 0);
+  *this /= length();
+}
+
+float Vector4::distance3(const Vector4& otherVector) const {
+  return (otherVector - *this).length3();
+}
+
+float
+Vector4::distance(const Vector4& otherVector) const {
+  return (otherVector - *this).length();
+}
+
+float Vector4::distanceSqr3(const Vector4& otherVector) const {
+  return (otherVector - *this).lengthSqr3();
+}
+
+float
+Vector4::distanceSqr(const Vector4& otherVector) const {
+  return (otherVector - *this).lengthSqr();
+}
+
+bool
+Vector4::equals(const Vector4& otherVector, float errorRange) const {
+  return (Math::abs(x - otherVector.x) < errorRange) &&
+         (Math::abs(y - otherVector.y) < errorRange) &&
+         (Math::abs(z - otherVector.z) < errorRange) &&
+         (Math::abs(w - otherVector.w) < errorRange);
+}
+
+float*
+Vector4::ptr() {
+  return &data[0];
+}
+
+const float*
+Vector4::ptr() const {
+  return &data[0];
 }
 
 float&
-Vector4::operator[](UInt32 index) {
-  return (&x)[index];
+Vector4::operator[](const SizeT index){
+  TB_ASSERT(index < 4);
+  return data[index];
+}
+
+const float&
+Vector4::operator[](const SizeT index) const {
+  TB_ASSERT(index < 4);
+  return data[index];
 }
 
 float
-Vector4::operator[](UInt32 index) const {
-  return (&x)[index];
+Vector4::operator|(const Vector4& B) const {
+  return dot(B);
 }
 
 Vector4
-Vector4::operator+(const Vector4& v) const {
-  return Vector4(x + v.x, y + v.y, z + v.z, w + v.w);
+Vector4::operator^(const Vector4& B) const {
+  return cross(B);
+}
+
+Vector4&
+Vector4::operator=(const Vector4& A) {
+  x = A.x;
+  y = A.y;
+  z = A.z;
+  w = A.w;
+  return *this;
+}
+
+Vector4&
+Vector4::operator=(const Vector3& A) {
+  x = A.x;
+  y = A.y;
+  z = A.z;
+  return *this;
 }
 
 Vector4
-Vector4::operator-(const Vector4& v) const {
-  return Vector4(x - v.x, y - v.y, z - v.z, w - v.w);
+Vector4::operator+(const Vector4& A) const {
+  return Vector4(x + A.x, y + A.y, z + A.z, w + A.w);
+}
+
+Vector4&
+Vector4::operator+=(const Vector4& A) {
+  x += A.x;
+  y += A.y;
+  z += A.z;
+  w += A.w;
+  return *this;
 }
 
 Vector4
-Vector4::operator*(const Vector4& v) const {
-  return Vector4(x * v.x, y * v.y, z * v.z, w * v.w);
+Vector4::operator-(const Vector4& A) const {
+  return Vector4(x - A.x, y - A.y, z - A.z, w - A.w);
+}
+
+Vector4&
+Vector4::operator-=(const Vector4& A) {
+  x -= A.x;
+  y -= A.y;
+  z -= A.z;
+  w -= A.w;
+  return *this;
 }
 
 Vector4
-Vector4::operator/(const Vector4& v) const {
-  return Vector4(x / v.x, y / v.y, z / v.z, w / v.w);
+Vector4::operator*(const Vector4& A) const {
+  return Vector4(x*A.x, y*A.y, z*A.z, w * A.w);
+}
+
+Vector4 
+Vector4::operator*(Matrix4x4 matrix) const {
+  return matrix.transpose() * *this;
+}
+
+Vector4&
+Vector4::operator*=(const Vector4& A) {
+  x *= A.x;
+  y *= A.y;
+  z *= A.z;
+  w *= A.w;
+  return *this;
 }
 
 Vector4
-Vector4::operator+(float plus) const {
-  return Vector4(x + plus, y + plus, z + plus, w + plus);
+Vector4::operator*(const float scalar) const {
+  return Vector4(x*scalar, y*scalar, z*scalar, w*scalar);
+}
+
+Vector4&
+Vector4::operator*=(const float scalar) {
+  x *= scalar;
+  y *= scalar;
+  z *= scalar;
+  w *= scalar;
+  return *this;
 }
 
 Vector4
-Vector4::operator-(float minus) const {
-  return Vector4(x - minus, y - minus, z - minus, w - minus);
-}
-Vector4
-Vector4::operator*(float times) const {
-  return Vector4(x * times, y * times, z * times, w * times);
-}
-Vector4
-Vector4::operator/(float under) const {
-  return Vector4(x / under, y / under, z / under, w / under);
-}
-float
-Vector4::operator|(const Vector4 v) const {
-  return x * v.x + y * v.y + z * v.z + w * v.w;
+Vector4::operator/(const float scalar) const {
+  TB_ASSERT(scalar != 0.0f);
+  return Vector4(x / scalar, y / scalar, z / scalar, w / scalar);
 }
 
-Vector4
-Vector4::operator^(const Vector4 v) const {
-
-  Vector4 tmp;
-
-  tmp.x = (y*v.z) - (z*v.y);
-  tmp.y = (z*v.x) - (x*v.z);
-  tmp.z = (x*v.y) - (y*v.x);
-  tmp.w = 1.0f;
-  return tmp;
+Vector4&
+Vector4::operator/=(const float scalar) {
+  TB_ASSERT(scalar != 0.0f);
+  x /= scalar;
+  y /= scalar;
+  z /= scalar;
+  w /= scalar;
+  return *this;
 }
 
 bool
-Vector4::operator==(const Vector4& v) const {
-  return x == v.x && y == v.y && z == v.z && w == v.w;
+Vector4::operator==(const Vector4& otherVector) {
+  return ((x == otherVector.x) &&
+          (y == otherVector.y) &&
+          (z == otherVector.z) &&
+          (w == otherVector.w));
 }
 
 bool
-Vector4::operator!=(const Vector4& v) const {
-  return x != v.x || y != v.y || z != v.z || w != v.w;
-}
-
-bool
-Vector4::operator<(const Vector4& v) const {
-  return x < v.x && y < v.y && z < v.z && w < v.w;
-}
-
-bool
-Vector4::operator>(const Vector4& v) const {
-  return x > v.x && y > v.y && z > v.z && w > v.w;
-}
-
-bool
-Vector4::operator<=(const Vector4& v) const {
-  return x <= v.x && y <= v.y && z <= v.z && w <= v.w;
-}
-
-bool
-Vector4::operator>=(const Vector4& v) const {
-  return x >= v.x && y >= v.y && z >= v.z && w >= v.w;
+Vector4::operator!=(const Vector4& otherVector) {
+  return !((*this) == otherVector);
 }
 
 Vector4
 Vector4::operator-() const {
   return Vector4(-x, -y, -z, -w);
 }
-
-Vector4&
-Vector4::operator+=(const Vector4& v) {
-  x += v.x;
-  y += v.y;
-  z += v.z;
-  w += v.w;
-  return *this;
-}
-
-Vector4&
-Vector4::operator-=(const Vector4& v) {
-  x -= v.x;
-  y -= v.y;
-  z -= v.z;
-  w -= v.w;
-  return *this;
-}
-
-Vector4&
-Vector4::operator/=(const Vector4& v) {
-  x /= v.x;
-  y /= v.y;
-  z /= v.z;
-  return *this;
-}
-
-Vector4&
-Vector4::operator*=(const Vector4& v) {
-  x *= v.x;
-  y *= v.y;
-  z *= v.z;
-  w *= v.w;
-  return *this;
-}
-
-Vector4&
-Vector4::operator*=(float scale) {
-  x *= scale;
-  y *= scale;
-  z *= scale;
-  w *= scale;
-  return *this;
-}
-
-Vector4&
-Vector4::operator/=(float scale) {
-  x /= scale;
-  y /= scale;
-  z /= scale;
-  w /= scale;
-  return *this;
-}
-
-Vector4
-Vector4::cross(const Vector4& a, const Vector4& b) {
-  return a ^ b;
-}
-
-float
- Vector4::dot(const Vector4& a, const Vector4& b) {
-  return a | b;
-}
-
-float
-Vector4::dotScale(const Vector4& a, const Vector4& b) {
-  return (a | b) / a.magnitude();
-}
-
-float
-Vector4::sqrDistance(const Vector4& a, const Vector4& b) {
-  return pow(a.x - b.x, 2.0f) + 
-         pow(a.y - b.y, 2.0f) + 
-         pow(a.z - b.z, 2.0f) +
-         pow(a.z - b.z, 2.0f);
-}
-
-float
-Vector4::distance(const Vector4& a, const Vector4& b) {
-  return sqrt(pow(a.x - b.x, 2.0f) + 
-              pow(a.y - b.y, 2.0f) +
-              pow(a.z - b.z, 2.0f) +
-              pow(a.w - b.w, 2.0f));
-
-}
-
-void
-Vector4::set(float newX, float newY, float newZ, float newW = 1.0f) {
-  x = newX;
-  y = newY;
-  z = newZ;
-  w = newW;
-}
-
-void
-Vector4::round() {
-  x = std::round(x);
-  y = std::round(y);
-  z = std::round(z);
-  w = std::round(w);
-}
-
-float
-Vector4::magnitude() const {
-  return sqrt(x * x + y * y + z * z + w * w);
-}
-
-float
-Vector4::sqrMagnitude() const {
-  return (x * x + y * y + z * z + w * w);
-}
-
-Vector4
-  Vector4::normalized() const {
-
-  TB_ASSERT(!isnan(x) &&
-            !isnan(y) &&
-            !isnan(z) &&
-            !isnan(w) &&
-            !isinf(x) &&
-            !isinf(y) &&
-            !isinf(z) &&
-            !isinf(w) &&
-            "Value X or Y or Z or W are either infinite or NAN");
-
-  float sqr = pow(x, 2.0f) + pow(y, 2.0f) + pow(z, 2.0f) + pow(w, 2.0f);
-
-  TB_ASSERT(sqr <= std::numeric_limits<float>::epsilon() &&
-            "Square is less than epsilon and that shit is wack");
-
-  TB_DEBUG_ONLY(sqrMagnitude());
-
-  float unit = 1.0f / sqrt(sqr);
-  return Vector4((x * unit), (y * unit), (z * unit), (w * unit));
-}
-
-void
-  Vector4::normalize() {
-  TB_ASSERT(!isnan(x) &&
-            !isnan(y) &&
-            !isnan(z) &&
-            !isnan(w) &&
-            !isinf(x) &&
-            !isinf(y) &&
-            !isinf(z) &&
-            !isinf(w) &&
-            "Value X or Y or Z or W are either infinite or NAN");
-
-  float sqr = pow(x, 2.0f) + pow(y, 2.0f) + pow(z, 2.0f) + pow(w, 2.0f);
-
-  TB_ASSERT(sqr <= std::numeric_limits<float>::epsilon() &&
-            "Square is less than epsilon and that shit is wack");
-
-  TB_DEBUG_ONLY(sqrMagnitude());
-
-  float unit = 1.0f / sqrt(sqr);
-
-  x *= unit;
-  y *= unit;
-  z *= unit;
-  w *= unit;
-}
-
-const Vector4 Vector4::ONES   = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-
-const Vector4 Vector4::ZERO   = Vector4(0.0f, 0.0f, 0.0f, 1.0f);
-
-const Vector4 Vector4::RIGHT  = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-
-const Vector4 Vector4::UP     = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-
-const Vector4 Vector4::FRONT  = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
 }

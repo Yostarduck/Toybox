@@ -144,7 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Include\tb_math_defines.h" />
+    <ClInclude Include="Include\tb_math.h" />
     <ClInclude Include="Include\tb_math_prerequisites.h" />
     <ClInclude Include="Include\tb_matrix3x3.h" />
     <ClInclude Include="Include\tb_matrix4x4.h" />
@@ -154,7 +154,7 @@
     <ClInclude Include="Include\tb_vector4.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\tb_math_defines.cpp" />
+    <ClCompile Include="Source\tb_math.cpp" />
     <ClCompile Include="Source\tb_matrix3x3.cpp" />
     <ClCompile Include="Source\tb_matrix4x4.cpp" />
     <ClCompile Include="Source\tb_random.cpp" />

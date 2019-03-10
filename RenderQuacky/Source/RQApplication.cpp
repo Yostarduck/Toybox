@@ -20,21 +20,46 @@ RenderQuackyApp::postInit() {
   FileSystem FSys;
   String workingPath = StringConversion::toString(FSys.GetWorkingPath());
   String path = workingPath + "Resources\\Textures\\";
-
+  
   FIBITMAP *tgaImg = FreeImage_Load(FIF_TARGA,
                                     (path + "256_Checker_Diffuse.tga").c_str(),
                                     TARGA_DEFAULT);
-  FREE_IMAGE_TYPE tgaType = FreeImage_GetImageType(tgaImg);
-  UInt32 tgaWidth = FreeImage_GetWidth(tgaImg);
-  UInt32 tgaHeight = FreeImage_GetHeight(tgaImg);
-  UInt32 tgaLine = FreeImage_GetLine(tgaImg);
-  UInt32 tgaPitch = FreeImage_GetPitch(tgaImg);
-  SizeT tgaSize = FreeImage_GetMemorySize(tgaImg);
-
+  {
+    FREE_IMAGE_TYPE tgaType = FreeImage_GetImageType(tgaImg);
+    UInt32 tgaWidth = FreeImage_GetWidth(tgaImg);
+    UInt32 tgaHeight = FreeImage_GetHeight(tgaImg);
+    UInt32 tgaLine = FreeImage_GetLine(tgaImg);
+    UInt32 tgaPitch = FreeImage_GetPitch(tgaImg);
+    SizeT tgaSize = FreeImage_GetMemorySize(tgaImg);
+  }
+  
   if (tgaImg) { FreeImage_Unload(tgaImg); }
 
-  //FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS, (path + "256_Checker_Diffuse.tga").c_str(), DDS_DEFAULT);
-  //if (ddsImg) { FreeImage_Unload(ddsImg); }
+  FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS,
+                                    (path + "EarthCubemap.dds").c_str(),
+                                    DDS_DEFAULT);
+  {
+    FREE_IMAGE_TYPE ddsType = FreeImage_GetImageType(ddsImg);
+    UInt32 ddsWidth = FreeImage_GetWidth(ddsImg);
+    UInt32 ddsHeight = FreeImage_GetHeight(ddsImg);
+    UInt32 ddsLine = FreeImage_GetLine(ddsImg);
+    UInt32 ddsPitch = FreeImage_GetPitch(ddsImg);
+    SizeT ddsSize = FreeImage_GetMemorySize(ddsImg);
+  }
+  if (ddsImg) { FreeImage_Unload(ddsImg); }
+  
+  FIBITMAP *hdrImg = FreeImage_Load(FIF_HDR,
+                                    (path + "TearsOfSteelBridge_2K.hdr").c_str(),
+                                    HDR_DEFAULT);
+  {
+    FREE_IMAGE_TYPE hdrType = FreeImage_GetImageType(hdrImg);
+    UInt32 hdrWidth = FreeImage_GetWidth(hdrImg);
+    UInt32 hdrHeight = FreeImage_GetHeight(hdrImg);
+    UInt32 hdrLine = FreeImage_GetLine(hdrImg);
+    UInt32 hdrPitch = FreeImage_GetPitch(hdrImg);
+    SizeT hdrSize = FreeImage_GetMemorySize(hdrImg);
+  }
+  if (hdrImg) { FreeImage_Unload(hdrImg); }
 
   GraphicsAPI::startUp();
   GraphicsAPI::instance().init(m_viewport.width, m_viewport.height, m_hwnd);
