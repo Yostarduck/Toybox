@@ -89,6 +89,9 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
        TB_GRAPHICS_API::E api = TB_GRAPHICS_API::E::kD3D12);
 
   void
+  UpdateCB(std::vector<byte>& data);
+
+  void
   ApplyGBuffer();
 
   void
@@ -199,7 +202,6 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   void CreateGPSOForward();
   void CreateDSV();
   void CreateRTV();
-
   //Utilities
   bool m_bUseCPU;
   Int32 m_iFrameBuffers;

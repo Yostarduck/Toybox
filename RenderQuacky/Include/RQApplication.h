@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tb_application.h>
+#include <tb_matrix4x4.h>
 
 //#include <assimp/Importer.hpp>
 //#include <FreeImage/FreeImage.h>
@@ -54,6 +55,9 @@ class RenderQuackyApp : public Application
   virtual void
   onResize() override;
 
+  Matrix4x4 m_World;
+  Matrix4x4 m_View;
+  Matrix4x4 m_Projection;
 };
 
 }

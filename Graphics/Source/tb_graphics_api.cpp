@@ -69,6 +69,14 @@ GraphicsAPI::init(UInt32 w,
 }
 
 void
+GraphicsAPI::UpdateCB(std::vector<byte>& data) {
+  byte* mapped = nullptr;
+  m_CB->Map(0, nullptr, reinterpret_cast<void**>(&mapped));
+  std::memcpy(mapped, &data[0], data.size());
+  m_CB->Unmap(0, nullptr);
+}
+
+void
 GraphicsAPI::ApplyGBuffer() {
   const Int32 RTSize = 4;
   float mClearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -668,7 +676,6 @@ GraphicsAPI::CreateGBufferRootSignature() {
     throw std::exception();
   }
 }
-
 
 void
 GraphicsAPI::CreateForwardRootSignature() {

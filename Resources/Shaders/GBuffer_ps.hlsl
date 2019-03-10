@@ -21,6 +21,8 @@ PS_OUTPUT
 main(PS_INPUT input) {
 	PS_OUTPUT output;
   
+  
+  Output.Position  = mul(WVP, vertexTransformed);
   output.WorldPosition  = input.WorldPos;
   output.Metallic       = float4(1.0f, 0.0f, 0.0f, 1.0f);
   output.Roughness      = float4(0.0f, 1.0f, 0.0f, 1.0f);

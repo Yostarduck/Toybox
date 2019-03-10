@@ -18,11 +18,11 @@ struct VS_OUTPUT {
 VS_OUTPUT
 main(VS_INPUT input) {
   VS_OUTPUT Output;
-  
-  const float4x4 WVP = mul(mul(Projection, View), World);
 
-  //Output.Position = mul(WVP, input.Position);
-  Output.Position = input.Position;
+  const float4x4 WVP = mul(mul(Projection, View), World);
+  //const float4x4 WVP = mul(World, mul(View, Projection));
+
+  Output.Position = mul(WVP, input.Position);
   Output.WorldPos = float4(mul(World, input.Position).xyz, 1.0f);
   Output.Texcoord = input.Texcoord;
   

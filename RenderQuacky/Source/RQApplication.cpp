@@ -32,7 +32,6 @@ RenderQuackyApp::postInit() {
     UInt32 tgaPitch = FreeImage_GetPitch(tgaImg);
     SizeT tgaSize = FreeImage_GetMemorySize(tgaImg);
   }
-  
   if (tgaImg) { FreeImage_Unload(tgaImg); }
 
   FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS,
@@ -61,8 +60,36 @@ RenderQuackyApp::postInit() {
   }
   if (hdrImg) { FreeImage_Unload(hdrImg); }
 
+  //Camera stuff
+  m_World.identity();
+
+  m_View.identity();
+  m_View.LookAt(Vector3(-5.0f, 5.0f, -5.0f),
+                Vector3(0.0f, 0.0f, 0.0f),
+                Vector3(0.0f, 1.0f, 0.0f));
+
+  m_Projection.identity();
+  m_Projection.ProjectionFov(60.0f * Math::DEGREE_TO_RADIAN,
+                              static_cast<float>(m_viewport.width) /
+                                                 m_viewport.height,
+                             0.0f,
+                             10000.0f);
+
   GraphicsAPI::startUp();
   GraphicsAPI::instance().init(m_viewport.width, m_viewport.height, m_hwnd);
+
+  SizeT matrix4x4Size = sizeof(Matrix4x4);
+
+  std::vector<byte> CBData;
+  CBData.resize(matrix4x4Size * 3);
+
+  Matrix4x4 WVP = m_World * (m_View * m_Projection);
+
+  std::memcpy(&CBData[matrix4x4Size * 0], &m_World, matrix4x4Size);
+  std::memcpy(&CBData[matrix4x4Size * 1], &m_View, matrix4x4Size);
+  std::memcpy(&CBData[matrix4x4Size * 2], &m_Projection, matrix4x4Size);
+
+  GraphicsAPI::instance().UpdateCB(CBData);
 }
 
 void
