@@ -69,28 +69,28 @@ GraphicsAPI::init(UInt32 w,
 }
 
 void
-GraphicsAPI::CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT faces) {
+GraphicsAPI::CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT totalVertex) {
+  D3D12_HEAP_PROPERTIES heapProperty;
+  heapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
+  heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+  heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+  heapProperty.CreationNodeMask = 1;
+  heapProperty.VisibleNodeMask = 1;
+
+	D3D12_RESOURCE_DESC resourceDesc;
+	ZeroMemory(&resourceDesc, sizeof(resourceDesc));
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	resourceDesc.Alignment = 0;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.SampleDesc.Quality = 0;
+	resourceDesc.MipLevels = 1;
+	resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.Height = 1;
+	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
   //VB
   {
-    D3D12_HEAP_PROPERTIES heapProperty;
-    heapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
-    heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-    heapProperty.CreationNodeMask = 1;
-    heapProperty.VisibleNodeMask = 1;
-
-	  D3D12_RESOURCE_DESC resourceDesc;
-	  ZeroMemory(&resourceDesc, sizeof(resourceDesc));
-	  resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	  resourceDesc.Alignment = 0;
-	  resourceDesc.SampleDesc.Count = 1;
-	  resourceDesc.SampleDesc.Quality = 0;
-	  resourceDesc.MipLevels = 1;
-	  resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-	  resourceDesc.DepthOrArraySize = 1;
 	  resourceDesc.Width = VB.size();
-	  resourceDesc.Height = 1;
-	  resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
 	  HRESULT HRVBCR = m_device->CreateCommittedResource(&heapProperty,
                                                        D3D12_HEAP_FLAG_NONE,
@@ -109,7 +109,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT fac
     if (FAILED(HRMapVB)) {
       throw std::exception();
     }
-	  memcpy(VBDataBegin, &VB[0], VB.size());
+    std::memcpy(VBDataBegin, &VB[0], VB.size());
 	  m_ModelVB->Unmap(0, nullptr);
 
 	  m_ModelVBView.BufferLocation = m_ModelVB->GetGPUVirtualAddress();
@@ -118,25 +118,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT fac
   }
   //IB
   {
-    D3D12_HEAP_PROPERTIES heapProperty;
-    heapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
-    heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-    heapProperty.CreationNodeMask = 1;
-    heapProperty.VisibleNodeMask = 1;
-
-    D3D12_RESOURCE_DESC resourceDesc;
-    ZeroMemory(&resourceDesc, sizeof(resourceDesc));
-    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    resourceDesc.Alignment = 0;
-    resourceDesc.SampleDesc.Count = 1;
-    resourceDesc.SampleDesc.Quality = 0;
-    resourceDesc.MipLevels = 1;
-    resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-    resourceDesc.DepthOrArraySize = 1;
     resourceDesc.Width = IB.size();
-    resourceDesc.Height = 1;
-    resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
     HRESULT HRIDCR = m_device->CreateCommittedResource(&heapProperty,
                                                        D3D12_HEAP_FLAG_NONE,
@@ -155,7 +137,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT fac
     if (FAILED(HRIB)) {
       throw std::exception();
     }
-    memcpy(IBDataBegin, &IB[0], IB.size());
+    std::memcpy(IBDataBegin, &IB[0], IB.size());
     m_ModelIB->Unmap(0, nullptr);
 
     m_ModelIBView.BufferLocation = m_ModelIB->GetGPUVirtualAddress();
@@ -163,7 +145,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT fac
     m_ModelIBView.SizeInBytes = IB.size();
   }
 
-  m_ModelTriangles = faces;
+  m_ModelIndexes = totalVertex;
 }
 
 void
@@ -197,7 +179,7 @@ GraphicsAPI::ApplyGBuffer() {
     m_commandList->ClearRenderTargetView(CPUDescriptorhandle, mClearColor, 0, nullptr);
   }
 
-  m_commandList->ClearDepthStencilView(m_DSCPUHeapStartHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0xff, 0, nullptr);
+  m_commandList->ClearDepthStencilView(m_DSCPUHeapStartHandle, D3D12_CLEAR_FLAG_DEPTH, 0.0f, 0xff, 0, nullptr);
 
   D3D12_GPU_DESCRIPTOR_HANDLE handleOffset;
   handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr;
@@ -210,7 +192,8 @@ GraphicsAPI::ApplyGBuffer() {
   m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
   m_commandList->IASetIndexBuffer(&m_ModelIBView);
   m_commandList->IASetVertexBuffers(0, 1, &m_ModelVBView);
-  m_commandList->DrawInstanced(m_ModelTriangles, 1, 0, 0);
+
+  m_commandList->DrawIndexedInstanced(m_ModelIndexes, 1, 0, 0, 0);
 }
 
 void
@@ -871,10 +854,10 @@ void
 GraphicsAPI::CreateGPSOGBuffer() {
   D3D12_DEPTH_STENCIL_DESC DepthStencilDefault;
   {
-    DepthStencilDefault.DepthEnable = TRUE;
+    DepthStencilDefault.DepthEnable = true;
     DepthStencilDefault.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-    DepthStencilDefault.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-    DepthStencilDefault.StencilEnable = FALSE;
+    DepthStencilDefault.DepthFunc = D3D12_COMPARISON_FUNC_GREATER;
+    DepthStencilDefault.StencilEnable = false;
     DepthStencilDefault.StencilReadMask = D3D12_DEFAULT_STENCIL_READ_MASK;
     DepthStencilDefault.StencilWriteMask = D3D12_DEFAULT_STENCIL_WRITE_MASK;
     const D3D12_DEPTH_STENCILOP_DESC defaultStencilOp =
@@ -927,10 +910,8 @@ GraphicsAPI::CreateGPSOGBuffer() {
   descPipelineState.InputLayout.NumElements = _countof(ModelVertexDesc);
   descPipelineState.pRootSignature = m_GBufferRootSignature;
   descPipelineState.DepthStencilState = DepthStencilDefault;
-  descPipelineState.DepthStencilState.DepthEnable = false;
   descPipelineState.BlendState = BlendStateDefault;
   descPipelineState.RasterizerState = RasterizerDefault;
-  descPipelineState.RasterizerState.DepthClipEnable = false;
   descPipelineState.SampleMask = UINT_MAX;
   descPipelineState.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
   descPipelineState.NumRenderTargets = 4;
@@ -938,6 +919,7 @@ GraphicsAPI::CreateGPSOGBuffer() {
   descPipelineState.RTVFormats[1] = DXGI_FORMAT_R32G32B32A32_FLOAT;
   descPipelineState.RTVFormats[2] = DXGI_FORMAT_R32G32B32A32_FLOAT;
   descPipelineState.RTVFormats[3] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  descPipelineState.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
   descPipelineState.SampleDesc.Count = 1;
 
   HRESULT HRPSO = m_device->CreateGraphicsPipelineState(&descPipelineState,
@@ -1076,7 +1058,7 @@ GraphicsAPI::CreateDSV() {
 	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
 	D3D12_CLEAR_VALUE clearVal;
-	clearVal = { DXGI_FORMAT_D24_UNORM_S8_UINT, 1.0f };
+	clearVal = { DXGI_FORMAT_D24_UNORM_S8_UINT, 0.0f };
 
 	HRESULT HRCR = m_device->CreateCommittedResource(&heapProperty,
                                                    D3D12_HEAP_FLAG_NONE,

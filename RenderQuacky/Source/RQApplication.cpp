@@ -30,7 +30,7 @@ RenderQuackyApp::postInit() {
 
   std::vector<byte> byteIndexList;
   std::vector<byte> byteVertexList;
-  SizeT totalFaces;
+  SizeT totalIndex;
 
   Assimp::Importer importer;
 
@@ -46,7 +46,7 @@ RenderQuackyApp::postInit() {
   flags |= aiProcess_FindInvalidData;
   flags |= aiProcess_GenUVCoords;
   
-  const aiScene* scene = importer.ReadFile(GeoRes + "Cube.fbx",
+  const aiScene* scene = importer.ReadFile(GeoRes + "Helmet1.fbx",
                                            flags);
   if (scene) {
     //For each mesh
@@ -58,7 +58,7 @@ RenderQuackyApp::postInit() {
       bool hasUVs = mesh->HasTextureCoords(0);
 
       SizeT verticesSize = static_cast<SizeT>(mesh->mNumVertices);
-      totalFaces = static_cast<SizeT>(mesh->mNumFaces);
+      SizeT totalFaces = static_cast<SizeT>(mesh->mNumFaces);
 
       std::vector<UInt32> indexList;
       std::vector<VertexInfo> vertexList;
@@ -106,14 +106,14 @@ RenderQuackyApp::postInit() {
         indexList.push_back(static_cast<UInt32>(face.mIndices[2]));
       }
 
-      byteIndexList.resize(indexList.size() * sizeof(UInt32));
       byteVertexList.resize(vertexList.size() * sizeof(VertexInfo));
-
-      std::memcpy(&byteIndexList[0], &indexList[0], byteIndexList.size());
       std::memcpy(&byteVertexList[0], &vertexList[0], byteVertexList.size());
 
-      //totalFaces = vertexList.size();
-      totalFaces = indexList.size();
+      byteIndexList.resize(indexList.size() * sizeof(UInt32));
+      std::memcpy(&byteIndexList[0], &indexList[0], byteIndexList.size());
+
+      //totalVertex = vertexList.size();
+      totalIndex = indexList.size();
     }
   }
   
@@ -160,7 +160,7 @@ RenderQuackyApp::postInit() {
   m_World.identity();
 
   m_View.identity();
-  m_View.LookAt(Vector3(-5.0f, 5.0f, -5.0f),
+  m_View.LookAt(Vector3(100.0f, 100.0f, 150.0f),
                 Vector3(0.0f, 0.0f, 0.0f),
                 Vector3(0.0f, 1.0f, 0.0f));
 
@@ -186,7 +186,7 @@ RenderQuackyApp::postInit() {
   std::memcpy(&CBData[matrix4x4Size * 2], &m_Projection, matrix4x4Size);
 
   GraphicsAPI::instance().UpdateCB(CBData);
-  GraphicsAPI::instance().CreateModel(byteVertexList, byteIndexList, totalFaces);
+  GraphicsAPI::instance().CreateModel(byteVertexList, byteIndexList, totalIndex);
 }
 
 void
