@@ -89,6 +89,9 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
        TB_GRAPHICS_API::E api = TB_GRAPHICS_API::E::kD3D12);
 
   void
+  CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT faces);
+
+  void
   UpdateCB(std::vector<byte>& data);
 
   void
@@ -246,9 +249,15 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
 
   ID3D12Resource* m_QuadVB;
   ID3D12Resource* m_QuadIB;
-
   D3D12_VERTEX_BUFFER_VIEW m_QuadVBView;
   D3D12_INDEX_BUFFER_VIEW m_QuadIBView;
+
+  ID3D12Resource* m_ModelVB;
+  ID3D12Resource* m_ModelIB;
+  D3D12_VERTEX_BUFFER_VIEW m_ModelVBView;
+  D3D12_INDEX_BUFFER_VIEW m_ModelIBView;
+  SizeT m_ModelTriangles;
+
 
   //Shader Heap
   ID3D12DescriptorHeap* m_ShaderDHPtr;
@@ -300,6 +309,14 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
     Matrix4x4 World;
     Matrix4x4 View;
     Matrix4x4 Projection;
+  };
+
+  struct ModelVertex {
+    Vector4 position;
+    Vector4 normal;
+    Vector4 binormal;
+    Vector4 tangent;
+    Vector2 texcoord;
   };
 
   struct ScreenQuadVertex {

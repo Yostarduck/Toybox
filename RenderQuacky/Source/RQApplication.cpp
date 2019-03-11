@@ -5,7 +5,13 @@
 #include <tb_string_conversions.h>
 
 #include <iostream>
+
 #include <FreeImage/FreeImage.h>
+
+#include <assimp/Exporter.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 namespace toyboxSDK {
 
@@ -19,10 +25,100 @@ void
 RenderQuackyApp::postInit() {
   FileSystem FSys;
   String workingPath = StringConversion::toString(FSys.GetWorkingPath());
-  String path = workingPath + "Resources\\Textures\\";
+  String texRes = workingPath + "Resources\\Textures\\";
+  String GeoRes = workingPath + "Resources\\Geometry\\";
+
+  std::vector<byte> byteIndexList;
+  std::vector<byte> byteVertexList;
+  SizeT totalFaces;
+
+  Assimp::Importer importer;
+
+  UInt32 flags = 0;
+
+  flags |= aiProcess_FlipUVs | aiProcess_CalcTangentSpace;
+  flags |= aiProcess_RemoveRedundantMaterials;
+  flags |= aiProcess_LimitBoneWeights;
+  flags |= aiProcess_Triangulate;
+  flags |= aiProcess_OptimizeGraph;
+  flags |= aiProcess_OptimizeMeshes;
+  flags |= aiProcess_JoinIdenticalVertices;
+  flags |= aiProcess_FindInvalidData;
+  flags |= aiProcess_GenUVCoords;
+  
+  const aiScene* scene = importer.ReadFile(GeoRes + "Cube.fbx",
+                                           flags);
+  if (scene) {
+    //For each mesh
+    for (SizeT iMesh = 0; iMesh < scene->mNumMeshes; ++iMesh) {
+      aiMesh* mesh = scene->mMeshes[iMesh];
+
+      bool hasNormals = mesh->HasNormals();
+      bool hasBinTangs = mesh->HasTangentsAndBitangents();
+      bool hasUVs = mesh->HasTextureCoords(0);
+
+      SizeT verticesSize = static_cast<SizeT>(mesh->mNumVertices);
+      totalFaces = static_cast<SizeT>(mesh->mNumFaces);
+
+      std::vector<UInt32> indexList;
+      std::vector<VertexInfo> vertexList;
+
+      //Load vertex list
+      vertexList.resize(verticesSize);
+      for (SizeT vertexIndex = 0; vertexIndex < verticesSize; ++vertexIndex) {
+        
+        vertexList[vertexIndex].position.x = mesh->mVertices[vertexIndex].x;
+        vertexList[vertexIndex].position.y = mesh->mVertices[vertexIndex].y;
+        vertexList[vertexIndex].position.z = mesh->mVertices[vertexIndex].z;
+        vertexList[vertexIndex].position.w = 1.f;
+    
+        if (hasNormals) {
+          vertexList[vertexIndex].normal.x = mesh->mNormals[vertexIndex].x;
+          vertexList[vertexIndex].normal.y = mesh->mNormals[vertexIndex].y;
+          vertexList[vertexIndex].normal.z = mesh->mNormals[vertexIndex].z;
+          vertexList[vertexIndex].normal.w = 0.f;
+        }
+    
+        if (hasBinTangs) {
+          vertexList[vertexIndex].binormal.x = mesh->mBitangents[vertexIndex].x;
+          vertexList[vertexIndex].binormal.y = mesh->mBitangents[vertexIndex].y;
+          vertexList[vertexIndex].binormal.z = mesh->mBitangents[vertexIndex].z;
+          vertexList[vertexIndex].binormal.w = 0.f;
+
+          vertexList[vertexIndex].tangent.x = mesh->mTangents[vertexIndex].x;
+          vertexList[vertexIndex].tangent.y = mesh->mTangents[vertexIndex].y;
+          vertexList[vertexIndex].tangent.z = mesh->mTangents[vertexIndex].z;
+          vertexList[vertexIndex].tangent.w = 0.f;
+        }
+
+        if (hasUVs) {
+          vertexList[vertexIndex].uv.x = mesh->mTextureCoords[0][vertexIndex].x;
+          vertexList[vertexIndex].uv.y = mesh->mTextureCoords[0][vertexIndex].y;
+        }
+      }
+
+      //Load index list
+      for (SizeT iFace = 0; iFace < totalFaces; ++iFace) {
+        aiFace& face = mesh->mFaces[iFace];
+        TB_ASSERT(face.mNumIndices == 3);
+        indexList.push_back(static_cast<UInt32>(face.mIndices[0]));
+        indexList.push_back(static_cast<UInt32>(face.mIndices[1]));
+        indexList.push_back(static_cast<UInt32>(face.mIndices[2]));
+      }
+
+      byteIndexList.resize(indexList.size() * sizeof(UInt32));
+      byteVertexList.resize(vertexList.size() * sizeof(VertexInfo));
+
+      std::memcpy(&byteIndexList[0], &indexList[0], byteIndexList.size());
+      std::memcpy(&byteVertexList[0], &vertexList[0], byteVertexList.size());
+
+      //totalFaces = vertexList.size();
+      totalFaces = indexList.size();
+    }
+  }
   
   FIBITMAP *tgaImg = FreeImage_Load(FIF_TARGA,
-                                    (path + "256_Checker_Diffuse.tga").c_str(),
+                                    (texRes + "256_Checker_Diffuse.tga").c_str(),
                                     TARGA_DEFAULT);
   {
     FREE_IMAGE_TYPE tgaType = FreeImage_GetImageType(tgaImg);
@@ -35,7 +131,7 @@ RenderQuackyApp::postInit() {
   if (tgaImg) { FreeImage_Unload(tgaImg); }
 
   FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS,
-                                    (path + "EarthCubemap.dds").c_str(),
+                                    (texRes + "EarthCubemap.dds").c_str(),
                                     DDS_DEFAULT);
   {
     FREE_IMAGE_TYPE ddsType = FreeImage_GetImageType(ddsImg);
@@ -48,7 +144,7 @@ RenderQuackyApp::postInit() {
   if (ddsImg) { FreeImage_Unload(ddsImg); }
   
   FIBITMAP *hdrImg = FreeImage_Load(FIF_HDR,
-                                    (path + "TearsOfSteelBridge_2K.hdr").c_str(),
+                                    (texRes + "TearsOfSteelBridge_2K.hdr").c_str(),
                                     HDR_DEFAULT);
   {
     FREE_IMAGE_TYPE hdrType = FreeImage_GetImageType(hdrImg);
@@ -90,6 +186,7 @@ RenderQuackyApp::postInit() {
   std::memcpy(&CBData[matrix4x4Size * 2], &m_Projection, matrix4x4Size);
 
   GraphicsAPI::instance().UpdateCB(CBData);
+  GraphicsAPI::instance().CreateModel(byteVertexList, byteIndexList, totalFaces);
 }
 
 void

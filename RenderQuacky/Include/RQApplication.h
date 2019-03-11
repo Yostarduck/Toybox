@@ -2,11 +2,21 @@
 
 #include <tb_application.h>
 #include <tb_matrix4x4.h>
+#include <tb_vector2.h>
 
 //#include <assimp/Importer.hpp>
 //#include <FreeImage/FreeImage.h>
 
 namespace toyboxSDK {
+
+struct VertexInfo
+{
+  Vector4 position;
+  Vector4 normal;
+  Vector4 binormal;
+  Vector4 tangent;
+  Vector2 uv;
+};
 
 /*
 *

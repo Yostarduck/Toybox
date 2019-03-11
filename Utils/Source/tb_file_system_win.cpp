@@ -1,3 +1,4 @@
+#pragma once
 #include "tb_file_system.h"
 
 #if TB_PLATFORM == TB_PLATFORM_WINDOWS

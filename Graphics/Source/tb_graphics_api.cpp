@@ -69,6 +69,104 @@ GraphicsAPI::init(UInt32 w,
 }
 
 void
+GraphicsAPI::CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT faces) {
+  //VB
+  {
+    D3D12_HEAP_PROPERTIES heapProperty;
+    heapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
+    heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    heapProperty.CreationNodeMask = 1;
+    heapProperty.VisibleNodeMask = 1;
+
+	  D3D12_RESOURCE_DESC resourceDesc;
+	  ZeroMemory(&resourceDesc, sizeof(resourceDesc));
+	  resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+	  resourceDesc.Alignment = 0;
+	  resourceDesc.SampleDesc.Count = 1;
+	  resourceDesc.SampleDesc.Quality = 0;
+	  resourceDesc.MipLevels = 1;
+	  resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+	  resourceDesc.DepthOrArraySize = 1;
+	  resourceDesc.Width = VB.size();
+	  resourceDesc.Height = 1;
+	  resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+	  HRESULT HRVBCR = m_device->CreateCommittedResource(&heapProperty,
+                                                       D3D12_HEAP_FLAG_NONE,
+                                                       &resourceDesc,
+                                                       D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                       nullptr,
+                                                       __uuidof(**(&m_ModelVB)),
+                                                       (void**)(&m_ModelVB));
+	
+    if (FAILED(HRVBCR)) {
+      throw std::exception();
+    }
+
+	  UInt8* VBDataBegin;
+	  HRESULT HRMapVB = m_ModelVB->Map(0, nullptr, reinterpret_cast<void**>(&VBDataBegin));
+    if (FAILED(HRMapVB)) {
+      throw std::exception();
+    }
+	  memcpy(VBDataBegin, &VB[0], VB.size());
+	  m_ModelVB->Unmap(0, nullptr);
+
+	  m_ModelVBView.BufferLocation = m_ModelVB->GetGPUVirtualAddress();
+	  m_ModelVBView.StrideInBytes = sizeof(ModelVertex);
+	  m_ModelVBView.SizeInBytes = VB.size();
+  }
+  //IB
+  {
+    D3D12_HEAP_PROPERTIES heapProperty;
+    heapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
+    heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+    heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+    heapProperty.CreationNodeMask = 1;
+    heapProperty.VisibleNodeMask = 1;
+
+    D3D12_RESOURCE_DESC resourceDesc;
+    ZeroMemory(&resourceDesc, sizeof(resourceDesc));
+    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+    resourceDesc.Alignment = 0;
+    resourceDesc.SampleDesc.Count = 1;
+    resourceDesc.SampleDesc.Quality = 0;
+    resourceDesc.MipLevels = 1;
+    resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+    resourceDesc.DepthOrArraySize = 1;
+    resourceDesc.Width = IB.size();
+    resourceDesc.Height = 1;
+    resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+
+    HRESULT HRIDCR = m_device->CreateCommittedResource(&heapProperty,
+                                                       D3D12_HEAP_FLAG_NONE,
+                                                       &resourceDesc,
+                                                       D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                       nullptr,
+                                                       __uuidof(**(&m_ModelIB)),
+                                                       (void**)(&m_ModelIB));
+
+    if (FAILED(HRIDCR)) {
+      throw std::exception();
+    }
+
+    byte* IBDataBegin;
+    HRESULT HRIB = m_ModelIB->Map(0, nullptr, reinterpret_cast<void**>(&IBDataBegin));
+    if (FAILED(HRIB)) {
+      throw std::exception();
+    }
+    memcpy(IBDataBegin, &IB[0], IB.size());
+    m_ModelIB->Unmap(0, nullptr);
+
+    m_ModelIBView.BufferLocation = m_ModelIB->GetGPUVirtualAddress();
+    m_ModelIBView.Format = DXGI_FORMAT_R32_UINT;
+    m_ModelIBView.SizeInBytes = IB.size();
+  }
+
+  m_ModelTriangles = faces;
+}
+
+void
 GraphicsAPI::UpdateCB(std::vector<byte>& data) {
   byte* mapped = nullptr;
   m_CB->Map(0, nullptr, reinterpret_cast<void**>(&mapped));
@@ -109,10 +207,10 @@ GraphicsAPI::ApplyGBuffer() {
   m_commandList->SetGraphicsRootSignature(m_GBufferRootSignature);
   m_commandList->SetGraphicsRootDescriptorTable(0, m_ShaderGPUHeapStartHandle);
 
-  m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-  m_commandList->IASetIndexBuffer(&m_QuadIBView);
-  m_commandList->IASetVertexBuffers(0, 1, &m_QuadVBView);
-  m_commandList->DrawInstanced(4, 1, 0, 0);
+  m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+  m_commandList->IASetIndexBuffer(&m_ModelIBView);
+  m_commandList->IASetVertexBuffers(0, 1, &m_ModelVBView);
+  m_commandList->DrawInstanced(m_ModelTriangles, 1, 0, 0);
 }
 
 void
@@ -756,7 +854,15 @@ GraphicsAPI::CreateForwardRootSignature() {
   }
 }
 
-static D3D12_INPUT_ELEMENT_DESC VertexDesc[] = {
+static D3D12_INPUT_ELEMENT_DESC ModelVertexDesc[] = {
+  { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0,  D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+  { "NORMAL",   0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+  { "BINORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+  { "TANGENT",  0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 48, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+  { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,       0, 64, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+};
+
+static D3D12_INPUT_ELEMENT_DESC QuadVertexDesc[] = {
   { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
   { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 16, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 };
@@ -817,8 +923,8 @@ GraphicsAPI::CreateGPSOGBuffer() {
   //descPipelineState.HS = { GBufferHSBytecodePtr, GBufferHSbytecodeSz };
   //descPipelineState.GS = { GBufferGSBytecodePtr, GBufferGSbytecodeSz };
   descPipelineState.PS = { GBufferPSBytecodePtr, GBufferPSbytecodeSz };
-  descPipelineState.InputLayout.pInputElementDescs = VertexDesc;
-  descPipelineState.InputLayout.NumElements = _countof(VertexDesc);
+  descPipelineState.InputLayout.pInputElementDescs = ModelVertexDesc;
+  descPipelineState.InputLayout.NumElements = _countof(ModelVertexDesc);
   descPipelineState.pRootSignature = m_GBufferRootSignature;
   descPipelineState.DepthStencilState = DepthStencilDefault;
   descPipelineState.DepthStencilState.DepthEnable = false;
@@ -904,8 +1010,8 @@ GraphicsAPI::CreateGPSOForward() {
   //descPipelineState.HS = { GBufferHSBytecodePtr, GBufferHSbytecodeSz };
   //descPipelineState.GS = { GBufferGSBytecodePtr, GBufferGSbytecodeSz };
   descPipelineState.PS = { ForwardPSBytecodePtr, ForwardPSbytecodeSz };
-  descPipelineState.InputLayout.pInputElementDescs = VertexDesc;
-  descPipelineState.InputLayout.NumElements = _countof(VertexDesc);
+  descPipelineState.InputLayout.pInputElementDescs = QuadVertexDesc;
+  descPipelineState.InputLayout.NumElements = _countof(QuadVertexDesc);
   descPipelineState.pRootSignature = m_ForwardRootSignature;
   descPipelineState.DepthStencilState = DepthStencilDefault;
   descPipelineState.DepthStencilState.DepthEnable = false;
@@ -1198,6 +1304,7 @@ GraphicsAPI::CompileShaderFromFile(WString filepath,
                                         &errorBlob);
 
   if (FAILED(HRShader)) {
+    OutputDebugStringA((char*)errorBlob->GetBufferPointer());
     throw std::exception();
   }
 
