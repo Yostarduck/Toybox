@@ -9,12 +9,22 @@
 /*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
 #pragma once
 
+#include <tb_core_prerequisites.h>
+#include <tb_gameobject.h>
+
 namespace toyboxSDK {
-  class Room 
+  class Room : public GameObject
   {
   public:
-    Room();
-    ~Room();
+    /**
+     * Default constructor
+     */
+    Room() = default;
+
+    /**
+     * Default destructor
+     */
+    ~Room() = default;
   };
   
 }
