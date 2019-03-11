@@ -4,7 +4,7 @@ Texture2D RoughnessTexture  : register(t2);
 Texture2D EmissiveTexture   : register(t3);
 Texture2D DepthTexture      : register(t4);
 
-sampler gLinearSample;
+SamplerState gLinearSample;
 
 struct PS_INPUT {
   float4 Position : SV_POSITION;
@@ -13,5 +13,9 @@ struct PS_INPUT {
 
 float4
 main(PS_INPUT input) : SV_TARGET0 {
-  return float4(input.Texcoord, 0.0f, 1.0f);
+  float2 uv = input.Texcoord;
+
+  return float4(WorldPosition.Sample(gLinearSample, uv).xyz, 1.0f);
+  //return float4(EmissiveTexture.Sample(gLinearSample, uv).xyz, 1.0f);
+  //return float4(input.Texcoord, 0.0f, 1.0f);
 }
