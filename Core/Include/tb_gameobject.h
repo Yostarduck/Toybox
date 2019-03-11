@@ -21,12 +21,12 @@ namespace toyboxSDK {
     /**
      * Default constructor
      */
-    GameObject();
+    GameObject() = default;
 
     /**
      * Default destructor
      */
-    ~GameObject();
+    ~GameObject() = default;
 
    public:
 

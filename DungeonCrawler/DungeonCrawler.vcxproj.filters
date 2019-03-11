@@ -18,5 +18,13 @@
     <ClCompile Include="DungeonCrawler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tb_room.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tb_room.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
