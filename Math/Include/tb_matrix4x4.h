@@ -20,7 +20,6 @@ class TB_MATH_EXPORT Matrix4x4
  public:
   /**
   * Default constructor
-  *
   */
   Matrix4x4();
 

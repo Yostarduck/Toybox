@@ -18,20 +18,14 @@ class TB_MATH_EXPORT Matrix3x3
 {
  public:
   /**
-  * TEST::operatorEqual
-  *
   * Default constructor
-  *
   */
   Matrix3x3();
 
   /**
-  * TEST::forceInit
-  *
   * Default constructor
   *
   * Values are initialized with 0(kZero) or identity matrix(kIdentity).
-  *
   */
   explicit Matrix3x3(Math::FORCE_INIT k);
 
@@ -97,81 +91,60 @@ class TB_MATH_EXPORT Matrix3x3
   ~Matrix3x3();
 
   /**
-  * TEST::determinant
-  *
   * Calculates the determinant of the matrix
   *
   * @return
   *   determinant.
-  *
   */
   float
   determinant() const;
 
   /**
-  * TEST::inverse
-  *
   * Calculates the cofactor of the matrix
   *
   * @return
   *   cofactor of matrix.
-  *
   */
   Matrix3x3&
   cofactor();
 
   /**
-  *
-  * TEST::inverse
-  *
   * Calculates the adjugate of the matrix
   * using transpose for cofactor matrix 
   * 
   * @return
   *   adjugate.
-  *
   */
   Matrix3x3&
   adjugate();
 
   /**
-  * TEST::inverse
-  *
   * Calculate inverse of matrix.
   * using det * adjugate
-  *
   */
   Matrix3x3&
   inverse();
 
   /**
-  * TEST::inverse
-  *
   * Transpose
   *
   * Invert columns whith rows
   * | A1 | A2 | A3 |T    | A1 | B1 | C1 |
   * | B1 | B2 | B3 |  =  | A2 | B2 | C2 |
   * | C1 | C2 | C3 |     | A3 | B3 | C3 |
-  *
   */
   Matrix3x3&
   transpose();
 
   /**
-  * TEST::identity
-  *
   * Identity
   *
   * Tranform matrix to identity
-  *
   */
   Matrix3x3&
   identity();
 
   /**
-  * TEST::equals
-  *
   * Check's if the other matrix is equal to this matrix with an error
   * range.
   *
@@ -188,8 +161,6 @@ class TB_MATH_EXPORT Matrix3x3
   equals(const Matrix3x3& otherMatrix, float errorRange = Math::SMALL_NUMBER) const;
 
   /**
-  * TEST::toEulerAngles
-  *
   * Euler angles form quaternion.
   *
   * @return
@@ -199,8 +170,6 @@ class TB_MATH_EXPORT Matrix3x3
   eulerAngles();
 
   /**
-  * TEST::getPointer
-  *
   * Gets a pointer to the first element of the matrix.
   *
   * @return
@@ -210,8 +179,6 @@ class TB_MATH_EXPORT Matrix3x3
   ptr();
 
   /**
-  * TEST::getPointerConst
-  *
   * Gets a constant pointer to the first element of the matrix.
   *
   * @return
@@ -221,97 +188,97 @@ class TB_MATH_EXPORT Matrix3x3
   ptr() const;
 
   /**
-  * TEST::forceInit
+  * 
   */
   Vector3&
   operator[](SizeT index);
 
   /**
-  * TEST::operatorEqual
+  * 
   */
   Matrix3x3&
   operator=(const Matrix3x3& A);
 
   /**
-  * TEST::operatorEqualMatrix4x4
+  * 
   */
   Matrix3x3&
   operator=(const Matrix4x4& A);
 
   /**
-  * TEST::operatorAdd
+  * 
   */
   Matrix3x3
   operator+(const Matrix3x3& A) const;
 
   /**
-  * TEST::operatorAddEqual
+  * 
   */
   Matrix3x3&
   operator+=(const Matrix3x3& A);
 
   /**
-  * TEST::operatorMinus
+  * 
   */
   Matrix3x3
   operator-(const Matrix3x3& A) const;
 
   /**
-  * TEST::operatorMinusEqual
+  * 
   */
   Matrix3x3&
   operator-=(const Matrix3x3& A);
 
   /**
-  * TEST::operatorMultiplication
+  * 
   */
   Matrix3x3
   operator*(const Matrix3x3& A) const;
 
   /**
-  * TEST::operatorMultiplicationEqual
+  * 
   */
   Matrix3x3&
   operator*=(const Matrix3x3& A);
 
   /**
-  * TEST::operatorMultiplicationForVector3
+  * 
   */
   Vector3
   operator*(const Vector3& S) const;
 
   /**
-  * TEST::operatorMultiplicationFloat
+  * 
   */
   Matrix3x3
   operator*(const float S) const;
 
   /**
-  * TEST::operatorMultiplicationEqualFloat
+  * 
   */
   Matrix3x3&
   operator*=(const float S);
 
   /**
-  * TEST::operatorDivide
+  * 
   */
   Matrix3x3
   operator/(const Matrix3x3& M) const;
 
   /**
-  * TEST::operatorDivideEqual
+  * 
   */
   Matrix3x3&
   operator/=(const Matrix3x3& M);
 
   /**
-  * TEST::operatorEqualEqual
+  * 
   */
   bool
   operator==(const Matrix3x3& M);
 
   /**
-  * TEST::operatorNotEqual
+  * 
   */
   bool
   operator!=(const Matrix3x3& M);
