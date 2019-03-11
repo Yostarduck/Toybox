@@ -6,6 +6,9 @@ cbuffer ConstantBuffer : register(b0) {
 
 struct VS_INPUT {
   float4 Position : POSITION;
+  float4 Normal   : NORMAL;
+  float4 Binormal : BINORMAL;
+  float4 Tangent  : TANGENT;
   float2 Texcoord : TEXCOORD;
 };
 
@@ -23,6 +26,7 @@ main(VS_INPUT input) {
   //const float4x4 WVP = mul(World, mul(View, Projection));
 
   Output.Position = mul(WVP, input.Position);
+  //Output.Position = input.Position;
   Output.WorldPos = float4(mul(World, input.Position).xyz, 1.0f);
   Output.Texcoord = input.Texcoord;
   
