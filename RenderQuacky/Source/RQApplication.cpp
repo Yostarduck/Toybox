@@ -151,7 +151,7 @@ RenderQuackyApp::postInit() {
   //Texture loading
   {
     FIBITMAP *tgaImg = FreeImage_Load(FIF_TARGA,
-                                      (texRes + "256_Checker_Diffuse.tga").c_str(),
+                                      (texRes + "Casco1_BaseColor.tga").c_str(),
                                       TARGA_DEFAULT);
     {
       FREE_IMAGE_TYPE tgaType = FreeImage_GetImageType(tgaImg);
@@ -164,7 +164,7 @@ RenderQuackyApp::postInit() {
     if (tgaImg) { FreeImage_Unload(tgaImg); }
 
     FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS,
-                                      (texRes + "EarthCubemap.dds").c_str(),
+                                      (texRes + "SeaEnviroment.dds").c_str(),
                                       DDS_DEFAULT);
     {
       FREE_IMAGE_TYPE ddsType = FreeImage_GetImageType(ddsImg);
