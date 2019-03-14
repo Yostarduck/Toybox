@@ -92,6 +92,11 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT totalVertex);
 
   void
+  CreateTexture(UInt32 texturewidth,
+                UInt32 textureHeight,
+                TB_FORMAT::E pixelFormat);
+
+  void
   UpdateCB(std::vector<byte>& data);
 
   void
@@ -257,6 +262,13 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   D3D12_VERTEX_BUFFER_VIEW m_ModelVBView;
   D3D12_INDEX_BUFFER_VIEW m_ModelIBView;
   SizeT m_ModelIndexes;
+
+  //Texture
+  ID3D12Resource* m_textureBuffer;
+  ID3D12DescriptorHeap* m_TxDHPtr;
+  D3D12_CPU_DESCRIPTOR_HANDLE m_TxCPUHeapStartHandle;
+  D3D12_GPU_DESCRIPTOR_HANDLE m_TxGPUHeapStartHandle;
+  SizeT m_TxHandleIncrementSize;
 
   //Shader Heap
   ID3D12DescriptorHeap* m_ShaderDHPtr;
