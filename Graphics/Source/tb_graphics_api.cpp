@@ -262,54 +262,10 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
   }
 
   //////////
-  UInt64 textureMemSize = 0;
-  m_device->GetCopyableFootprints(&textureDesc, 0, numSubResources, 0, nullptr, nullptr, nullptr, &textureMemSize);
-
-  struct UploadContext
-  {
-    ID3D12GraphicsCommandList* CmdList;
-    void* CPUAddress = nullptr;
-    UInt64 ResourceOffset = 0;
-    ID3D12Resource* Resource = nullptr;
-    void* Submission = nullptr;
-  };
-
-  // Get a GPU upload buffer
-  UploadContext uploadContext;
-  {
-    {
-      UInt64 size = textureMemSize;
-      TB_ASSERT(m_device != nullptr);
-
-      size = ((size + 512 - 1) / 512) * 512;
-      TB_ASSERT(size > 0);
-
-      UploadSubmission* submission = nullptr;
-      {
-        AcquireSRWLockExclusive(&UploadSubmissionLock);
-
-        ClearFinishedUploads(0);
-
-        submission = AllocUploadSubmission(size);
-        while (submission == nullptr)
-        {
-          ClearFinishedUploads(1);
-          submission = AllocUploadSubmission(size);
-        }
-
-        ReleaseSRWLockExclusive(&UploadSubmissionLock);
-      }
-
-      DXCall(submission->CmdAllocator->Reset());
-      DXCall(submission->CmdList->Reset(submission->CmdAllocator, nullptr));
-
-      uploadContext.CmdList = submission->CmdList;
-      uploadContext.Resource = UploadBuffer;
-      uploadContext.CPUAddress = UploadBufferCPUAddr + submission->Offset;
-      uploadContext.ResourceOffset = submission->Offset;
-      uploadContext.Submission = submission;
-    }
-  }
+  D3D12_TEXTURE_COPY_LOCATION src;
+  src.pResource = m_textureBuffer;
+  src.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+  src.SubresourceIndex = 0;
   //////////
 
   for (UInt64 subResourceIdx = 0; subResourceIdx < numSubResources; ++subResourceIdx) {
@@ -317,11 +273,13 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
     dst.pResource = m_textureBuffer;
     dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
     dst.SubresourceIndex = 0;
+
     D3D12_TEXTURE_COPY_LOCATION src = {};
-    src.pResource = uploadResource;
+    src.pResource = uploadContext.Resource;
     src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
     src.PlacedFootprint = layouts[subResourceIdx];
-    src.PlacedFootprint.Offset += resourceOffset;
+    src.PlacedFootprint.Offset += uploadContext.ResourceOffset;
+
     m_commandList->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
   }
 }
