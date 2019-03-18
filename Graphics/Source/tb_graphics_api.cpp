@@ -177,12 +177,12 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
 
   // create a default heap where the upload heap will copy its contents into (contents being the texture)
   HRESULT hr = m_device->CreateCommittedResource(&heapProperty, // a default heap
-                                                 D3D12_HEAP_FLAG_NONE, // no flags
-                                                 &textureDesc, // the description of our texture
-                                                 D3D12_RESOURCE_STATE_COMMON, // We will copy the texture from the upload heap to here, so we start it out in a copy dest state
-                                                 nullptr, // used for render targets and depth/stencil buffers
-                                                 __uuidof(**(&m_textureBuffer)),
-                                                 (void**)(&m_textureBuffer));
+    D3D12_HEAP_FLAG_NONE, // no flags
+    &textureDesc, // the description of our texture
+    D3D12_RESOURCE_STATE_COMMON, // We will copy the texture from the upload heap to here, so we start it out in a copy dest state
+    nullptr, // used for render targets and depth/stencil buffers
+    __uuidof(**(&m_textureBuffer)),
+    (void**)(&m_textureBuffer));
   if (FAILED(hr)) {
     throw std::exception();
   }
@@ -199,11 +199,11 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
 
   D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorhandle;
   CPUDescriptorhandle.ptr = m_ShaderCPUHeapStartHandle.ptr +
-                            (static_cast<SizeT>(m_SHandleIncrementSize) * 6);
+    (static_cast<SizeT>(m_SHandleIncrementSize) * 6);
 
   m_device->CreateShaderResourceView(m_textureBuffer,
-                                     &srvDesc,
-                                     CPUDescriptorhandle);
+    &srvDesc,
+    CPUDescriptorhandle);
 
   //////////////////////////////////////////////////////////////////////////////
   bool isCubemap = false;
@@ -223,13 +223,13 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
 
   UInt64 textureMemSize = 0;
   m_device->GetCopyableFootprints(&textureDesc,
-                                  0,
-                                  1,
-                                  0,
-                                  &layouts[0],
-                                  &numRows[0],
-                                  &rowSizes[0], 
-                                  &textureMemSize);
+    0,
+    1,
+    0,
+    &layouts[0],
+    &numRows[0],
+    &rowSizes[0],
+    &textureMemSize);
 
   // Get a GPU upload buffer
   byte* uploadMem = reinterpret_cast<byte*>(CPUDescriptorhandle.ptr);

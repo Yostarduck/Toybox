@@ -150,24 +150,6 @@ RenderQuackyApp::postInit() {
   String texRes = workingPath + "Resources\\Textures\\";
   //Texture loading
   {
-    FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS,
-                                      (texRes + "SeaEnviroment.dds").c_str(),
-                                      DDS_DEFAULT);
-    if (ddsImg) {
-      BITMAPINFOHEADER* ddsInfoHeader = FreeImage_GetInfoHeader(ddsImg);
-      FREE_IMAGE_TYPE ddsType = FreeImage_GetImageType(ddsImg);
-      FREE_IMAGE_COLOR_TYPE ddsColor = FreeImage_GetColorType(ddsImg);
-      UInt32 ddsBytes = FreeImage_GetColorsUsed(ddsImg);
-      UInt32 ddsBPP = FreeImage_GetBPP(ddsImg);
-      UInt32 ddsWidth = FreeImage_GetWidth(ddsImg);
-      UInt32 ddsHeight = FreeImage_GetHeight(ddsImg);
-      UInt32 ddsLine = FreeImage_GetLine(ddsImg); //Returns the width of the bitmap in bytes.
-      UInt32 ddsPitch = FreeImage_GetPitch(ddsImg); //Returns the width of the bitmap in bytes, rounded to the next 32-bit boundary, also known as pitch or stride or scan width.
-      SizeT ddsSize = FreeImage_GetMemorySize(ddsImg);
-
-      FreeImage_Unload(ddsImg);
-    }
-
     FIBITMAP *tgaImg = FreeImage_Load(FIF_TARGA,
                                       (texRes + "Casco1_BaseColor.tga").c_str(),
                                       TARGA_DEFAULT);
@@ -189,6 +171,25 @@ RenderQuackyApp::postInit() {
 
       FreeImage_Unload(tgaImg);
     }
+    /*
+    FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS,
+                                      (texRes + "SeaEnviroment.dds").c_str(),
+                                      DDS_DEFAULT);
+    if (ddsImg) {
+      BITMAPINFOHEADER* ddsInfoHeader = FreeImage_GetInfoHeader(ddsImg);
+      FREE_IMAGE_TYPE ddsType = FreeImage_GetImageType(ddsImg);
+      FREE_IMAGE_COLOR_TYPE ddsColor = FreeImage_GetColorType(ddsImg);
+      UInt32 ddsBytes = FreeImage_GetColorsUsed(ddsImg);
+      UInt32 ddsBPP = FreeImage_GetBPP(ddsImg);
+      UInt32 ddsWidth = FreeImage_GetWidth(ddsImg);
+      UInt32 ddsHeight = FreeImage_GetHeight(ddsImg);
+      UInt32 ddsLine = FreeImage_GetLine(ddsImg); //Returns the width of the bitmap in bytes.
+      UInt32 ddsPitch = FreeImage_GetPitch(ddsImg); //Returns the width of the bitmap in bytes, rounded to the next 32-bit boundary, also known as pitch or stride or scan width.
+      SizeT ddsSize = FreeImage_GetMemorySize(ddsImg);
+
+      FreeImage_Unload(ddsImg);
+    }
+    */
   }
 
   GraphicsAPI::instance().UpdateCB(CBData);
