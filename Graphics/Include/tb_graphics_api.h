@@ -94,7 +94,8 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   void
   CreateTexture(UInt32 texturewidth,
                 UInt32 textureHeight,
-                TB_FORMAT::E pixelFormat);
+                TB_FORMAT::E pixelFormat,
+                byte* initData);
 
   void
   UpdateCB(std::vector<byte>& data);

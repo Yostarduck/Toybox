@@ -151,7 +151,8 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT tot
 void
 GraphicsAPI::CreateTexture(UInt32 textureWidth,
                            UInt32 textureHeight,
-                           TB_FORMAT::E pixelFormat) {
+                           TB_FORMAT::E pixelFormat,
+                           byte* initData) {
   D3D12_HEAP_PROPERTIES heapProperty;
   heapProperty.Type = D3D12_HEAP_TYPE_DEFAULT;
   heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -205,8 +206,8 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
                                      CPUDescriptorhandle);
 
   //////////////////////////////////////////////////////////////////////////////
-  /*
-  const UInt32 arraySize = texture.Cubemap ? texture.ArraySize * 6 : texture.ArraySize;
+  bool isCubemap = false;
+  const UInt32 arraySize = (isCubemap ? 6 : 1) * textureDesc.DepthOrArraySize;
   const UInt32 depthArraySz = textureDesc.DepthOrArraySize;
   const UInt32 MipsSz = textureDesc.MipLevels;
   const UInt32 numSubResources = depthArraySz * MipsSz;
@@ -233,13 +234,13 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
   // Get a GPU upload buffer
   byte* uploadMem = reinterpret_cast<byte*>(CPUDescriptorhandle.ptr);
 
-  const byte* srcMem = reinterpret_cast<const byte*>(initData);
-  const UInt64 srcTexelSize = DirectX::BitsPerPixel(texture.Format) / 8;
+  const byte* srcMem = initData;
+  const UInt64 srcTexelSize = 32 / 8;
 
   for (UInt64 arrayIdx = 0; arrayIdx < arraySize; ++arrayIdx) {
-    UInt64 mipWidth = texture.Width;
-    for (UInt64 mipIdx = 0; mipIdx < texture.NumMips; ++mipIdx) {
-      const UInt64 subResourceIdx = mipIdx + (arrayIdx * texture.NumMips);
+    UInt64 mipWidth = textureWidth;
+    for (UInt64 mipIdx = 0; mipIdx < textureDesc.MipLevels; ++mipIdx) {
+      const UInt64 subResourceIdx = mipIdx + (arrayIdx * textureDesc.MipLevels);
 
       const D3D12_PLACED_SUBRESOURCE_FOOTPRINT& subResourceLayout = layouts[subResourceIdx];
       const UInt64 subResourceHeight = numRows[subResourceIdx];
@@ -260,19 +261,69 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
     }
   }
 
-  for (UInt64 subResourceIdx = 0; subResourceIdx < numSubResources; ++subResourceIdx) {
+  //////////
+  UInt64 textureMemSize = 0;
+  m_device->GetCopyableFootprints(&textureDesc, 0, numSubResources, 0, nullptr, nullptr, nullptr, &textureMemSize);
+
+  struct UploadContext
+  {
+    ID3D12GraphicsCommandList* CmdList;
+    void* CPUAddress = nullptr;
+    UInt64 ResourceOffset = 0;
+    ID3D12Resource* Resource = nullptr;
+    void* Submission = nullptr;
+  };
+
+  // Get a GPU upload buffer
+  UploadContext uploadContext;
+  {
+    {
+      UInt64 size = textureMemSize;
+      TB_ASSERT(m_device != nullptr);
+
+      size = ((size + 512 - 1) / 512) * 512;
+      TB_ASSERT(size > 0);
+
+      UploadSubmission* submission = nullptr;
+      {
+        AcquireSRWLockExclusive(&UploadSubmissionLock);
+
+        ClearFinishedUploads(0);
+
+        submission = AllocUploadSubmission(size);
+        while (submission == nullptr)
+        {
+          ClearFinishedUploads(1);
+          submission = AllocUploadSubmission(size);
+        }
+
+        ReleaseSRWLockExclusive(&UploadSubmissionLock);
+      }
+
+      DXCall(submission->CmdAllocator->Reset());
+      DXCall(submission->CmdList->Reset(submission->CmdAllocator, nullptr));
+
+      uploadContext.CmdList = submission->CmdList;
+      uploadContext.Resource = UploadBuffer;
+      uploadContext.CPUAddress = UploadBufferCPUAddr + submission->Offset;
+      uploadContext.ResourceOffset = submission->Offset;
+      uploadContext.Submission = submission;
+    }
   }
-  D3D12_TEXTURE_COPY_LOCATION dst = {};
-  dst.pResource = texture.Resource;
-  dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
-  dst.SubresourceIndex = 0;
-  D3D12_TEXTURE_COPY_LOCATION src = {};
-  src.pResource = uploadResource;
-  src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-  src.PlacedFootprint = layouts;
-  src.PlacedFootprint.Offset += resourceOffset;
-  m_commandList->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
-  */
+  //////////
+
+  for (UInt64 subResourceIdx = 0; subResourceIdx < numSubResources; ++subResourceIdx) {
+    D3D12_TEXTURE_COPY_LOCATION dst = {};
+    dst.pResource = m_textureBuffer;
+    dst.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+    dst.SubresourceIndex = 0;
+    D3D12_TEXTURE_COPY_LOCATION src = {};
+    src.pResource = uploadResource;
+    src.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+    src.PlacedFootprint = layouts[subResourceIdx];
+    src.PlacedFootprint.Offset += resourceOffset;
+    m_commandList->CopyTextureRegion(&dst, 0, 0, 0, &src, nullptr);
+  }
 }
 
 void
