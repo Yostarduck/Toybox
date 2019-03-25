@@ -240,6 +240,67 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
   barrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
 
   UpdateSubresources(m_commandList, m_textureBuffer, textureUploadHeap, 0, 0, 1, &textureData);
+  {
+    UInt64 RequiredSize = 0;
+    UInt64 MemToAlloc = static_cast<UInt64>(sizeof(D3D12_PLACED_SUBRESOURCE_FOOTPRINT) + sizeof(UInt32) + sizeof(UInt64)) * NumSubresources;
+    if (MemToAlloc > SIZE_MAX) {
+      return 0;
+    }
+    void* pMem = HeapAlloc(GetProcessHeap(), 0, static_cast<SizeT>(MemToAlloc));
+    if (pMem == nullptr) {
+      return 0;
+    }
+    auto pLayouts = reinterpret_cast<D3D12_PLACED_SUBRESOURCE_FOOTPRINT*>(pMem);
+    UInt64* pRowSizesInBytes = reinterpret_cast<UInt64*>(pLayouts + NumSubresources);
+    UInt32* pNumRows = reinterpret_cast<UInt32*>(pRowSizesInBytes + NumSubresources);
+
+    auto Desc = pDestinationResource->GetDesc();
+    ID3D12Device* pDevice = nullptr;
+    pDestinationResource->GetDevice(__uuidof(*pDevice), reinterpret_cast<void**>(&pDevice));
+    pDevice->GetCopyableFootprints(&Desc, FirstSubresource, NumSubresources, IntermediateOffset, pLayouts, pNumRows, pRowSizesInBytes, &RequiredSize);
+    pDevice->Release();
+
+    //UINT64 Result = UpdateSubresources(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, pLayouts, pNumRows, pRowSizesInBytes, pSrcData);
+    {
+      auto IntermediateDesc = pIntermediate->GetDesc();
+      auto DestinationDesc = pDestinationResource->GetDesc();
+      if (IntermediateDesc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER ||
+          IntermediateDesc.Width < RequiredSize + pLayouts[0].Offset ||
+          RequiredSize > SIZE_T(-1) ||
+          (DestinationDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER &&
+          (FirstSubresource != 0 || NumSubresources != 1))) {
+        return 0;
+      }
+
+      BYTE* pData;
+      HRESULT hr = pIntermediate->Map(0, nullptr, reinterpret_cast<void**>(&pData));
+      if (FAILED(hr)) {
+        return 0;
+      }
+
+      for (UInt32 i = 0; i < NumSubresources; ++i) {
+        if (pRowSizesInBytes[i] > SizeT(-1)) return 0;
+        D3D12_MEMCPY_DEST DestData = { pData + pLayouts[i].Offset, pLayouts[i].Footprint.RowPitch, SizeT(pLayouts[i].Footprint.RowPitch) * SizeT(pNumRows[i]) };
+        MemcpySubresource(&DestData, &pSrcData[i], static_cast<SizeT>(pRowSizesInBytes[i]), pNumRows[i], pLayouts[i].Footprint.Depth);
+      }
+      pIntermediate->Unmap(0, nullptr);
+
+      if (DestinationDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER) {
+        pCmdList->CopyBufferRegion(pDestinationResource, 0, pIntermediate, pLayouts[0].Offset, pLayouts[0].Footprint.Width);
+      }
+      else {
+        for (UInt32 i = 0; i < NumSubresources; ++i) {
+          CD3DX12_TEXTURE_COPY_LOCATION Dst(pDestinationResource, i + FirstSubresource);
+          CD3DX12_TEXTURE_COPY_LOCATION Src(pIntermediate, pLayouts[i]);
+          m_commandList->CopyTextureRegion(&Dst, 0, 0, 0, &Src, nullptr);
+        }
+      }
+      return RequiredSize;
+    }
+    HeapFree(GetProcessHeap(), 0, pMem);
+    return Result;
+
+  }
   m_commandList->ResourceBarrier(1, &barrier);
   
   // Describe and create a SRV for the texture.
