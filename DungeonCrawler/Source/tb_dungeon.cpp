@@ -1,24 +1,14 @@
 /*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
 /**
- * @file tb_lua_registration.h
+ * @file tb_dungeon.cpp
  * @author Marco "Swampy" Millan
  * @date 2019/03/18 2019
- * @brief This is for creating all objects with lua registrations
+ * @brief member definition
  * 
  */
 /*||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||°°°||*/
-#pragma once
-
-#include "tb_luaGameObject.h"
+#include "tb_dungeon.h"
 
 namespace toyboxSDK {
-  
-  static void
-  registerObjects(lua_State* L) {
-    
-    registerGameObject(L);
 
-  }
-  
 }
-

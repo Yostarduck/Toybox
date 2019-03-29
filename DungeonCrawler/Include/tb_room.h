@@ -12,7 +12,12 @@
 #include <tb_core_prerequisites.h>
 #include <tb_gameobject.h>
 
+#include "SFML/Graphics.hpp"
+
 namespace toyboxSDK {
+  using namespace sf;
+
+
   class Room : public GameObject
   {
   public:
@@ -25,7 +30,18 @@ namespace toyboxSDK {
      * Default destructor
      */
     ~Room() = default;
+
+    
+    RectangleShape m_northBoundary;
+    RectangleShape m_southBoundary;
+
+    RectangleShape m_westBoundary;
+    RectangleShape m_eastBoundary;
+
+
   };
   
+  
+
 }
 

@@ -85,7 +85,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>CORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CORE_EXPORTS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include/;$(SolutionDir)Utils/Include/;$(SolutionDir)Math/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -99,7 +99,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>CORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CORE_EXPORTS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include/;$(SolutionDir)Utils/Include/;$(SolutionDir)Math/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -115,7 +115,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>CORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CORE_EXPORTS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include/;$(SolutionDir)Utils/Include/;$(SolutionDir)Math/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -133,7 +133,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>CORE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>CORE_EXPORTS</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(TOYBOX_DEPENDENCIES)Include/;$(SolutionDir)Utils/Include/;$(SolutionDir)Math/Include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -145,12 +145,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Include\tb_application.h" />
+    <ClInclude Include="Include\tb_component.h" />
     <ClInclude Include="Include\tb_core_prerequisites.h" />
     <ClInclude Include="Include\tb_gameobject.h" />
     <ClInclude Include="Include\tb_viewport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_application.cpp" />
+    <ClCompile Include="Source\tb_component.cpp" />
     <ClCompile Include="Source\tb_gameobject.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

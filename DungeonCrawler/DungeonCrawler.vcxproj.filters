@@ -21,12 +21,36 @@
     <ClInclude Include="Include\tb_lua_registration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\tb_dungeon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_hall.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\tb_sfml_app.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tb_unit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\DungeonCrawler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Source\tb_room.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_dungeon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_hall.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\tb_sfml_app.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tb_unit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
