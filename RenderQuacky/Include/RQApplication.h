@@ -68,6 +68,10 @@ class RenderQuackyApp : public Application
   Matrix4x4 m_World;
   Matrix4x4 m_View;
   Matrix4x4 m_Projection;
+
+  UInt32 tgaWidth;
+  UInt32 tgaHeight;
+  byte* tgaData;
 };
 
 }

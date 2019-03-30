@@ -150,11 +150,11 @@ RenderQuackyApp::postInit() {
   String texRes = workingPath + "Resources\\Textures\\";
   //Texture loading
   FIBITMAP *tgaImg = FreeImage_Load(FIF_TARGA,
-                                    (texRes + "Casco1_BaseColor.tga").c_str(),
+                                    (texRes + "Casco1_Normal.tga").c_str(),
                                     TARGA_DEFAULT);
-  UInt32 tgaWidth = 0;
-  UInt32 tgaHeight = 0;
-  byte* tgaData = nullptr;
+  tgaWidth = 0;
+  tgaHeight = 0;
+  tgaData = nullptr;
   if (tgaImg) {
     BITMAPINFOHEADER* tgaInfoHeader = FreeImage_GetInfoHeader(tgaImg);
     FREE_IMAGE_TYPE tgaType = FreeImage_GetImageType(tgaImg);
@@ -167,7 +167,6 @@ RenderQuackyApp::postInit() {
     tgaWidth = FreeImage_GetWidth(tgaImg);
     tgaHeight = FreeImage_GetHeight(tgaImg);
     tgaData = FreeImage_GetBits(tgaImg);
-    std::memset(tgaData, 1, tgaSize);
     /*
     FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS,
                                       (texRes + "SeaEnviroment.dds").c_str(),
@@ -232,6 +231,8 @@ RenderQuackyApp::postInit() {
     commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
     GraphicAPI.WaitForGPU();
+
+    GraphicAPI.PresentFrame();
   }
   commandQueue->EndEvent();
 

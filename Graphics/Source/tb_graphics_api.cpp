@@ -42,7 +42,6 @@ GraphicsAPI::init(UInt32 w,
                              _T("Setup"),
                              (wcslen(_T("Setup")) + 1) * sizeof(_T("Setup")));
   {
-
     CreateCommandList();
     CreateConstantBuffer();
     CreateQuadVB();
@@ -162,12 +161,9 @@ MemcpySubresource(const D3D12_MEMCPY_DEST* pDest,
                             (pSrc->SlicePitch * z);
 
     for (UInt32 y = 0; y < NumRows; ++y) {
-      /*
       memcpy(pDestSlice + (pDest->RowPitch * y),
              pSrcSlice + (pSrc->RowPitch * y),
              RowSizeInBytes);
-      */
-      std::memset(pDestSlice + (pDest->RowPitch * y), 1, RowSizeInBytes);
     }
   }
 }
@@ -342,7 +338,7 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
   }
 
   m_texture->SetName(_T("Albedo texture"));
-  
+
   //Get required buffer size
   UInt64 uploadBufferSize = 0;
   m_device->GetCopyableFootprints(&textureDesc,
@@ -395,12 +391,12 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
   //Copy data to the intermediate upload heap and then schedule a copy
   //from the upload heap to the Texture2D.
   D3D12_SUBRESOURCE_DATA textureData = {};
-  //textureData.pData = initData;
-  textureData.pData = &texture[0];
+  textureData.pData = initData;
+  //textureData.pData = &texture[0];
   //textureData.RowPitch = textureWidth * texturePixelSize;
-  //textureData.RowPitch = textureWidth * ((8 * 4) / 8);
+  textureData.RowPitch = textureWidth * ((8 * 4) / 8);
   //textureData.RowPitch = textureWidth * ((32 * 4) / 8);
-  textureData.RowPitch = textureWidth * 4;
+  //textureData.RowPitch = textureWidth * 4;
   textureData.SlicePitch = textureData.RowPitch * textureHeight;
   
   D3D12_RESOURCE_BARRIER barrier = {};
@@ -413,7 +409,7 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
 
   UpdateSubresources(m_commandList, m_texture, textureUploadHeap, 0, 0, 1, &textureData);
   m_commandList->ResourceBarrier(1, &barrier);
-  
+
   //Describe a SRV for the texture.
   D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
   srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
