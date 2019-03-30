@@ -265,7 +265,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   SizeT m_ModelIndexes;
 
   //Texture
-  ID3D12Resource* m_textureBuffer;
+  ID3D12Resource* m_texture;
   ID3D12DescriptorHeap* m_TxDHPtr;
   D3D12_CPU_DESCRIPTOR_HANDLE m_TxCPUHeapStartHandle;
   D3D12_GPU_DESCRIPTOR_HANDLE m_TxGPUHeapStartHandle;

@@ -149,28 +149,25 @@ RenderQuackyApp::postInit() {
   
   String texRes = workingPath + "Resources\\Textures\\";
   //Texture loading
-  {
-    FIBITMAP *tgaImg = FreeImage_Load(FIF_TARGA,
-                                      (texRes + "Casco1_BaseColor.tga").c_str(),
-                                      TARGA_DEFAULT);
-    if (tgaImg) {
-      BITMAPINFOHEADER* tgaInfoHeader = FreeImage_GetInfoHeader(tgaImg);
-      FREE_IMAGE_TYPE tgaType = FreeImage_GetImageType(tgaImg);
-      FREE_IMAGE_COLOR_TYPE tgaColor = FreeImage_GetColorType(tgaImg);
-      UInt32 tgaBytes = FreeImage_GetColorsUsed(tgaImg);
-      UInt32 tgaBPP = FreeImage_GetBPP(tgaImg);
-      UInt32 tgaWidth = FreeImage_GetWidth(tgaImg);
-      UInt32 tgaHeight = FreeImage_GetHeight(tgaImg);
-      UInt32 tgaLine = FreeImage_GetLine(tgaImg); //Returns the width of the bitmap in bytes.
-      UInt32 tgaPitch = FreeImage_GetPitch(tgaImg); //Returns the width of the bitmap in bytes, rounded to the next 32-bit boundary, also known as pitch or stride or scan width.
-      SizeT tgaSize = FreeImage_GetMemorySize(tgaImg);
-
-      GraphicsAPI::instance().CreateTexture(tgaWidth,
-                                            tgaHeight,
-                                            TB_FORMAT::kR32G32B32_FLOAT);
-
-      FreeImage_Unload(tgaImg);
-    }
+  FIBITMAP *tgaImg = FreeImage_Load(FIF_TARGA,
+                                    (texRes + "Casco1_BaseColor.tga").c_str(),
+                                    TARGA_DEFAULT);
+  UInt32 tgaWidth = 0;
+  UInt32 tgaHeight = 0;
+  byte* tgaData = nullptr;
+  if (tgaImg) {
+    BITMAPINFOHEADER* tgaInfoHeader = FreeImage_GetInfoHeader(tgaImg);
+    FREE_IMAGE_TYPE tgaType = FreeImage_GetImageType(tgaImg);
+    FREE_IMAGE_COLOR_TYPE tgaColor = FreeImage_GetColorType(tgaImg);
+    UInt32 tgaBytes = FreeImage_GetColorsUsed(tgaImg);
+    UInt32 tgaBPP = FreeImage_GetBPP(tgaImg);
+    UInt32 tgaLine = FreeImage_GetLine(tgaImg); //Returns the width of the bitmap in bytes.
+    UInt32 tgaPitch = FreeImage_GetPitch(tgaImg); //Returns the width of the bitmap in bytes, rounded to the next 32-bit boundary, also known as pitch or stride or scan width.
+    SizeT tgaSize = FreeImage_GetMemorySize(tgaImg);
+    tgaWidth = FreeImage_GetWidth(tgaImg);
+    tgaHeight = FreeImage_GetHeight(tgaImg);
+    tgaData = FreeImage_GetBits(tgaImg);
+    std::memset(tgaData, 1, tgaSize);
     /*
     FIBITMAP *ddsImg = FreeImage_Load(FIF_DDS,
                                       (texRes + "SeaEnviroment.dds").c_str(),
@@ -192,8 +189,52 @@ RenderQuackyApp::postInit() {
     */
   }
 
-  GraphicsAPI::instance().UpdateCB(CBData);
-  GraphicsAPI::instance().CreateModel(byteVertexList, byteIndexList, totalIndex);
+  auto& GraphicAPI = GraphicsAPI::instance();
+  auto commandQueue = GraphicAPI.GetCommandQueue();
+  auto commandAllocator = GraphicAPI.GetCommandAllocator();
+  auto commandList = GraphicAPI.GetCommandList();
+
+  const UInt32 PIX_EVENT_UNICODE_VERSION = 0;
+  commandQueue->BeginEvent(PIX_EVENT_UNICODE_VERSION,
+                           _T("Init"),
+                           (wcslen(_T("Init")) + 1) * sizeof(_T("Init")));
+  {
+    //Start list
+    HRESULT HRCAReset = commandAllocator->Reset();
+    if (FAILED(HRCAReset)) {
+      std::exception();
+    }
+
+    HRESULT HRCLReset = commandList->Reset(commandAllocator, GraphicAPI.GetGPSOForward());
+    if (FAILED(HRCLReset)) {
+      std::exception();
+    }
+
+    //Commands
+    GraphicsAPI::instance().UpdateCB(CBData);
+    GraphicsAPI::instance().CreateModel(byteVertexList, byteIndexList, totalIndex);
+    if (nullptr != tgaData) {
+      GraphicsAPI::instance().CreateTexture(tgaWidth,
+                                            tgaHeight,
+                                            TB_FORMAT::kR32G32B32_FLOAT,
+                                            tgaData);
+
+      //FreeImage_Unload(tgaImg);
+    }
+
+    //End list
+    HRESULT HRCLClose = commandList->Close();
+    if (FAILED(HRCLClose)) {
+      std::exception();
+    }
+    ID3D12CommandList* ppCommandLists[1] = { commandList };
+
+    commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+
+    GraphicAPI.WaitForGPU();
+  }
+  commandQueue->EndEvent();
+
 }
 
 void
