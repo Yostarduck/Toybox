@@ -104,6 +104,9 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ApplyGBuffer();
 
   void
+  ApplyInverter();
+
+  void
   ApplyForward();
 
   void
@@ -159,6 +162,11 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
     GetGPSOGBuffer() const {
     return m_GPSOGBuffer;
   }
+  
+  FORCEINLINE ID3D12PipelineState*
+    GetCPSOInverter() const {
+    return m_CPSOInverter;
+  }
 
   FORCEINLINE ID3D12PipelineState*
   GetGPSOForward() const {
@@ -207,8 +215,10 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   void CreateShaderHeap();
   void CreateGBufferRootSignature();
   void CreateForwardRootSignature();
+  void CreateInverterRootSignature();
   void CreateGPSOGBuffer();
   void CreateGPSOForward();
+  void CreateCPSOInverter();
   void CreateDSV();
   void CreateRTV();
   //Utilities
@@ -251,7 +261,8 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
 
   ID3D12GraphicsCommandList* m_commandList;
 
-  ID3D12Resource* m_CB;
+  ID3D12Resource* m_GbufferCB;
+  ID3D12Resource* m_ComputeCB;
 
   ID3D12Resource* m_QuadVB;
   ID3D12Resource* m_QuadIB;
@@ -279,12 +290,13 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
 
   ID3D12RootSignature* m_GBufferRootSignature;
   ID3D12RootSignature* m_ForwardRootSignature;
+  ID3D12RootSignature* m_InverterRootSignature;
 
   ID3D12PipelineState* m_GPSOGBuffer;
-
+  ID3D12PipelineState* m_CPSOInverter;
   ID3D12PipelineState* m_GPSOForward;
 
-  //GBuffer Shader
+  //GPSO GBuffer Shader
   //Vertex
   ID3DBlob* GBufferVSShaderBlob;
   void* GBufferVSBytecodePtr;
@@ -293,7 +305,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ID3DBlob* GBufferPSShaderBlob;
   void* GBufferPSBytecodePtr;
   SizeT GBufferPSbytecodeSz;
-  //Forward Shader
+  //GPSO Forward Shader
   //Vertex
   ID3DBlob* ForwardVSShaderBlob;
   void* ForwardVSBytecodePtr;
@@ -302,6 +314,10 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ID3DBlob* ForwardPSShaderBlob;
   void* ForwardPSBytecodePtr;
   SizeT ForwardPSbytecodeSz;
+  //CPSO Inverter Shader
+  ID3DBlob* InverterCSShaderBlob;
+  void* InverterCSBytecodePtr;
+  SizeT InverterCSbytecodeSz;
 
   //Depth Stencil Texture
   ID3D12Resource* m_DSTexture;

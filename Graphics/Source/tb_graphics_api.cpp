@@ -50,8 +50,10 @@ GraphicsAPI::init(UInt32 w,
     CreateShaders();
     CreateGBufferRootSignature();
     CreateForwardRootSignature();
+    CreateInverterRootSignature();
     CreateGPSOGBuffer();
     CreateGPSOForward();
+    CreateCPSOInverter();
     CreateDSV();
     CreateRTV();
 
@@ -420,17 +422,30 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
   //Create a SRV for the texture.
   D3D12_CPU_DESCRIPTOR_HANDLE SHCPUDescriptorhandle;
   SHCPUDescriptorhandle.ptr = m_ShaderCPUHeapStartHandle.ptr +
-                              (static_cast<SizeT>(m_SHandleIncrementSize) * 6);
+                              (static_cast<SizeT>(m_SHandleIncrementSize) * 8);
 
   m_device->CreateShaderResourceView(m_texture, &srvDesc, SHCPUDescriptorhandle);
 }
 
 void
 GraphicsAPI::UpdateCB(std::vector<byte>& data) {
-  byte* mapped = nullptr;
-  m_CB->Map(0, nullptr, reinterpret_cast<void**>(&mapped));
-  std::memcpy(mapped, &data[0], data.size());
-  m_CB->Unmap(0, nullptr);
+  //Gbuffer CB
+  {
+    byte* mapped = nullptr;
+    m_GbufferCB->Map(0, nullptr, reinterpret_cast<void**>(&mapped));
+    std::memcpy(mapped, &data[0], data.size());
+    m_GbufferCB->Unmap(0, nullptr);
+  }
+  //Compute CB
+  {
+    Vector2 screen = Vector2(1280.0f, 720.0f);
+    byte* screenData = reinterpret_cast<byte*>(&screen[0]);
+
+    byte* mapped = nullptr;
+    m_ComputeCB->Map(0, nullptr, reinterpret_cast<void**>(&mapped));
+    std::memcpy(mapped, screenData, sizeof(Vector2));
+    m_ComputeCB->Unmap(0, nullptr);
+  }
 }
 
 void
@@ -459,15 +474,14 @@ GraphicsAPI::ApplyGBuffer() {
   m_commandList->ClearDepthStencilView(m_DSCPUHeapStartHandle, D3D12_CLEAR_FLAG_DEPTH, 0.0f, 0xff, 0, nullptr);
 
   D3D12_GPU_DESCRIPTOR_HANDLE handleOffset;
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr;
 
   m_commandList->OMSetRenderTargets(RTSize, &m_RTCPUHeapStartHandle, true, &m_DSCPUHeapStartHandle);
   m_commandList->SetDescriptorHeaps(1, ppHeaps);
   m_commandList->SetGraphicsRootSignature(m_GBufferRootSignature);
 
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 6); //Tex
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 8); //Tex
   m_commandList->SetGraphicsRootDescriptorTable(0, handleOffset);
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 0); //CB
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 0); //CB G
   m_commandList->SetGraphicsRootDescriptorTable(1, handleOffset);
 
   m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -475,6 +489,28 @@ GraphicsAPI::ApplyGBuffer() {
   m_commandList->IASetVertexBuffers(0, 1, &m_ModelVBView);
 
   m_commandList->DrawIndexedInstanced(m_ModelIndexes, 1, 0, 0, 0);
+}
+
+void
+GraphicsAPI::ApplyInverter() {
+  ID3D12DescriptorHeap* ppHeaps[1] = { m_ShaderDHPtr };
+
+  m_commandList->SetPipelineState(m_CPSOInverter);
+
+  D3D12_GPU_DESCRIPTOR_HANDLE handleOffset;
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr;
+
+  m_commandList->SetDescriptorHeaps(1, ppHeaps);
+  m_commandList->SetComputeRootSignature(m_InverterRootSignature);
+
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 8); //Tex
+  m_commandList->SetComputeRootDescriptorTable(0, handleOffset);
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 2); //UAV
+  m_commandList->SetComputeRootDescriptorTable(1, handleOffset);
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 1); //CB
+  m_commandList->SetComputeRootDescriptorTable(2, handleOffset);
+
+  m_commandList->Dispatch(20, 20, 1);
 }
 
 void
@@ -498,10 +534,11 @@ GraphicsAPI::ApplyForward() {
   m_commandList->SetDescriptorHeaps(1, ppHeaps);
   m_commandList->SetGraphicsRootSignature(m_ForwardRootSignature);
 
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 1); //RTs
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 2); //RTs
   m_commandList->SetGraphicsRootDescriptorTable(0, handleOffset);
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 5); //Ds
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 7); //Ds
   m_commandList->SetGraphicsRootDescriptorTable(1, handleOffset);
+
 
   m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
   m_commandList->IASetVertexBuffers(0, 1, &m_QuadVBView);
@@ -799,6 +836,12 @@ GraphicsAPI::CreateShaders() {
                         &ForwardPSShaderBlob,
                         &ForwardPSBytecodePtr,
                         &ForwardPSbytecodeSz);
+
+  CompileShaderFromFile(path + _T("Resources\\Shaders\\Basic_cs.hlsl"),
+                        TB_SHADER_TYPE::E::kCompute,
+                        &InverterCSShaderBlob,
+                        &InverterCSBytecodePtr,
+                        &InverterCSbytecodeSz);
 }
 
 void
@@ -824,15 +867,28 @@ GraphicsAPI::CreateConstantBuffer() {
   resourceDesc.Height = 1;
   resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 
-  HRESULT HRCBCR = m_device->CreateCommittedResource(&heapProperty,
-                                                     D3D12_HEAP_FLAG_NONE,
-                                                     &resourceDesc,
-                                                     D3D12_RESOURCE_STATE_GENERIC_READ,
-                                                     nullptr,
-                                                     __uuidof(**(&m_CB)),
-                                                     (void**)(&m_CB));
+  HRESULT HRCBCRGB = m_device->CreateCommittedResource(&heapProperty,
+                                                       D3D12_HEAP_FLAG_NONE,
+                                                       &resourceDesc,
+                                                       D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                       nullptr,
+                                                       __uuidof(**(&m_GbufferCB)),
+                                                       (void**)(&m_GbufferCB));
 
-  if (FAILED(HRCBCR)) {
+  if (FAILED(HRCBCRGB)) {
+    throw std::exception();
+  }
+
+  resourceDesc.Width = 256;
+  HRESULT HRCBCRC = m_device->CreateCommittedResource(&heapProperty,
+                                                      D3D12_HEAP_FLAG_NONE,
+                                                      &resourceDesc,
+                                                      D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                      nullptr,
+                                                      __uuidof(**(&m_ComputeCB)),
+                                                      (void**)(&m_ComputeCB));
+
+  if (FAILED(HRCBCRC)) {
     throw std::exception();
   }
 }
@@ -952,18 +1008,20 @@ void
 GraphicsAPI::CreateShaderHeap() {
   //m_cbvsrvHeap.Create(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 10, true);
 
-  //CBv = 1 (0)
+  //CBv
+  // GBuffer = 1 (0)
+  // Compute = 1 (1)
   //SRv
-    //RTv = 4 (1 - 4)
-    //DSv = 1 (5)
-    //Txr = 1 (6)
+  //  RTv = 5 (2 - 6)
+  //  DSv = 1 (7)
+  //  Txr = 1 (8)
   //UAv = 0
 
   //Start of create GPU Heap
   D3D12_DESCRIPTOR_HEAP_DESC GPUHDesc;
   GPUHDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
   GPUHDesc.NodeMask = 0;
-  GPUHDesc.NumDescriptors = 7;
+  GPUHDesc.NumDescriptors = 9;
   GPUHDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 
 
@@ -978,22 +1036,28 @@ GraphicsAPI::CreateShaderHeap() {
 
   m_ShaderCPUHeapStartHandle = m_ShaderDHPtr->GetCPUDescriptorHandleForHeapStart();
   m_ShaderGPUHeapStartHandle = m_ShaderDHPtr->GetGPUDescriptorHandleForHeapStart();
-
   m_SHandleIncrementSize = m_device->GetDescriptorHandleIncrementSize(GPUHDesc.Type);
   //End of create of GPU Heap
 
   D3D12_CPU_DESCRIPTOR_HANDLE CPUHandle;
-  CPUHandle.ptr = m_ShaderCPUHeapStartHandle.ptr;
-
   D3D12_CONSTANT_BUFFER_VIEW_DESC	descBuffer;
 
   //Camera CBV
-  descBuffer.BufferLocation = m_CB->GetGPUVirtualAddress();
+  descBuffer.BufferLocation = m_GbufferCB->GetGPUVirtualAddress();
   //Constant buffer must be larger than 256 bytes
   //descBuffer.SizeInBytes = sizeof(CBuffer); //Memory should be aligned
   //descBuffer.SizeInBytes = (sizeof(CBuffer) + 255) & ~255; //Aligns memory to 256
   descBuffer.SizeInBytes = 256; //Aligns memory to 256
 
+  CPUHandle.ptr = m_ShaderCPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 0);
+  m_device->CreateConstantBufferView(&descBuffer, CPUHandle);
+
+  descBuffer.BufferLocation = m_ComputeCB->GetGPUVirtualAddress();
+  //Constant buffer must be larger than 256 bytes
+  //descBuffer.SizeInBytes = sizeof(CBuffer); //Memory should be aligned
+  //descBuffer.SizeInBytes = (sizeof(CBuffer) + 255) & ~255; //Aligns memory to 256
+  descBuffer.SizeInBytes = 256; //Aligns memory to 256
+  CPUHandle.ptr = m_ShaderCPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 1);
   m_device->CreateConstantBufferView(&descBuffer, CPUHandle);
 }
 
@@ -1002,30 +1066,34 @@ GraphicsAPI::CreateGBufferRootSignature() {
   //Init descriptor tables
 
   D3D12_DESCRIPTOR_RANGE range[2];
-  //SRV (The albedo texture)
-  range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-  range[0].NumDescriptors = 1;
-  range[0].BaseShaderRegister = 0;
-  range[0].RegisterSpace = 0;
-  range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-  //CBV (The camera one)
-  range[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-  range[1].NumDescriptors = 1;
-  range[1].BaseShaderRegister = 0;
-  range[1].RegisterSpace = 0;
-  range[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+  {
+    //SRV (The albedo texture)
+    range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    range[0].NumDescriptors = 1;
+    range[0].BaseShaderRegister = 0;
+    range[0].RegisterSpace = 0;
+    range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+    //CBV (The camera one)
+    range[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+    range[1].NumDescriptors = 1;
+    range[1].BaseShaderRegister = 0;
+    range[1].RegisterSpace = 0;
+    range[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+  }
 
   D3D12_ROOT_PARAMETER rootParameters[2];
-  //
-  rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-  rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-  rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
-  rootParameters[0].DescriptorTable.pDescriptorRanges = &range[0];
-  //
-  rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-  rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-  rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
-  rootParameters[1].DescriptorTable.pDescriptorRanges = &range[1];
+  {
+    //
+    rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
+    rootParameters[0].DescriptorTable.pDescriptorRanges = &range[0];
+    //
+    rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
+    rootParameters[1].DescriptorTable.pDescriptorRanges = &range[1];
+  }
 
   D3D12_STATIC_SAMPLER_DESC StaticSamplers;
   {
@@ -1074,36 +1142,130 @@ GraphicsAPI::CreateGBufferRootSignature() {
 }
 
 void
+GraphicsAPI::CreateInverterRootSignature() {
+  //Init descriptor tables
+
+  D3D12_DESCRIPTOR_RANGE range[3];
+  {
+    //SRV (The depth stencil)
+    range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    range[0].NumDescriptors = 1;
+    range[0].BaseShaderRegister = 0;
+    range[0].RegisterSpace = 0;
+    range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+    //SRV (The depth stencil)
+    range[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+    range[1].NumDescriptors = 1;
+    range[1].BaseShaderRegister = 0;
+    range[1].RegisterSpace = 0;
+    range[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+    //SRV (GBuffer RTs)
+    range[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
+    range[2].NumDescriptors = 1;
+    range[2].BaseShaderRegister = 0;
+    range[2].RegisterSpace = 0;
+    range[2].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+  }
+
+  D3D12_ROOT_PARAMETER rootParameters[3];
+  {
+    //
+    rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
+    rootParameters[0].DescriptorTable.pDescriptorRanges = &range[0];
+    //
+    rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
+    rootParameters[1].DescriptorTable.pDescriptorRanges = &range[1];
+    //
+    rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
+    rootParameters[2].DescriptorTable.pDescriptorRanges = &range[2];
+  }
+
+  D3D12_STATIC_SAMPLER_DESC StaticSamplers;
+  {
+    StaticSamplers.ShaderRegister = 0;
+    StaticSamplers.Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+    StaticSamplers.AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    StaticSamplers.AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    StaticSamplers.AddressW = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+    StaticSamplers.MipLODBias = 0;
+    StaticSamplers.MaxAnisotropy = 16;
+    StaticSamplers.ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+    StaticSamplers.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+    StaticSamplers.MinLOD = 0.0f;
+    StaticSamplers.MaxLOD = D3D12_FLOAT32_MAX;
+    StaticSamplers.ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    StaticSamplers.RegisterSpace = 0;
+  }
+
+  D3D12_ROOT_SIGNATURE_DESC descRootSignature;
+  descRootSignature.NumParameters = 3;
+  descRootSignature.pParameters = &rootParameters[0];
+  descRootSignature.NumStaticSamplers = 1;
+  descRootSignature.pStaticSamplers = &StaticSamplers;
+  descRootSignature.Flags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+  ID3DBlob* rootSigBlob;
+  ID3DBlob* errorBlob;
+
+  HRESULT HRRootSerialize = D3D12SerializeRootSignature(&descRootSignature,
+                                                        D3D_ROOT_SIGNATURE_VERSION_1,
+                                                        &rootSigBlob,
+                                                        &errorBlob);
+
+  if (FAILED(HRRootSerialize)) {
+    throw std::exception();
+  }
+
+  HRESULT HRRootSignature = m_device->CreateRootSignature(0,
+                                                          rootSigBlob->GetBufferPointer(),
+                                                          rootSigBlob->GetBufferSize(),
+                                                          __uuidof(**(&m_InverterRootSignature)),
+                                                          (void**)(&m_InverterRootSignature));
+  if (FAILED(HRRootSignature)) {
+    throw std::exception();
+  }
+
+}
+
+void
 GraphicsAPI::CreateForwardRootSignature() {
   //Init descriptor tables
 
   D3D12_DESCRIPTOR_RANGE range[2];
-
-  //SRV (GBuffer RTs)
-  range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-  range[0].NumDescriptors = 4;
-  range[0].BaseShaderRegister = 0;
-  range[0].RegisterSpace = 0;
-  range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-  //SRV (The depth stencil)
-  range[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-  range[1].NumDescriptors = 1;
-  range[1].BaseShaderRegister = 4;
-  range[1].RegisterSpace = 0;
-  range[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
+  {
+    //SRV (GBuffer RTs)
+    range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    range[0].NumDescriptors = 4;
+    range[0].BaseShaderRegister = 0;
+    range[0].RegisterSpace = 0;
+    range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+    //SRV (The depth stencil)
+    range[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+    range[1].NumDescriptors = 1;
+    range[1].BaseShaderRegister = 4;
+    range[1].RegisterSpace = 0;
+    range[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+  }
 
   D3D12_ROOT_PARAMETER rootParameters[2];
-  //
-  rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-  rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-  rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
-  rootParameters[0].DescriptorTable.pDescriptorRanges = &range[0];
-  //
-  rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-  rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-  rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
-  rootParameters[1].DescriptorTable.pDescriptorRanges = &range[1];
+  {
+    //
+    rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
+    rootParameters[0].DescriptorTable.pDescriptorRanges = &range[0];
+    //
+    rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+    rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+    rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
+    rootParameters[1].DescriptorTable.pDescriptorRanges = &range[1];
+  }
 
   D3D12_STATIC_SAMPLER_DESC StaticSamplers;
   {
@@ -1213,33 +1375,49 @@ GraphicsAPI::CreateGPSOGBuffer() {
     RasterizerDefault.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
   }
 
-  D3D12_GRAPHICS_PIPELINE_STATE_DESC descPipelineState;
-  ZeroMemory(&descPipelineState, sizeof(descPipelineState));
+  D3D12_GRAPHICS_PIPELINE_STATE_DESC GPSODescPipelineState;
+  ZeroMemory(&GPSODescPipelineState, sizeof(GPSODescPipelineState));
 
-  descPipelineState.VS = { GBufferVSBytecodePtr, GBufferVSbytecodeSz };
-  //descPipelineState.DS = { GBufferDSBytecodePtr, GBufferDSbytecodeSz };
-  //descPipelineState.HS = { GBufferHSBytecodePtr, GBufferHSbytecodeSz };
-  //descPipelineState.GS = { GBufferGSBytecodePtr, GBufferGSbytecodeSz };
-  descPipelineState.PS = { GBufferPSBytecodePtr, GBufferPSbytecodeSz };
-  descPipelineState.InputLayout.pInputElementDescs = ModelVertexDesc;
-  descPipelineState.InputLayout.NumElements = _countof(ModelVertexDesc);
-  descPipelineState.pRootSignature = m_GBufferRootSignature;
-  descPipelineState.DepthStencilState = DepthStencilDefault;
-  descPipelineState.BlendState = BlendStateDefault;
-  descPipelineState.RasterizerState = RasterizerDefault;
-  descPipelineState.SampleMask = UINT_MAX;
-  descPipelineState.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-  descPipelineState.NumRenderTargets = 4;
-  descPipelineState.RTVFormats[0] = DXGI_FORMAT_R32G32B32A32_FLOAT;
-  descPipelineState.RTVFormats[1] = DXGI_FORMAT_R32G32B32A32_FLOAT;
-  descPipelineState.RTVFormats[2] = DXGI_FORMAT_R32G32B32A32_FLOAT;
-  descPipelineState.RTVFormats[3] = DXGI_FORMAT_R32G32B32A32_FLOAT;
-  descPipelineState.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-  descPipelineState.SampleDesc.Count = 1;
+  GPSODescPipelineState.VS = { GBufferVSBytecodePtr, GBufferVSbytecodeSz };
+  //GPSODescPipelineState.DS = { GBufferDSBytecodePtr, GBufferDSbytecodeSz };
+  //GPSODescPipelineState.HS = { GBufferHSBytecodePtr, GBufferHSbytecodeSz };
+  //GPSODescPipelineState.GS = { GBufferGSBytecodePtr, GBufferGSbytecodeSz };
+  GPSODescPipelineState.PS = { GBufferPSBytecodePtr, GBufferPSbytecodeSz };
+  GPSODescPipelineState.InputLayout.pInputElementDescs = ModelVertexDesc;
+  GPSODescPipelineState.InputLayout.NumElements = _countof(ModelVertexDesc);
+  GPSODescPipelineState.pRootSignature = m_GBufferRootSignature;
+  GPSODescPipelineState.DepthStencilState = DepthStencilDefault;
+  GPSODescPipelineState.BlendState = BlendStateDefault;
+  GPSODescPipelineState.RasterizerState = RasterizerDefault;
+  GPSODescPipelineState.SampleMask = UINT_MAX;
+  GPSODescPipelineState.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+  GPSODescPipelineState.NumRenderTargets = 4;
+  GPSODescPipelineState.RTVFormats[0] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  GPSODescPipelineState.RTVFormats[1] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  GPSODescPipelineState.RTVFormats[2] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  GPSODescPipelineState.RTVFormats[3] = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  GPSODescPipelineState.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+  GPSODescPipelineState.SampleDesc.Count = 1;
 
-  HRESULT HRPSO = m_device->CreateGraphicsPipelineState(&descPipelineState,
+  HRESULT HRPSO = m_device->CreateGraphicsPipelineState(&GPSODescPipelineState,
                                                         __uuidof(**(&m_GPSOGBuffer)),
                                                         (void**)(&m_GPSOGBuffer));
+  if (FAILED(HRPSO)) {
+    throw std::exception();
+  }
+}
+
+void
+GraphicsAPI::CreateCPSOInverter() {
+  D3D12_COMPUTE_PIPELINE_STATE_DESC CPSODescPipelineState;
+  ZeroMemory(&CPSODescPipelineState, sizeof(CPSODescPipelineState));
+
+  CPSODescPipelineState.pRootSignature = m_InverterRootSignature;
+  CPSODescPipelineState.CS = { InverterCSBytecodePtr, InverterCSbytecodeSz };
+
+  HRESULT HRPSO = m_device->CreateComputePipelineState(&CPSODescPipelineState,
+                                                       __uuidof(**(&m_CPSOInverter)),
+                                                       (void**)(&m_CPSOInverter));
   if (FAILED(HRPSO)) {
     throw std::exception();
   }
@@ -1413,19 +1591,20 @@ GraphicsAPI::CreateDSV() {
 
   D3D12_CPU_DESCRIPTOR_HANDLE CPUDescriptorhandle;
   CPUDescriptorhandle.ptr = m_ShaderCPUHeapStartHandle.ptr +
-                            (static_cast<SizeT>(m_SHandleIncrementSize) * 5);
+                            (static_cast<SizeT>(m_SHandleIncrementSize) * 7);
 
 	m_device->CreateShaderResourceView(m_DSTexture, &descSRV, CPUDescriptorhandle);
 }
 
 void
 GraphicsAPI::CreateRTV() {
-  const Int32 GBufferRTSize = 4;
+  const Int32 GBufferRTSize = 5;
   //Create deferred buffers
   //1.WorldPosition
   //2.Metallic
 	//3.Roughness
-	//4.Emissive
+  //4.Emissive
+  //5.ComputeRT
 
   D3D12_DESCRIPTOR_HEAP_DESC RTHeapDesc;
   
@@ -1486,13 +1665,14 @@ GraphicsAPI::CreateRTV() {
                                                     __uuidof(**(&m_RTTexture[i])),
                                                     (void**)(&m_RTTexture[i]));
 
-    WString name = _T("GBuffer RT(") + StringConversion::toTString(i) + _T(")");
+    WString name = _T("Gbuffer RT(") + StringConversion::toTString(i) + _T(")");
 
     m_RTTexture[i]->SetName(name.c_str());
     if (FAILED(HRCR)) {
       throw std::exception();
     }
 	}
+  m_RTTexture[4]->SetName(_T("Compute RT"));
 
 	D3D12_RENDER_TARGET_VIEW_DESC RTVDesc;
 	ZeroMemory(&RTVDesc, sizeof(RTVDesc));
@@ -1529,7 +1709,7 @@ GraphicsAPI::CreateRTV() {
 
     D3D12_CPU_DESCRIPTOR_HANDLE SHCPUDescriptorhandle;
     SHCPUDescriptorhandle.ptr = m_ShaderCPUHeapStartHandle.ptr +
-                                (static_cast<SizeT>(m_SHandleIncrementSize) * (1 + i));
+                                (static_cast<SizeT>(m_SHandleIncrementSize) * (2 + i));
 
 		m_device->CreateShaderResourceView(m_RTTexture[i],
                                        &RTVDescSRV,
