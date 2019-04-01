@@ -200,6 +200,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   //////////Hardcoded stuff//////////
   ///////////////////////////////////
 
+  void EnableRTX();
   //Required Flow
   void CreateDevice();
   void CreateCommandQueue();

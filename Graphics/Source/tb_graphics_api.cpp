@@ -519,10 +519,16 @@ GraphicsAPI::ApplyForward() {
   float mClearColor[4] = { 0.0, 0.0f, 0.0f, 1.0f };
 
   for (Int32 i = 0; i < RTSize; ++i) {
-    AddResourceBarrier(m_commandList, m_RTTexture[i], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ);
+    AddResourceBarrier(m_commandList,
+                       m_RTTexture[i],
+                       D3D12_RESOURCE_STATE_RENDER_TARGET,
+                       D3D12_RESOURCE_STATE_GENERIC_READ);
   }
 
-  AddResourceBarrier(m_commandList, m_DSTexture, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
+  AddResourceBarrier(m_commandList,
+                     m_DSTexture,
+                     D3D12_RESOURCE_STATE_DEPTH_WRITE,
+                     D3D12_RESOURCE_STATE_GENERIC_READ);
 
   ID3D12DescriptorHeap* ppHeaps[1] = { m_ShaderDHPtr };
 
@@ -538,7 +544,6 @@ GraphicsAPI::ApplyForward() {
   m_commandList->SetGraphicsRootDescriptorTable(0, handleOffset);
   handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 7); //Ds
   m_commandList->SetGraphicsRootDescriptorTable(1, handleOffset);
-
 
   m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
   m_commandList->IASetVertexBuffers(0, 1, &m_QuadVBView);
@@ -620,6 +625,34 @@ GraphicsAPI::onStartUp() {
 
 void
 GraphicsAPI::onShutDown() {
+}
+
+void
+GraphicsAPI::EnableRTX() {
+  // Temporary: Before Win10 RS5 raytracing and raster/raytracing compatibilities are in a prototype
+  // state. Therefore, they need to be explicitly enabled BEFORE creating the device
+  /*
+  static const GUID guids[] = { D3D12RaytracingPrototype };
+
+  HRESULT HRRTX = D3D12EnableExperimentalFeatures(1, guids, nullptr, nullptr);
+
+  if (FAILED(HRRTX)) {
+    printf("Could not enable raytracing (D3D12EnableExperimentalFeatures() "
+           "failed, hr=0x%X).\n"
+           "Possible reasons:\n"
+           "  1) your OS is not in developer mode\n"
+           "  2) your GPU driver doesn't match the D3D12 runtime loaded by the "
+           "app (d3d12.dll and friends)\n"
+           "  3) your D3D12 runtime doesn't match the D3D12 headers used by "
+           "your app (in particular, the GUID passed to "
+           "D3D12EnableExperimentalFeatures)\n\n",
+           HRRTX);
+  }
+
+  if (FAILED(HRRTX)) {
+    throw std::exception();
+  }
+  */
 }
 
 void
@@ -1008,14 +1041,17 @@ void
 GraphicsAPI::CreateShaderHeap() {
   //m_cbvsrvHeap.Create(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 10, true);
 
-  //CBv
-  // GBuffer = 1 (0)
-  // Compute = 1 (1)
-  //SRv
-  //  RTv = 5 (2 - 6)
-  //  DSv = 1 (7)
-  //  Txr = 1 (8)
-  //UAv = 0
+  // Thing           Array  offset
+  //
+  // CBV
+  //  GBuffer      = 1      (0)
+  //  Compute      = 1      (1)
+  // SRV
+  //   GBuffer RTv = 4      (2 - 5)
+  //   Compute RTv = 1      (6)
+  //   GBuffer DSv = 1      (7)
+  //   Model Tex   = 1      (8)
+  // UAV = 0
 
   //Start of create GPU Heap
   D3D12_DESCRIPTOR_HEAP_DESC GPUHDesc;
