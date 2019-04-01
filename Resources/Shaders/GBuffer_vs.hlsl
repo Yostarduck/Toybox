@@ -27,6 +27,7 @@ main(VS_INPUT input) {
   Output.Position = mul(WVP, input.Position);
   Output.WorldPos = float4(mul(World, input.Position).xyz, 1.0f);
   Output.Texcoord = input.Texcoord;
+  Output.Texcoord.y = 1.0f - input.Texcoord.y;
   
   return Output;
 }

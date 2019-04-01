@@ -1,3 +1,7 @@
+Texture2D AlbedoTex : register(t0);
+
+SamplerState gLinearSample : register(s0);
+
 cbuffer ConstantBuffer : register(b0) {
 	float4x4 World;
   float4x4 View;
@@ -21,7 +25,13 @@ PS_OUTPUT
 main(PS_INPUT input) {
 	PS_OUTPUT output;
   
-  output.WorldPosition  = input.WorldPos;
+  float2 uv = input.Texcoord;
+  
+  float4 albedo = float4(AlbedoTex.Sample(gLinearSample, uv).zyx, 1.0f);
+  
+  output.WorldPosition  = albedo;
+  //output.WorldPosition  = input.WorldPos;
+  //output.WorldPosition  = float4(uv, 0.0f, 1.0f);
   output.Metallic       = float4(1.0f, 0.0f, 0.0f, 1.0f);
   output.Roughness      = float4(0.0f, 1.0f, 0.0f, 1.0f);
   output.Emissive       = float4(0.0f, 0.0f, 1.0f, 1.0f);
