@@ -18,6 +18,14 @@
 
 namespace toyboxSDK {
 
+namespace RTXMode {
+enum E {
+  None = 0,           //No RTX        //No RTX
+  FallbackLayer,      //Compute RTX   //Driver RTX
+  DirectXRaytracing,  //GPU RTX       //GPU RTX
+};
+}
+
 void
 AddResourceBarrier(ID3D12GraphicsCommandList* command,
                    ID3D12Resource* pResource,
@@ -209,6 +217,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ///Set variables
   void CreateSwapChain();
   void CreateCommandList();
+  void CreateDXRDeviceAndCommandList(); //RTX
   void CreateShaders();
   void CreateConstantBuffer();
   void CreateQuadVB();
@@ -244,8 +253,16 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   IDXGIFactory4* GetFactory(UInt32 flags = 0);
   void GetHardwareAdapter(IDXGIFactory4* pFactory, IDXGIAdapter1** ppAdapter);
 
-  ID3D12Device* m_device; //Device
+  /////RTX
+  RTXMode::E m_raytracingMode;
+  /////RTX
+
+  IDXGIAdapter1* m_hardwareAdapter;
+  ID3D12Device* m_device; //Common Device
+  ID3D12Device5* m_dxrDevice; //RTX Device
   ID3D12CommandQueue* m_commandQueue; //Command Queue
+  ID3D12GraphicsCommandList* m_commandList;
+  ID3D12GraphicsCommandList* m_dxrCommandList; //RTX Command list
 
   std::vector<ID3D12CommandAllocator*> m_commandAllocators;
   ID3D12Fence* m_fence;
@@ -260,7 +277,6 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   UInt32 m_rtvDescriptorSize;
   std::vector<ID3D12Resource*> m_renderTargets;
 
-  ID3D12GraphicsCommandList* m_commandList;
 
   ID3D12Resource* m_GbufferCB;
   ID3D12Resource* m_ComputeCB;

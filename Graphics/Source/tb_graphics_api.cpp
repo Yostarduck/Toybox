@@ -26,6 +26,7 @@ GraphicsAPI::init(UInt32 w,
                   UInt32 h,
                   void* hwnd,
                   TB_GRAPHICS_API::E api) {
+  //EnableRTX(); //RTX
   CreateDevice();
   CreateCommandQueue();
   CreateSwapChainCommanAllocators();
@@ -43,6 +44,7 @@ GraphicsAPI::init(UInt32 w,
                              (wcslen(_T("Setup")) + 1) * sizeof(_T("Setup")));
   {
     CreateCommandList();
+    //CreateDXRDeviceAndCommandList(); //RTX
     CreateConstantBuffer();
     CreateQuadVB();
     CreateQuadIB();
@@ -629,30 +631,70 @@ GraphicsAPI::onShutDown() {
 
 void
 GraphicsAPI::EnableRTX() {
-  // Temporary: Before Win10 RS5 raytracing and raster/raytracing compatibilities are in a prototype
-  // state. Therefore, they need to be explicitly enabled BEFORE creating the device
-  /*
-  static const GUID guids[] = { D3D12RaytracingPrototype };
+  ID3D12Device* testDevice = nullptr;
 
-  HRESULT HRRTX = D3D12EnableExperimentalFeatures(1, guids, nullptr, nullptr);
+  bool computeRTXAvaible = false;
+  {
+    IDXGIFactory4* factory = GetFactory();
 
-  if (FAILED(HRRTX)) {
-    printf("Could not enable raytracing (D3D12EnableExperimentalFeatures() "
-           "failed, hr=0x%X).\n"
-           "Possible reasons:\n"
-           "  1) your OS is not in developer mode\n"
-           "  2) your GPU driver doesn't match the D3D12 runtime loaded by the "
-           "app (d3d12.dll and friends)\n"
-           "  3) your D3D12 runtime doesn't match the D3D12 headers used by "
-           "your app (in particular, the GUID passed to "
-           "D3D12EnableExperimentalFeatures)\n\n",
-           HRRTX);
+    GetHardwareAdapter(factory, &m_hardwareAdapter);
+
+    UUID experimentalFeatures[] = { D3D12ExperimentalShaderModels };
+
+    HRESULT HRExperimental = D3D12EnableExperimentalFeatures(1, experimentalFeatures, nullptr, nullptr);
+    HRESULT HRDevice = D3D12CreateDevice(m_hardwareAdapter,
+                                         D3D_FEATURE_LEVEL_11_0,
+                                         __uuidof(**(&testDevice)),
+                                         (void**)(&testDevice));
+    if (FAILED(HRExperimental)) {
+      std::cout << HRExperimental << std::endl;
+    }
+    if (FAILED(HRDevice)) {
+      std::cout << HRDevice << std::endl;
+    }
+
+    bool b1 = SUCCEEDED(HRExperimental);
+    bool b2 = SUCCEEDED(HRDevice);
+
+    computeRTXAvaible = b1 && b2;
+    computeRTXAvaible = b1;
   }
 
-  if (FAILED(HRRTX)) {
-    throw std::exception();
+  if (!computeRTXAvaible) {
+    //std::cout << _T("Warning: Could not enable Compute Raytracing Fallback (D3D12EnableExperimentalFeatures() failed).\n Possible reasons: your OS is not in developer mode.\n\n") << std::endl;
   }
-  */
+
+  bool m_isDxrSupported = false;
+  {
+    //ID3D12Device* testDevice = nullptr;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS5 featureSupportData = {};
+
+    //bool b1 = SUCCEEDED(D3D12CreateDevice(m_device,
+    //                                      D3D_FEATURE_LEVEL_11_0,
+    //                                      __uuidof(**(&testDevice)),
+    //                                      (void**)(&testDevice)));
+    bool b2 = SUCCEEDED(testDevice->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS5, &featureSupportData, sizeof(featureSupportData)));
+    bool b3 = featureSupportData.RaytracingTier != D3D12_RAYTRACING_TIER_NOT_SUPPORTED;
+
+    //m_isDxrSupported = b1 && b2 && b3;
+    m_isDxrSupported = true && b2 && b3;
+  }
+
+  if (!m_isDxrSupported) {
+    //std::cout << _T"Warning: DirectX Raytracing is not supported by your GPU and driver.\n\n") << std::endl;
+
+    if (!computeRTXAvaible) {
+      //std::cout << _T("Could not enable compute based fallback raytracing support (D3D12EnableExperimentalFeatures() failed).\n Possible reasons: your OS is not in developer mode.\n\n") << std::endl;
+      m_raytracingMode = RTXMode::None;
+      return;
+    }
+
+    m_raytracingMode = RTXMode::FallbackLayer;
+    return;
+  }
+
+  m_raytracingMode = RTXMode::DirectXRaytracing;
+  return;
 }
 
 void
@@ -678,17 +720,16 @@ GraphicsAPI::CreateDevice() {
     warpAdapter->Release();
 	}
 	else {
-    IDXGIAdapter1* hardwareAdapter;
-		GetHardwareAdapter(factory, &hardwareAdapter);
+		GetHardwareAdapter(factory, &m_hardwareAdapter);
 
-    HRESULT HRCreateDevice = D3D12CreateDevice(hardwareAdapter,
+    HRESULT HRCreateDevice = D3D12CreateDevice(m_hardwareAdapter,
 			                                         D3D_FEATURE_LEVEL_11_0,
                                                __uuidof(**(&m_device)),
                                                (void**)(&m_device));
     if (FAILED(HRCreateDevice)) {
       throw std::exception();
     }
-    hardwareAdapter->Release();
+    //hardwareAdapter->Release();
 	}
 
   factory->Release();
@@ -841,6 +882,34 @@ GraphicsAPI::CreateCommandList() {
   if (FAILED(HRCommandList)) {
     throw std::exception();
   }
+}
+
+void
+GraphicsAPI::CreateDXRDeviceAndCommandList() {
+  if (RTXMode::DirectXRaytracing == m_raytracingMode) {
+    HRESULT HRDXRDevice = m_device->QueryInterface(__uuidof(**(&m_dxrDevice)),
+                                                   (void**)(&m_dxrDevice));
+    if (FAILED(HRDXRDevice)) {
+      //std::cout << _T("Couldn't get DirectX Raytracing interface for the device.\n") << std::endl;
+      throw std::exception();
+      return;
+    }
+
+    HRESULT HRDXRCommandList = m_commandList->QueryInterface(__uuidof(**(&m_dxrCommandList)),
+                                                             (void**)(&m_dxrCommandList));
+    if (FAILED(HRDXRDevice)) {
+      //std::cout << _T("Couldn't get DirectX Raytracing interface for the command list.\n") << std::endl;
+      throw std::exception();
+      return;
+    }
+  }
+  else if (RTXMode::FallbackLayer == m_raytracingMode) {
+  }
+  else if (RTXMode::None == m_raytracingMode) {
+    m_dxrDevice = nullptr;
+    m_dxrCommandList = nullptr;
+  }
+
 }
 
 void
