@@ -417,7 +417,7 @@ UpdateFontTexture() {
   texture.create(width, height);
   texture.update(pixels);
   
-  io.Fonts->TexID = (void*)texture.getNativeHandle();
+  io.Fonts->TexID = reinterpret_cast<void*>(texture.getNativeHandle());
 }
 
 sf::Texture&

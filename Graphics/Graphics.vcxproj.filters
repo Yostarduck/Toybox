@@ -86,5 +86,8 @@
     <ClInclude Include="Include\tb_d3d12_shader.h">
       <Filter>Archivos de encabezado\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Include\D3D12RaytracingHelpers.hpp">
+      <Filter>Archivos de encabezado\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

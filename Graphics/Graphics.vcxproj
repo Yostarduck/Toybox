@@ -152,6 +152,7 @@
     <ClCompile Include="Source\tb_graphics_api.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\D3D12RaytracingHelpers.hpp" />
     <ClInclude Include="Include\tb_d3d12_device.h" />
     <ClInclude Include="Include\tb_d3d12_render_target.h" />
     <ClInclude Include="Include\tb_d3d12_shader.h" />
