@@ -145,15 +145,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Include\tb_application.h" />
-    <ClInclude Include="Include\tb_component.h" />
     <ClInclude Include="Include\tb_core_prerequisites.h" />
-    <ClInclude Include="Include\tb_gameobject.h" />
     <ClInclude Include="Include\tb_viewport.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\tb_application.cpp" />
-    <ClCompile Include="Source\tb_component.cpp" />
-    <ClCompile Include="Source\tb_gameobject.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

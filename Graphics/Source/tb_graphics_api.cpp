@@ -14,6 +14,7 @@
 #include "D3D12RaytracingHelpers.hpp"
 
 #include <D3Dcompiler.h>
+#include <dxcapi.h>
 
 namespace toyboxSDK {
 
@@ -53,8 +54,8 @@ GraphicsAPI::init(UInt32 w,
     CreateCommandList();
 
     //DXR
-    CreateRaytracingInterfaces(); //Requires device and command list
-    CreateRaytracingPipelineStateObject();
+    //CreateRaytracingInterfaces(); //Requires device and command list
+    //CreateRaytracingPipelineStateObject();
 
     CreateConstantBuffer();
     CreateQuadVB();
@@ -85,93 +86,199 @@ GraphicsAPI::init(UInt32 w,
 
 //DXR
 void
-GraphicsAPI::CreateModel(std::vector<byte>& VB, std::vector<byte>& IB, SizeT totalVertex) {
+GraphicsAPI::CreateModel(std::vector<byte>& VB,
+                         std::vector<byte>& IB,
+                         SizeT totalVertex) {
+  D3D12_HEAP_PROPERTIES defaultHeapProps = {};
+  defaultHeapProps.Type = D3D12_HEAP_TYPE_DEFAULT;
+  defaultHeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+  defaultHeapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+  defaultHeapProps.CreationNodeMask = 1;
+  defaultHeapProps.VisibleNodeMask = 1;
 
-  std::cout <<
-  "Note: using upload heaps to transfer static data like vert buffers is not recommended. Every " \
-  "time the GPU needs it, the upload heap will be marshalled over. Please read up on Default " \
-  "Heap usage. An upload heap is used here for code simplicity and because there are very few " \
-  "verts to actually transfer." <<
-  std::endl;
+  D3D12_HEAP_PROPERTIES uploadHeapProps = {};
+  uploadHeapProps.Type = D3D12_HEAP_TYPE_UPLOAD;
+  uploadHeapProps.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+  uploadHeapProps.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+  uploadHeapProps.CreationNodeMask = 1;
+  uploadHeapProps.VisibleNodeMask = 1;
 
-  D3D12_HEAP_PROPERTIES heapProperty;
-  heapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
-  heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-  heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-  heapProperty.CreationNodeMask = 1;
-  heapProperty.VisibleNodeMask = 1;
+  D3D12_RESOURCE_DESC defaultResourceDesc = {};
+  defaultResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+  defaultResourceDesc.Alignment = 0;
+  defaultResourceDesc.Height = 1;
+  defaultResourceDesc.DepthOrArraySize = 1;
+  defaultResourceDesc.MipLevels = 1;
+  defaultResourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+  defaultResourceDesc.SampleDesc.Count = 1;
+  defaultResourceDesc.SampleDesc.Quality = 0;
+  defaultResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+  defaultResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS;
 
-	D3D12_RESOURCE_DESC resourceDesc;
-	ZeroMemory(&resourceDesc, sizeof(resourceDesc));
-	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-	resourceDesc.Alignment = 0;
-	resourceDesc.SampleDesc.Count = 1;
-	resourceDesc.SampleDesc.Quality = 0;
-	resourceDesc.MipLevels = 1;
-	resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-	resourceDesc.DepthOrArraySize = 1;
-	resourceDesc.Height = 1;
-	resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-  //VB
+  D3D12_RESOURCE_DESC uploadResourceDesc = {};
+  uploadResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+  uploadResourceDesc.Alignment = 0;
+  uploadResourceDesc.Height = 1;
+  uploadResourceDesc.DepthOrArraySize = 1;
+  uploadResourceDesc.MipLevels = 1;
+  uploadResourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+  uploadResourceDesc.SampleDesc.Count = 1;
+  uploadResourceDesc.SampleDesc.Quality = 0;
+  uploadResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+  uploadResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+  //Vertex buffer
   {
-	  resourceDesc.Width = VB.size();
+    defaultResourceDesc.Width = VB.size();
 
-	  HRESULT HRVBCR = m_device->CreateCommittedResource(&heapProperty,
+    HRESULT HRVBCR = m_device->CreateCommittedResource(&defaultHeapProps,
                                                        D3D12_HEAP_FLAG_NONE,
-                                                       &resourceDesc,
-                                                       D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                       &defaultResourceDesc,
+                                                       D3D12_RESOURCE_STATE_COMMON,
                                                        nullptr,
                                                        __uuidof(**(&m_ModelVB)),
                                                        (void**)(&m_ModelVB));
-	
+
     if (FAILED(HRVBCR)) {
       throw std::exception();
     }
 
-	  byte* VBDataBegin;
-	  HRESULT HRMapVB = m_ModelVB->Map(0, nullptr, reinterpret_cast<void**>(&VBDataBegin));
-    if (FAILED(HRMapVB)) {
-      throw std::exception();
+    m_ModelVBView.BufferLocation = m_ModelVB->GetGPUVirtualAddress();
+    m_ModelVBView.StrideInBytes = sizeof(ModelVertex);
+    m_ModelVBView.SizeInBytes = VB.size();
+
+    //Before state
+    {
+      D3D12_RESOURCE_BARRIER barrierDesc = {};
+      barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+      barrierDesc.Transition.pResource = m_ModelVB;
+      barrierDesc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+      barrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+      barrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+
+      m_commandList->ResourceBarrier(1, &barrierDesc);
     }
-    std::memcpy(VBDataBegin, &VB[0], VB.size());
-	  m_ModelVB->Unmap(0, nullptr);
 
-	  m_ModelVBView.BufferLocation = m_ModelVB->GetGPUVirtualAddress();
-	  m_ModelVBView.StrideInBytes = sizeof(ModelVertex);
-	  m_ModelVBView.SizeInBytes = VB.size();
+    //Copy buffer.
+    {
+      uploadResourceDesc.Width = VB.size();
+
+      ID3D12Resource* uploadBuffer;
+      HRESULT hr = m_device->CreateCommittedResource(&uploadHeapProps,
+                                                     D3D12_HEAP_FLAG_NONE,
+                                                     &uploadResourceDesc,
+                                                     D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                     nullptr,
+                                                     __uuidof(**(&uploadBuffer)),
+                                                     (void**)(&uploadBuffer));
+
+
+      void* pData;
+      if (FAILED(uploadBuffer->Map(0, NULL, &pData))) {
+        throw std::exception();
+      }
+
+      memcpy(pData, VB.data(), VB.size());
+      uploadBuffer->Unmap(0, NULL);
+
+      m_commandList->CopyBufferRegion(m_ModelVB,
+                                      0,
+                                      uploadBuffer,
+                                      0,
+                                      m_ModelVBView.SizeInBytes);
+    }
+
+    //After state
+    {
+      D3D12_RESOURCE_BARRIER barrierDesc = {};
+      barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+      barrierDesc.Transition.pResource = m_ModelVB;
+      barrierDesc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+      barrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+      barrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
+
+      m_commandList->ResourceBarrier(1, &barrierDesc);
+    }
   }
-  //IB
-  {
-    resourceDesc.Width = IB.size();
 
-    HRESULT HRIDCR = m_device->CreateCommittedResource(&heapProperty,
+  //Index buffer 
+  {
+    defaultResourceDesc.Width = IB.size();
+
+    HRESULT HRVBCR = m_device->CreateCommittedResource(&defaultHeapProps,
                                                        D3D12_HEAP_FLAG_NONE,
-                                                       &resourceDesc,
-                                                       D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                       &defaultResourceDesc,
+                                                       D3D12_RESOURCE_STATE_COMMON,
                                                        nullptr,
                                                        __uuidof(**(&m_ModelIB)),
                                                        (void**)(&m_ModelIB));
 
-    if (FAILED(HRIDCR)) {
+    if (FAILED(HRVBCR)) {
       throw std::exception();
     }
-
-    byte* IBDataBegin;
-    HRESULT HRIB = m_ModelIB->Map(0, nullptr, reinterpret_cast<void**>(&IBDataBegin));
-    if (FAILED(HRIB)) {
-      throw std::exception();
-    }
-    std::memcpy(IBDataBegin, &IB[0], IB.size());
-    m_ModelIB->Unmap(0, nullptr);
 
     m_ModelIBView.BufferLocation = m_ModelIB->GetGPUVirtualAddress();
     m_ModelIBView.Format = DXGI_FORMAT_R32_UINT;
     m_ModelIBView.SizeInBytes = IB.size();
+
+    //Before state
+    {
+      D3D12_RESOURCE_BARRIER barrierDesc = {};
+      barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+      barrierDesc.Transition.pResource = m_ModelIB;
+      barrierDesc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+      barrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+      barrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_COPY_DEST;
+      barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+
+
+      m_commandList->ResourceBarrier(1, &barrierDesc);
+    }
+
+    {
+      uploadResourceDesc.Width = IB.size();
+
+      ID3D12Resource* uploadBuffer;
+      HRESULT hr = m_device->CreateCommittedResource(&uploadHeapProps,
+                                                     D3D12_HEAP_FLAG_NONE,
+                                                     &uploadResourceDesc,
+                                                     D3D12_RESOURCE_STATE_GENERIC_READ,
+                                                     nullptr,
+                                                     __uuidof(**(&uploadBuffer)),
+                                                     (void**)(&uploadBuffer));
+
+
+      void* pData;
+      if (FAILED(uploadBuffer->Map(0, NULL, &pData))) {
+        throw std::exception();
+      }
+
+      memcpy(pData, IB.data(), IB.size());
+      uploadBuffer->Unmap(0, NULL);
+
+      m_commandList->CopyBufferRegion(m_ModelIB,
+                                      0,
+                                      uploadBuffer,
+                                      0,
+                                      m_ModelIBView.SizeInBytes);
+    }
+
+    //After state
+    {
+      D3D12_RESOURCE_BARRIER barrierDesc = {};
+      barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+      barrierDesc.Transition.pResource = m_ModelIB;
+      barrierDesc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+      barrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_COPY_DEST;
+      barrierDesc.Transition.StateAfter = D3D12_RESOURCE_STATE_GENERIC_READ;
+      barrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_END_ONLY;
+
+      m_commandList->ResourceBarrier(1, &barrierDesc);
+    }
   }
 
   m_ModelIndexes = totalVertex;
 
-  BuildAccelerationStructures();
 }
 ////////////////////////////////////////////////////////////////////////////////
 void
@@ -953,108 +1060,6 @@ GraphicsAPI::CreateRaytracingInterfaces() {
 
 }
 
-//DXR
-//void
-//CreateLocalRootSignatureSubobjects(CD3D12_STATE_OBJECT_DESC* raytracingPipeline) {
-//  // Hit group and miss shaders in this sample are not using a local root signature and thus one is not associated with them.
-//  
-//  // Local root signature to be used in a ray gen shader.
-//  {
-//    auto localRootSignature = raytracingPipeline->CreateSubobject<CD3D12_LOCAL_ROOT_SIGNATURE_SUBOBJECT>();
-//    localRootSignature->SetRootSignature(m_raytracingLocalRootSignature.Get());
-//    // Shader association
-//    auto rootSignatureAssociation = raytracingPipeline->CreateSubobject<CD3D12_SUBOBJECT_TO_EXPORTS_ASSOCIATION_SUBOBJECT>();
-//    rootSignatureAssociation->SetSubobjectToAssociate(*localRootSignature);
-//    rootSignatureAssociation->AddExport(c_raygenShaderName);
-//  }
-//}
-
-//DXR
-void
-GraphicsAPI::CreateRaytracingPipelineStateObject() {
-  // Create 7 subobjects that combine into a RTPSO:
-    // Subobjects need to be associated with DXIL exports (i.e. shaders) either by way of default or explicit associations.
-    // Default association applies to every exported shader entrypoint that doesn't have any of the same type of subobject associated with it.
-    // This simple sample utilizes default shader association except for local root signature subobject
-    // which has an explicit association specified purely for demonstration purposes.
-    // 1 - DXIL library
-    // 1 - Triangle hit group
-    // 1 - Shader config
-    // 2 - Local root signature and association
-    // 1 - Global root signature
-    // 1 - Pipeline config
-  CD3D12_STATE_OBJECT_DESC raytracingPipeline{ D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE };
-
-
-  // DXIL library
-  // This contains the shaders and their entrypoints for the state object.
-  // Since shaders are not considered a subobject, they need to be passed in via DXIL library subobjects.
-  auto lib = raytracingPipeline.CreateSubobject<CD3D12_DXIL_LIBRARY_SUBOBJECT>();
-  D3D12_SHADER_BYTECODE libdxil = CD3DX12_SHADER_BYTECODE((void *)g_pRaytracing, ARRAYSIZE(g_pRaytracing));
-
-  D3D12_SHADER_BYTECODE libdxil = {};
-
-  lib->SetDXILLibrary(&libdxil);
-  // Define which shader exports to surface from the library.
-  // If no shader exports are defined for a DXIL library subobject, all shaders will be surfaced.
-  // In this sample, this could be omitted for convenience since the sample uses all shaders in the library. 
-  {
-    lib->DefineExport(c_raygenShaderName.c_str());
-    lib->DefineExport(c_closestHitShaderName.c_str());
-    lib->DefineExport(c_missShaderName.c_str());
-  }
-
-  // Triangle hit group
-  // A hit group specifies closest hit, any hit and intersection shaders to be executed when a ray intersects the geometry's triangle/AABB.
-  // In this sample, we only use triangle geometry with a closest hit shader, so others are not set.
-  auto hitGroup = raytracingPipeline.CreateSubobject<CD3D12_HIT_GROUP_SUBOBJECT>();
-  hitGroup->SetClosestHitShaderImport(c_closestHitShaderName.c_str());
-  hitGroup->SetHitGroupExport(c_hitGroupName.c_str());
-  hitGroup->SetHitGroupType(D3D12_HIT_GROUP_TYPE_TRIANGLES);
-
-  // Shader config
-  // Defines the maximum sizes in bytes for the ray payload and attribute structure.
-  auto shaderConfig = raytracingPipeline.CreateSubobject<CD3D12_RAYTRACING_SHADER_CONFIG_SUBOBJECT>();
-  UINT payloadSize = 4 * sizeof(float);   // float4 color
-  UINT attributeSize = 2 * sizeof(float); // float2 barycentrics
-  shaderConfig->Config(payloadSize, attributeSize);
-
-  // Local root signature and shader association
-  CreateLocalRootSignatureSubobjects(&raytracingPipeline);
-  // This is a root signature that enables a shader to have unique arguments that come from shader tables.
-
-  // Global root signature
-  // This is a root signature that is shared across all raytracing shaders invoked during a DispatchRays() call.
-  auto globalRootSignature = raytracingPipeline.CreateSubobject<CD3D12_GLOBAL_ROOT_SIGNATURE_SUBOBJECT>();
-  globalRootSignature->SetRootSignature(m_raytracingGlobalRootSignature.Get());
-
-  // Pipeline config
-  // Defines the maximum TraceRay() recursion depth.
-  auto pipelineConfig = raytracingPipeline.CreateSubobject<CD3D12_RAYTRACING_PIPELINE_CONFIG_SUBOBJECT>();
-  // PERFOMANCE TIP: Set max recursion depth as low as needed 
-  // as drivers may apply optimization strategies for low recursion depths. 
-  UINT maxRecursionDepth = 1; // ~ primary rays only. 
-  pipelineConfig->Config(maxRecursionDepth);
-
-#if _DEBUG
-  //PrintStateObjectDesc(raytracingPipeline);
-#endif
-
-  // Create the state object.
-  if (m_raytracingMode == RTXMode::FallbackLayer) {
-    //ThrowIfFailed(m_fallbackDevice->CreateStateObject(raytracingPipeline, IID_PPV_ARGS(&m_fallbackStateObject)), L"Couldn't create DirectX Raytracing state object.\n");
-  }
-  else if (m_raytracingMode == RTXMode::DirectXRaytracing) {
-    HRESULT HRRTXObject = m_dxrDevice->CreateStateObject(raytracingPipeline, IID_PPV_ARGS(&m_dxrStateObject));
-    if (FAILED(HRRTXObject)) {
-      std::cout << "Couldn't create DirectX Raytracing state object." << std::endl;
-      throw std::exception();
-      return;
-    }
-  }
-}
-
-
 void
 AllocateUAVBuffer(ID3D12Device* pDevice,
                   UInt64 bufferSize,
@@ -1151,7 +1156,6 @@ GraphicsAPI::BuildAccelerationStructures() {
     std::cout << _T("RTXPSO can't be create since RTX couldn't be enabled") << std::endl;
     return;
   }
-  auto device = m_device;
   auto device = m_device;
   auto commandList = m_commandList;
   auto commandQueue = m_commandQueue;
@@ -1323,8 +1327,8 @@ GraphicsAPI::BuildAccelerationStructures() {
   if (FAILED(hr)) {
     throw std::exception();
   }
-  ID3D12CommandList *commandLists[] = { m_commandList };
-  m_commandQueue->ExecuteCommandLists(ARRAYSIZE(commandLists), commandLists);
+  //ID3D12CommandList* commandLists[] = { m_commandList };
+  //m_commandQueue->ExecuteCommandLists(ARRAYSIZE(commandLists), commandLists);
   
   // Wait for GPU to finish as the locally created temporary GPU resources will get released once we go out of scope.
   //m_deviceResources->WaitForGpu();
@@ -1367,141 +1371,6 @@ GraphicsAPI::CreateRaytracingOutputBuffer() {
     throw std::exception();
     return;
   }
-}
-
-void
-GraphicsAPI::CreateShaderResourceHeap() {
-  // Create a SRV/UAV/CBV descriptor heap. We need 2 entries - 1 SRV for the TLAS, 1 UAV for the
-  // raytracing output and 1 CBV for the camera matrices
-  D3D12_DESCRIPTOR_HEAP_DESC m_RTX_SRV_UAV_HeapDesc;
-  m_RTX_SRV_UAV_HeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-  m_RTX_SRV_UAV_HeapDesc.NodeMask = 0;
-  m_RTX_SRV_UAV_HeapDesc.NumDescriptors = 2;
-  m_RTX_SRV_UAV_HeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-
-  HRESULT RTXHeap = m_device->CreateDescriptorHeap(&m_RTX_SRV_UAV_HeapDesc,
-                                                    __uuidof(**(&m_RTXHeap)),
-                                                    (void**)(&m_RTXHeap));
-
-  if (FAILED(RTXHeap)) {
-    std::cout << "Couldn't create RTX heap" << std::endl;
-    throw std::exception();
-    return;
-  }
-
-  // Get a handle to the heap memory on the CPU side, to be able to write the descriptors directly
-  D3D12_CPU_DESCRIPTOR_HANDLE srvHandle = m_RTXHeap->GetCPUDescriptorHandleForHeapStart();
-
-  // Create the UAV. Based on the root signature we created it is the first entry. The Create*View
-  // methods write the view information directly into srvHandle
-  D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = {};
-  uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-  m_device->CreateUnorderedAccessView(m_outputResource, nullptr, &uavDesc, srvHandle);
-
-  // Add the Top Level AS SRV right after the raytracing output buffer
-  srvHandle.ptr += m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-  D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
-  srvDesc.Format = DXGI_FORMAT_UNKNOWN;
-  srvDesc.ViewDimension = D3D12_SRV_DIMENSION_RAYTRACING_ACCELERATION_STRUCTURE;
-  srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-  srvDesc.RaytracingAccelerationStructure.Location = m_topLevelASBuffers.pResult->GetGPUVirtualAddress();
-
-  // Write the acceleration structure view in the heap
-  m_device->CreateShaderResourceView(nullptr, &srvDesc, srvHandle);
-}
-
-/*
-UInt32
-CopyShaderData(ID3D12StateObjectPropertiesPrototype* raytracingPipeline,
-               UInt8* outputData,
-               const std::vector<SBTEntry>& shaders,
-               UInt32 entrySize) {
-  uint8_t* pData = outputData;
-  for (const auto& shader : shaders) {
-    // Get the shader identifier, and check whether that identifier is known
-    void* id = raytracingPipeline->GetShaderIdentifier(shader.m_entryPoint.c_str());
-    if (!id) {
-      std::wstring errMsg(std::wstring(L"Unknown shader identifier used in the SBT: ") +
-        shader.m_entryPoint);
-      throw std::logic_error(std::string(errMsg.begin(), errMsg.end()));
-    }
-    // Copy the shader identifier
-    memcpy(pData, id, m_progIdSize);
-    // Copy all its resources pointers or values in bulk
-    memcpy(pData + m_progIdSize, shader.m_inputData.data(), shader.m_inputData.size() * 8);
-
-    pData += entrySize;
-  }
-  // Return the number of bytes actually written to the output buffer
-  return static_cast<uint32_t>(shaders.size()) * entrySize;
-}
-*/
-
-void
-GraphicsAPI::CreateShaderBindingTable() {
-  D3D12_HEAP_PROPERTIES heapProperty;
-  heapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
-  heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-  heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-  heapProperty.CreationNodeMask = 1;
-  heapProperty.VisibleNodeMask = 1;
-
-  // The pointer to the beginning of the heap is the only parameter required by shaders without root
-  // parameters
-  D3D12_GPU_DESCRIPTOR_HANDLE srvUavHeapHandle = m_RTXHeap->GetGPUDescriptorHandleForHeapStart();
-
-  // The helper treats both root parameter pointers and heap pointers as void*, while DX12 uses the
-  // D3D12_GPU_DESCRIPTOR_HANDLE to define heap pointers. The pointer in this struct is a UINT64,
-  // which then has to be reinterpreted as a pointer.
-  UInt64* heapPointer = reinterpret_cast<UInt64*>(srvUavHeapHandle.ptr);
-
-  // The ray generation only uses heap data
-  m_sbtHelper.AddRayGenerationProgram(L"RayGen", { heapPointer });
-
-  // The miss shaders do not access any external resources: instead they communicate their results
-  // through the ray payload
-  m_sbtHelper.AddMissProgram(L"Miss", {});
-
-  // Adding the triangle hit shader
-  m_sbtHelper.AddHitGroup(L"HitGroup", { (void*)(m_ModelVB->GetGPUVirtualAddress()) });
-
-  // Compute the size of the SBT given the number of shaders and their parameters
-  UInt32 sbtSize = m_sbtHelper.ComputeSBTSize(m_dxrDevice);
-
-  // Create the SBT on the upload heap. This is required as the helper will use mapping to write the
-  // SBT contents. After the SBT compilation it could be copied to the default heap for performance.
-
-  D3D12_RESOURCE_DESC bufDesc = {};
-  bufDesc.Alignment = 0;
-  bufDesc.DepthOrArraySize = 1;
-  bufDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-  bufDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-  bufDesc.Format = DXGI_FORMAT_UNKNOWN;
-  bufDesc.Height = 1;
-  bufDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-  bufDesc.MipLevels = 1;
-  bufDesc.SampleDesc.Count = 1;
-  bufDesc.SampleDesc.Quality = 0;
-  bufDesc.Width = sbtSize;
-
-  ID3D12Resource* pBuffer;
-  HRESULT HRRTXBinding = m_device->CreateCommittedResource(&heapProperty,
-                                                           D3D12_HEAP_FLAG_NONE,
-                                                           &bufDesc,
-                                                           D3D12_RESOURCE_STATE_GENERIC_READ,
-                                                           nullptr,
-                                                           __uuidof(**(&m_RTXShaderBindingTable)),
-                                                           (void**)(&m_RTXShaderBindingTable));
-
-  if (FAILED(HRRTXBinding)) {
-    std::cout << "Couldn't create RXT shader binding table" << std::endl;
-    throw std::exception();
-    return;
-  }
-
-  // Compile the SBT from the shader and parameters info
-  m_sbtHelper.Generate(m_RTXShaderBindingTable, m_rtStateObjectProps.Get());
 }
 
 void

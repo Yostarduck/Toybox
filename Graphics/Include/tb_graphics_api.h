@@ -220,11 +220,11 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
 
   //RTX
   void CreateRaytracingInterfaces();
-  void CreateRaytracingPipelineStateObject();
+  //void CreateRaytracingPipelineStateObject();
   void BuildAccelerationStructures();
   void CreateRaytracingOutputBuffer();
-  void CreateShaderResourceHeap();
-  void CreateShaderBindingTable();
+  //void CreateShaderResourceHeap();
+  //void CreateShaderBindingTable();
 
   void CreateShaders();
   void CreateConstantBuffer();
