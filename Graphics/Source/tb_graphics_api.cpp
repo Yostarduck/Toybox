@@ -14,7 +14,6 @@
 #include "D3D12RaytracingHelpers.hpp"
 
 #include <D3Dcompiler.h>
-#include <dxcapi.h>
 
 namespace toyboxSDK {
 
@@ -54,8 +53,8 @@ GraphicsAPI::init(UInt32 w,
     CreateCommandList();
 
     //DXR
-    //CreateRaytracingInterfaces(); //Requires device and command list
-    //CreateRaytracingPipelineStateObject();
+    CreateRaytracingInterfaces(); //Requires device and command list
+    CreateRaytracingPipelineStateObject();
 
     CreateConstantBuffer();
     CreateQuadVB();
@@ -1043,7 +1042,7 @@ GraphicsAPI::CreateRaytracingInterfaces() {
     //This gets the raytracing command list, it doesn't creates it.
     HRESULT HRDXRCommandList = m_commandList->QueryInterface(__uuidof(**(&m_dxrCommandList)),
                                                              (void**)(&m_dxrCommandList));
-    if (FAILED(HRDXRDevice)) {
+    if (FAILED(HRDXRCommandList)) {
       //std::cout << _T("Couldn't get DirectX Raytracing interface for the command list.\n") << std::endl;
       throw std::exception();
       return;
@@ -1057,7 +1056,119 @@ GraphicsAPI::CreateRaytracingInterfaces() {
     m_dxrDevice = nullptr;
     m_dxrCommandList = nullptr;
   }
+}
 
+void
+GraphicsAPI::CompileRTXShader(TString fileName,
+                              IDxcBlob** blob) {
+  HMODULE m_dll = LoadLibraryW(_T("dxcompiler.dll"));
+  DxcCreateInstanceProc m_createFn = (DxcCreateInstanceProc)GetProcAddress(m_dll, "DxcCreateInstance");
+
+  static IDxcCompiler* pCompiler = nullptr;
+  static IDxcLibrary* pLibrary = nullptr;
+  static IDxcIncludeHandler* dxcIncludeHandler;
+
+  HRESULT HRLibrary = m_createFn(CLSID_DxcLibrary,
+                                 __uuidof(IDxcLibrary),
+                                 (void**)&pLibrary);
+
+  if (FAILED(HRLibrary)) {
+    std::cout << _T("Couldn't create Library.\n") << std::endl;
+    throw std::exception();
+    return;
+  }
+
+  HRESULT HRCompiler = m_createFn(CLSID_DxcCompiler,
+                                  __uuidof(IDxcCompiler),
+                                  (void**)&pCompiler);
+
+  if (FAILED(HRCompiler)) {
+    std::cout << _T("Couldn't create compiler.\n") << std::endl;
+    throw std::exception();
+    return;
+  }
+
+  HRESULT HRInclude = pLibrary->CreateIncludeHandler(&dxcIncludeHandler);
+
+  if (FAILED(HRInclude)) {
+    std::cout << _T("Couldn't create Library.\n") << std::endl;
+    throw std::exception();
+    return;
+  }
+
+  UINT32 codePage = 0;
+  IDxcBlobEncoding* pShaderText = nullptr;
+  IDxcOperationResult* result;
+  
+  // Load and encode the shader file.
+  pLibrary->CreateBlobFromFile(fileName.c_str(), &codePage, &pShaderText);
+  
+  // Compile shader; "main" is where execution starts.
+  HRESULT HRCompile = pCompiler->Compile(pShaderText,
+                                         fileName.c_str(),
+                                         _T("main"),
+                                         _T("lib_6_3"),
+                                         nullptr,
+                                         0,
+                                         nullptr,
+                                         0,
+                                         dxcIncludeHandler,
+                                         &result);
+  
+  // Get the shader bytecode result.
+  result->GetResult(blob);
+}
+
+void
+GraphicsAPI::CreateRaytracingPipelineStateObject() {
+  /*
+  * 0: RayGeneration
+  * 1: AnyHit
+  * 2: Miss
+  */
+  m_dxrStateObject = nullptr;
+
+  std::vector<D3D12_STATE_SUBOBJECT> rtxSubObj(3);
+
+  //RayGen
+  IDxcBlob* rayGenBlob;
+  CompileRTXShader(_T("Resources\\Shaders\\RTXRayGen.hlsl"), &rayGenBlob);
+
+  D3D12_EXPORT_DESC rayGenexport;
+
+  rayGenexport = {};
+  rayGenexport.Name = _T("RayGen");
+  rayGenexport.ExportToRename = nullptr;
+  rayGenexport.Flags = D3D12_EXPORT_FLAG_NONE;
+
+  D3D12_DXIL_LIBRARY_DESC rayGenlibDesc;
+  rayGenlibDesc.DXILLibrary.BytecodeLength = rayGenBlob->GetBufferSize();
+  rayGenlibDesc.DXILLibrary.pShaderBytecode = rayGenBlob->GetBufferPointer();
+  rayGenlibDesc.NumExports = static_cast<UINT>(1);
+  rayGenlibDesc.pExports = &rayGenexport;
+
+  D3D12_STATE_SUBOBJECT libSubobject = {};
+  libSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
+  libSubobject.pDesc = &rayGenlibDesc;
+
+  rtxSubObj[0] = libSubobject;
+
+  //AnyHit
+
+  D3D12_STATE_OBJECT_DESC rtxObjDesc;
+  rtxObjDesc.Type = D3D12_STATE_OBJECT_TYPE::D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE;
+  rtxObjDesc.NumSubobjects = 0;
+  rtxObjDesc.pSubobjects = nullptr;
+
+  HRESULT HRRTXObject = m_dxrDevice->CreateStateObject(&rtxObjDesc,
+                                                       __uuidof(**(&m_dxrStateObject)),
+                                                       (void**)(&m_dxrStateObject));
+
+  if (FAILED(HRRTXObject)) {
+    std::cout << _T("Couldn't create Raytracing pipeline object.\n") << std::endl;
+    throw std::exception();
+    return;
+  }
 }
 
 void
@@ -1405,6 +1516,12 @@ GraphicsAPI::CreateShaders() {
                         &InverterCSShaderBlob,
                         &InverterCSBytecodePtr,
                         &InverterCSbytecodeSz);
+}
+
+void
+GraphicsAPI::CreateRTXLib() {
+  m_dxrCommandList;
+
 }
 
 void

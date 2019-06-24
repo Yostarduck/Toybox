@@ -13,6 +13,7 @@
 //Hardcoded headers
 #include <d3d12.h>
 #include <dxgi1_4.h>
+#include <dxcapi.h>
 
 #include <vector>
 
@@ -220,13 +221,15 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
 
   //RTX
   void CreateRaytracingInterfaces();
-  //void CreateRaytracingPipelineStateObject();
+  void CreateRaytracingPipelineStateObject();
   void BuildAccelerationStructures();
   void CreateRaytracingOutputBuffer();
   //void CreateShaderResourceHeap();
   //void CreateShaderBindingTable();
 
   void CreateShaders();
+  //RTX
+  void CreateRTXLib();
   void CreateConstantBuffer();
   void CreateQuadVB();
   void CreateQuadIB();
@@ -258,6 +261,10 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
                           void** bytecodePtrOut,
                           SizeT* bytecodeSzOut);
 
+  void
+  CompileRTXShader(TString fileName,
+                   IDxcBlob** blob);
+
   IDXGIFactory4* GetFactory(UInt32 flags = 0);
   void GetHardwareAdapter(IDXGIFactory4* pFactory, IDXGIAdapter1** ppAdapter);
 
@@ -265,7 +272,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   RTXMode::E m_raytracingMode;
 
   ID3D12Device5* m_dxrDevice; //RTX Device
-  ID3D12GraphicsCommandList* m_dxrCommandList; //RTX Command list
+  ID3D12GraphicsCommandList4* m_dxrCommandList; //RTX Command list
 
   ID3D12Resource* m_accelerationStructure;
   ID3D12Resource* m_bottomLevelAccelerationStructure;
@@ -274,7 +281,6 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ID3D12DescriptorHeap* m_RTXHeap;
   ID3D12Resource* m_RTXShaderBindingTable;
 
-  //ID3D12StateObjectPrototype* rtStateObject;
   ID3D12StateObject* m_dxrStateObject;
 
   ID3DBlob* m_rayGenLibrary;
@@ -285,7 +291,7 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
 
   IDXGIAdapter1* m_hardwareAdapter;
   ID3D12Device* m_device; //Common Device
-  ID3D12CommandQueue* m_commandQueue; //Command Queue
+  ID3D12CommandQueue* m_commandQueue; //Common Command Queue
   ID3D12GraphicsCommandList* m_commandList;
 
   std::vector<ID3D12CommandAllocator*> m_commandAllocators;
