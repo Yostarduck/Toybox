@@ -4,12 +4,12 @@
 #include <tb_string_conversions.h>
 #include <tb_types.h>
 
-//#include "tb_device.h"
-//#include "tb_swap_chain.h"
-//#include "tb_render_target.h"
-//
-//#include "tb_d3d12_device.h"
-//#include "tb_d3d12_shader.h"
+// #include "tb_device.h"
+// #include "tb_swap_chain.h"
+// #include "tb_render_target.h"
+// 
+// #include "tb_d3d12_device.h"
+// #include "tb_d3d12_shader.h"
 
 #include "D3D12RaytracingHelpers.hpp"
 
@@ -52,8 +52,8 @@ GraphicsAPI::init(UInt32 w,
   {
     CreateCommandList();
 
-    //DXR
-    CreateRaytracingInterfaces(); //Requires device and command list
+    // DXR
+    CreateRaytracingInterfaces(); // Requires device and command list
     CreateRaytracingPipelineStateObject();
 
     CreateConstantBuffer();
@@ -83,7 +83,7 @@ GraphicsAPI::init(UInt32 w,
   m_commandQueue->EndEvent();
 }
 
-//DXR
+// DXR
 void
 GraphicsAPI::CreateModel(std::vector<byte>& VB,
                          std::vector<byte>& IB,
@@ -126,7 +126,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB,
   uploadResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
   uploadResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 
-  //Vertex buffer
+  // Vertex buffer
   {
     defaultResourceDesc.Width = VB.size();
 
@@ -146,7 +146,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB,
     m_ModelVBView.StrideInBytes = sizeof(ModelVertex);
     m_ModelVBView.SizeInBytes = VB.size();
 
-    //Before state
+    // Before state
     {
       D3D12_RESOURCE_BARRIER barrierDesc = {};
       barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -158,7 +158,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB,
       m_commandList->ResourceBarrier(1, &barrierDesc);
     }
 
-    //Copy buffer.
+    // Copy buffer.
     {
       uploadResourceDesc.Width = VB.size();
 
@@ -187,7 +187,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB,
                                       m_ModelVBView.SizeInBytes);
     }
 
-    //After state
+    // After state
     {
       D3D12_RESOURCE_BARRIER barrierDesc = {};
       barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -200,7 +200,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB,
     }
   }
 
-  //Index buffer 
+  // Index buffer 
   {
     defaultResourceDesc.Width = IB.size();
 
@@ -220,7 +220,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB,
     m_ModelIBView.Format = DXGI_FORMAT_R32_UINT;
     m_ModelIBView.SizeInBytes = IB.size();
 
-    //Before state
+    // Before state
     {
       D3D12_RESOURCE_BARRIER barrierDesc = {};
       barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -262,7 +262,7 @@ GraphicsAPI::CreateModel(std::vector<byte>& VB,
                                       m_ModelIBView.SizeInBytes);
     }
 
-    //After state
+    // After state
     {
       D3D12_RESOURCE_BARRIER barrierDesc = {};
       barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
@@ -427,7 +427,6 @@ GenerateTextureData() {
   return data;
 }
 ////////////////////////////////////////////////////////////////////////////////
-
 void
 GraphicsAPI::CreateTexture(UInt32 textureWidth,
                            UInt32 textureHeight,
@@ -435,7 +434,7 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
                            byte* initData) {
   /////Texture resource creation/////
 
-  //Default Heap properties
+  // Default Heap properties
   D3D12_HEAP_PROPERTIES defaultHeapProperty;
   defaultHeapProperty.Type = D3D12_HEAP_TYPE_DEFAULT;
   defaultHeapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -443,10 +442,10 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
   defaultHeapProperty.CreationNodeMask = 1;
   defaultHeapProperty.VisibleNodeMask = 1;
   
-  //Describe a Texture2D.
+  // Describe a Texture2D.
   D3D12_RESOURCE_DESC textureDesc = {};
   textureDesc.MipLevels = 1;
-  //textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+  // textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
   textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
   textureDesc.Width = textureWidth;
   textureDesc.Height = textureHeight;
@@ -456,7 +455,7 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
   textureDesc.SampleDesc.Quality = 0;
   textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
   
-  //Create a Texture2D resource.
+  // Create a Texture2D resource.
   HRESULT HRTexRes = m_device->CreateCommittedResource(&defaultHeapProperty,
                                                        D3D12_HEAP_FLAG_NONE,
                                                        &textureDesc,
@@ -471,7 +470,7 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
 
   m_texture->SetName(_T("Albedo texture"));
 
-  //Get required buffer size
+  // Get required buffer size
   UInt64 uploadBufferSize = 0;
   m_device->GetCopyableFootprints(&textureDesc,
                                   0,
@@ -482,7 +481,7 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
                                   nullptr,
                                   &uploadBufferSize);
 
-  //Upload heap properties
+  // Upload heap properties
   D3D12_HEAP_PROPERTIES uploadHeapProperty;
   uploadHeapProperty.Type = D3D12_HEAP_TYPE_UPLOAD;
   uploadHeapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
@@ -490,7 +489,7 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
   uploadHeapProperty.CreationNodeMask = 1;
   uploadHeapProperty.VisibleNodeMask = 1;
 
-  //Upload buffer description
+  // Upload buffer description
   D3D12_RESOURCE_DESC uploadBufferDesc;
   uploadBufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
   uploadBufferDesc.Alignment = 0;
@@ -520,15 +519,15 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
 
   std::vector<byte> texture = GenerateTextureData();
 
-  //Copy data to the intermediate upload heap and then schedule a copy
-  //from the upload heap to the Texture2D.
+  // Copy data to the intermediate upload heap and then schedule a copy
+  // from the upload heap to the Texture2D.
   D3D12_SUBRESOURCE_DATA textureData = {};
   textureData.pData = initData;
-  //textureData.pData = &texture[0];
-  //textureData.RowPitch = textureWidth * texturePixelSize;
+  // textureData.pData = &texture[0];
+  // textureData.RowPitch = textureWidth * texturePixelSize;
   textureData.RowPitch = textureWidth * ((8 * 4) / 8);
-  //textureData.RowPitch = textureWidth * ((32 * 4) / 8);
-  //textureData.RowPitch = textureWidth * 4;
+  // textureData.RowPitch = textureWidth * ((32 * 4) / 8);
+  // textureData.RowPitch = textureWidth * 4;
   textureData.SlicePitch = textureData.RowPitch * textureHeight;
   
   D3D12_RESOURCE_BARRIER barrier = {};
@@ -542,14 +541,14 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
   UpdateSubresources(m_commandList, m_texture, textureUploadHeap, 0, 0, 1, &textureData);
   m_commandList->ResourceBarrier(1, &barrier);
 
-  //Describe a SRV for the texture.
+  // Describe a SRV for the texture.
   D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
   srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
   srvDesc.Format = textureDesc.Format;
   srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
   srvDesc.Texture2D.MipLevels = 1;
 
-  //Create a SRV for the texture.
+  // Create a SRV for the texture.
   D3D12_CPU_DESCRIPTOR_HANDLE SHCPUDescriptorhandle;
   SHCPUDescriptorhandle.ptr = m_ShaderCPUHeapStartHandle.ptr +
                               (static_cast<SizeT>(m_SHandleIncrementSize) * 8);
@@ -559,14 +558,14 @@ GraphicsAPI::CreateTexture(UInt32 textureWidth,
 
 void
 GraphicsAPI::UpdateCB(std::vector<byte>& data) {
-  //Gbuffer CB
+  // Gbuffer CB
   {
     byte* mapped = nullptr;
     m_GbufferCB->Map(0, nullptr, reinterpret_cast<void**>(&mapped));
     std::memcpy(mapped, &data[0], data.size());
     m_GbufferCB->Unmap(0, nullptr);
   }
-  //Compute CB
+  // Compute CB
   {
     Vector2 screen = Vector2(1280.0f, 720.0f);
     byte* screenData = reinterpret_cast<byte*>(&screen[0]);
@@ -609,9 +608,9 @@ GraphicsAPI::ApplyGBuffer() {
   m_commandList->SetDescriptorHeaps(1, ppHeaps);
   m_commandList->SetGraphicsRootSignature(m_GBufferRootSignature);
 
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 8); //Tex
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 8); // Tex
   m_commandList->SetGraphicsRootDescriptorTable(0, handleOffset);
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 0); //CB G
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 0); // CB G
   m_commandList->SetGraphicsRootDescriptorTable(1, handleOffset);
 
   m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -633,11 +632,11 @@ GraphicsAPI::ApplyInverter() {
   m_commandList->SetDescriptorHeaps(1, ppHeaps);
   m_commandList->SetComputeRootSignature(m_InverterRootSignature);
 
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 8); //Tex
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 8); // Tex
   m_commandList->SetComputeRootDescriptorTable(0, handleOffset);
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 2); //UAV
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 2); // UAV
   m_commandList->SetComputeRootDescriptorTable(1, handleOffset);
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 1); //CB
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 1); // CB
   m_commandList->SetComputeRootDescriptorTable(2, handleOffset);
 
   m_commandList->Dispatch(20, 20, 1);
@@ -670,9 +669,9 @@ GraphicsAPI::ApplyForward() {
   m_commandList->SetDescriptorHeaps(1, ppHeaps);
   m_commandList->SetGraphicsRootSignature(m_ForwardRootSignature);
 
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 2); //RTs
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 2); // RTs
   m_commandList->SetGraphicsRootDescriptorTable(0, handleOffset);
-  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 7); //Ds
+  handleOffset.ptr = m_ShaderGPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 7); // Ds
   m_commandList->SetGraphicsRootDescriptorTable(1, handleOffset);
 
   m_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
@@ -691,7 +690,7 @@ GraphicsAPI::PresentFrame() {
 	// If the device was removed either by a disconnection or a driver upgrade, we 
 	// must recreate all device resources.
 	if (HRPresent == DXGI_ERROR_DEVICE_REMOVED || HRPresent == DXGI_ERROR_DEVICE_RESET) {
-		//m_deviceRemoved = true;
+		// m_deviceRemoved = true;
     exit(666);
 	}
 	else {
@@ -757,12 +756,12 @@ void
 GraphicsAPI::onShutDown() {
 }
 
-//DXR
+// DXR
 void
 GraphicsAPI::CheckIfRTXIsAvaible() {
 
   bool computeRTXAvaible = false;
-  //is compute Raytracing Fallback avaible?
+  // is compute Raytracing Fallback avaible?
   {
     IDXGIFactory4* factory = GetFactory();
     IDXGIAdapter1* hardwareAdapter = nullptr;
@@ -794,7 +793,7 @@ GraphicsAPI::CheckIfRTXIsAvaible() {
     factory->Release();
   }
 
-  //Is DirectXRaytracing supported?
+  // Is DirectXRaytracing supported?
   bool m_isDxrSupported = false;
   {
     IDXGIFactory4* factory = GetFactory();
@@ -843,7 +842,7 @@ void
 GraphicsAPI::CreateDevice() {
   IDXGIFactory4* factory = GetFactory();
 
-  //Create device
+  // Create device
 	if (m_bUseCPU) {
     IDXGIAdapter* warpAdapter;
     HRESULT HRWarpAdapter = factory->EnumWarpAdapter(__uuidof(**(&warpAdapter)),
@@ -871,7 +870,7 @@ GraphicsAPI::CreateDevice() {
     if (FAILED(HRCreateDevice)) {
       throw std::exception();
     }
-    //hardwareAdapter->Release();
+    // hardwareAdapter->Release();
 	}
 
   factory->Release();
@@ -879,7 +878,7 @@ GraphicsAPI::CreateDevice() {
 
 void
 GraphicsAPI::CreateCommandQueue() {
-  //Create the command queue.
+  // Create the command queue.
   D3D12_COMMAND_QUEUE_DESC queueDesc = {};
   queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
   queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
@@ -931,13 +930,13 @@ GraphicsAPI::CreateSwapChain() {
 
   swapChainDesc.Width = m_w;
   swapChainDesc.Height = m_h;
-  swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; //Common swap chain format.
+  swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // Common swap chain format.
   swapChainDesc.Stereo = false;
-  swapChainDesc.SampleDesc.Count = 1; //Don't use multi-sampling.
+  swapChainDesc.SampleDesc.Count = 1; // Don't use multi-sampling.
   swapChainDesc.SampleDesc.Quality = 0;
   swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-  swapChainDesc.BufferCount = m_iFrameBuffers; //Use double-buffering to minimize latency.
-  swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; //All Windows Store apps must use this SwapEffect.
+  swapChainDesc.BufferCount = m_iFrameBuffers; // Use double-buffering to minimize latency.
+  swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; // All Windows Store apps must use this SwapEffect.
   swapChainDesc.Flags = 0;
   swapChainDesc.Scaling = DXGI_SCALING_NONE;
   swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
@@ -957,7 +956,7 @@ GraphicsAPI::CreateSwapChain() {
 
   factory->Release();
 
-  //Swapchain RenderTargets
+  // Swapchain RenderTargets
   {
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
     desc.NumDescriptors = m_iFrameBuffers;
@@ -1002,7 +1001,7 @@ GraphicsAPI::CreateSwapChain() {
     }
   }
 
-  //Set the 3D rendering viewport to target the entire window.
+  // Set the 3D rendering viewport to target the entire window.
   m_viewport = { 0.0f,
                  0.0f,
                  static_cast<float>(m_w),
@@ -1017,7 +1016,7 @@ GraphicsAPI::CreateCommandList() {
                                                       D3D12_COMMAND_LIST_TYPE_DIRECT,
                                                       m_commandAllocators[m_iCurrentFrame],
                                                       nullptr,
-                                                      //m_GPSOForward,
+                                                      // m_GPSOForward,
                                                       __uuidof(**(&m_commandList)),
                                                       (void**)(&m_commandList));
 
@@ -1026,11 +1025,11 @@ GraphicsAPI::CreateCommandList() {
   }
 }
 
-//DXR
+// DXR
 void
 GraphicsAPI::CreateRaytracingInterfaces() {
   if (RTXMode::DirectXRaytracing == m_raytracingMode) {
-    //This gets the raytracing device interface, it doesn't creates it.
+    // This gets the raytracing device interface, it doesn't creates it.
     HRESULT HRDXRDevice = m_device->QueryInterface(__uuidof(**(&m_dxrDevice)),
                                                    (void**)(&m_dxrDevice));
     if (FAILED(HRDXRDevice)) {
@@ -1039,11 +1038,11 @@ GraphicsAPI::CreateRaytracingInterfaces() {
       return;
     }
 
-    //This gets the raytracing command list, it doesn't creates it.
+    // This gets the raytracing command list, it doesn't creates it.
     HRESULT HRDXRCommandList = m_commandList->QueryInterface(__uuidof(**(&m_dxrCommandList)),
                                                              (void**)(&m_dxrCommandList));
     if (FAILED(HRDXRCommandList)) {
-      //std::cout << _T("Couldn't get DirectX Raytracing interface for the command list.\n") << std::endl;
+      // std::cout << _T("Couldn't get DirectX Raytracing interface for the command list.\n") << std::endl;
       throw std::exception();
       return;
     }
@@ -1068,16 +1067,6 @@ GraphicsAPI::CompileRTXShader(TString fileName,
   static IDxcLibrary* pLibrary = nullptr;
   static IDxcIncludeHandler* dxcIncludeHandler;
 
-  HRESULT HRLibrary = m_createFn(CLSID_DxcLibrary,
-                                 __uuidof(IDxcLibrary),
-                                 (void**)&pLibrary);
-
-  if (FAILED(HRLibrary)) {
-    std::cout << _T("Couldn't create Library.\n") << std::endl;
-    throw std::exception();
-    return;
-  }
-
   HRESULT HRCompiler = m_createFn(CLSID_DxcCompiler,
                                   __uuidof(IDxcCompiler),
                                   (void**)&pCompiler);
@@ -1088,33 +1077,107 @@ GraphicsAPI::CompileRTXShader(TString fileName,
     return;
   }
 
-  HRESULT HRInclude = pLibrary->CreateIncludeHandler(&dxcIncludeHandler);
+  HRESULT HRLibrary = m_createFn(CLSID_DxcLibrary,
+                                 __uuidof(IDxcLibrary),
+                                 (void**)&pLibrary);
 
-  if (FAILED(HRInclude)) {
-    std::cout << _T("Couldn't create Library.\n") << std::endl;
+  if (FAILED(HRLibrary)) {
+    std::cout << _T("Couldn't create library.\n") << std::endl;
     throw std::exception();
     return;
   }
 
-  UINT32 codePage = 0;
-  IDxcBlobEncoding* pShaderText = nullptr;
+  HRESULT HRInclude = pLibrary->CreateIncludeHandler(&dxcIncludeHandler);
+
+  if (FAILED(HRInclude)) {
+    std::cout << _T("Couldn't create include header.\n") << std::endl;
+    throw std::exception();
+    return;
+  }
+
+  // Load the shader file.
+  std::ifstream shaderFile(fileName);
+  if (shaderFile.good() == false) {
+    std::cout << _T("Couldn't open shader file.\n") << std::endl;
+    throw std::exception();
+    return;
+  }
+  std::stringstream strStream;
+  strStream << shaderFile.rdbuf();
+  String pShaderText = strStream.str();
+
+  // Create blob from the string
+  IDxcBlobEncoding* pTextBlob = nullptr;
+  HRESULT HRBlob = pLibrary->CreateBlobWithEncodingFromPinned((LPBYTE)pShaderText.c_str(),
+                                                              (UInt32)pShaderText.size(),
+                                                              0,
+                                                              &pTextBlob);
+
+  if (FAILED(HRBlob)) {
+    std::cout << _T("Couldn't create shader blob.\n") << std::endl;
+    throw std::exception();
+    return;
+  }
+
+  // Compile shader.
+
+  // To see compiler options, check the following url:
+  // https://github.com/microsoft/DirectXShaderCompiler/blob/master/docs/SPIR-V.rst#general-options
+  std::vector<LPCWSTR> ppArgs;
+
+#ifdef TB_DEBUG_MODE
+  ppArgs.push_back(_T("\Zi"));
+#endif // TB_DEBUG_MODE
+  //ppArgs.push_back(_T("\I"));
+
   IDxcOperationResult* result;
-  
-  // Load and encode the shader file.
-  pLibrary->CreateBlobFromFile(fileName.c_str(), &codePage, &pShaderText);
-  
-  // Compile shader; "main" is where execution starts.
-  HRESULT HRCompile = pCompiler->Compile(pShaderText,
+  HRESULT HRCompile = pCompiler->Compile(pTextBlob,
                                          fileName.c_str(),
-                                         _T("main"),
+                                         _T(""),
                                          _T("lib_6_3"),
-                                         nullptr,
-                                         0,
+                                         ppArgs.data(),
+                                         ppArgs.size(),
                                          nullptr,
                                          0,
                                          dxcIncludeHandler,
                                          &result);
   
+  if (FAILED(HRCompile)) {
+    std::cout << _T("Couldn't compile shader.\n") << std::endl;
+    throw std::exception();
+    return;
+  }
+
+  HRESULT HRResultCode;
+  HRESULT HRStatus = result->GetStatus(&HRResultCode);
+  if (FAILED(HRStatus)) {
+    std::cout << _T("Couldn't get compile status.\n") << std::endl;
+    throw std::exception();
+    return;
+  }
+
+  if (FAILED(HRResultCode)) {
+    IDxcBlobEncoding* error;
+    HRESULT HRErrorBuffer = result->GetErrorBuffer(&error);
+    if (FAILED(HRErrorBuffer)) {
+      std::cout << _T("Failed to get shader compiler error.\n") << std::endl;
+      throw std::exception();
+      return;
+    }
+
+    // Convert error blob to a string
+    std::vector<char> infoLog(error->GetBufferSize() + 1);
+    memcpy_s(&infoLog[0], infoLog.size(), error->GetBufferPointer(), error->GetBufferSize());
+    infoLog[error->GetBufferSize()] = 0;
+
+    String errorMsg = "Shader Compiler Error:\n";
+    errorMsg.append(infoLog.data());
+
+    std::cout << errorMsg << std::endl;
+    throw std::exception();
+    return;
+  }
+
   // Get the shader bytecode result.
   result->GetResult(blob);
 }
@@ -1130,31 +1193,78 @@ GraphicsAPI::CreateRaytracingPipelineStateObject() {
 
   std::vector<D3D12_STATE_SUBOBJECT> rtxSubObj(3);
 
-  //RayGen
+  FileSystem FS;
+  TString path = FS.GetWorkingPath();
+
+  // RayGen Shader
   IDxcBlob* rayGenBlob;
-  CompileRTXShader(_T("Resources\\Shaders\\RTXRayGen.hlsl"), &rayGenBlob);
+  CompileRTXShader(path + _T("Resources\\Shaders\\RTX_RayGen.hlsl"), &rayGenBlob);
 
-  D3D12_EXPORT_DESC rayGenexport;
+  D3D12_EXPORT_DESC rayGenExport;
 
-  rayGenexport = {};
-  rayGenexport.Name = _T("RayGen");
-  rayGenexport.ExportToRename = nullptr;
-  rayGenexport.Flags = D3D12_EXPORT_FLAG_NONE;
+  rayGenExport = {};
+  rayGenExport.Name = _T("RayGen");
+  rayGenExport.ExportToRename = nullptr;
+  rayGenExport.Flags = D3D12_EXPORT_FLAG_NONE;
 
-  D3D12_DXIL_LIBRARY_DESC rayGenlibDesc;
-  rayGenlibDesc.DXILLibrary.BytecodeLength = rayGenBlob->GetBufferSize();
-  rayGenlibDesc.DXILLibrary.pShaderBytecode = rayGenBlob->GetBufferPointer();
-  rayGenlibDesc.NumExports = static_cast<UINT>(1);
-  rayGenlibDesc.pExports = &rayGenexport;
+  D3D12_DXIL_LIBRARY_DESC rayGenLibDesc;
+  rayGenLibDesc.DXILLibrary.BytecodeLength = rayGenBlob->GetBufferSize();
+  rayGenLibDesc.DXILLibrary.pShaderBytecode = rayGenBlob->GetBufferPointer();
+  rayGenLibDesc.NumExports = static_cast<UINT>(1);
+  rayGenLibDesc.pExports = &rayGenExport;
 
-  D3D12_STATE_SUBOBJECT libSubobject = {};
-  libSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
-  libSubobject.pDesc = &rayGenlibDesc;
+  D3D12_STATE_SUBOBJECT rayGenLibSubObject = {};
+  rayGenLibSubObject.Type = D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
+  rayGenLibSubObject.pDesc = &rayGenLibDesc;
 
-  rtxSubObj[0] = libSubobject;
+  rtxSubObj[0] = rayGenLibSubObject;
 
-  //AnyHit
+  // ClosestHit Shader
+  IDxcBlob* closestHitBlob;
+  CompileRTXShader(path + _T("Resources\\Shaders\\RTX_ClosestHit.hlsl"), &closestHitBlob);
 
+  D3D12_EXPORT_DESC closestHitExport;
+  closestHitExport = {};
+  closestHitExport.Name = _T("ClosestHit");
+  closestHitExport.ExportToRename = nullptr;
+  closestHitExport.Flags = D3D12_EXPORT_FLAG_NONE;
+
+  D3D12_DXIL_LIBRARY_DESC closestHitLibDesc;
+  closestHitLibDesc.DXILLibrary.BytecodeLength = closestHitBlob->GetBufferSize();
+  closestHitLibDesc.DXILLibrary.pShaderBytecode = closestHitBlob->GetBufferPointer();
+  closestHitLibDesc.NumExports = static_cast<UINT>(1);
+  closestHitLibDesc.pExports = &closestHitExport;
+
+  D3D12_STATE_SUBOBJECT closestHitLibSubobject = {};
+  closestHitLibSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
+  closestHitLibSubobject.pDesc = &closestHitLibDesc;
+
+  rtxSubObj[1] = closestHitLibSubobject;
+
+  // Miss Shader
+  IDxcBlob* missBlob;
+  CompileRTXShader(path + _T("Resources\\Shaders\\RTX_Miss.hlsl"), &missBlob);
+
+  D3D12_EXPORT_DESC missExport;
+
+  missExport = {};
+  missExport.Name = _T("Miss");
+  missExport.ExportToRename = nullptr;
+  missExport.Flags = D3D12_EXPORT_FLAG_NONE;
+
+  D3D12_DXIL_LIBRARY_DESC missLibDesc;
+  missLibDesc.DXILLibrary.BytecodeLength = missBlob->GetBufferSize();
+  missLibDesc.DXILLibrary.pShaderBytecode = missBlob->GetBufferPointer();
+  missLibDesc.NumExports = static_cast<UINT>(1);
+  missLibDesc.pExports = &missExport;
+
+  D3D12_STATE_SUBOBJECT missLibSubobject = {};
+  missLibSubobject.Type = D3D12_STATE_SUBOBJECT_TYPE_DXIL_LIBRARY;
+  missLibSubobject.pDesc = &missLibDesc;
+
+  rtxSubObj[2] = missLibSubobject;
+
+  // 
   D3D12_STATE_OBJECT_DESC rtxObjDesc;
   rtxObjDesc.Type = D3D12_STATE_OBJECT_TYPE::D3D12_STATE_OBJECT_TYPE_RAYTRACING_PIPELINE;
   rtxObjDesc.NumSubobjects = 0;
@@ -1260,7 +1370,7 @@ AllocateUploadBuffer(ID3D12Device* pDevice,
   (*ppResource)->Unmap(0, nullptr);
 }
 
-//DXR
+// DXR
 void
 GraphicsAPI::BuildAccelerationStructures() {
   if (m_raytracingMode == RTXMode::None) {
@@ -1301,7 +1411,7 @@ GraphicsAPI::BuildAccelerationStructures() {
 
   D3D12_RAYTRACING_ACCELERATION_STRUCTURE_PREBUILD_INFO topLevelPrebuildInfo = {};
   if (m_raytracingMode == RTXMode::FallbackLayer) {
-    //m_fallbackDevice->GetRaytracingAccelerationStructurePrebuildInfo(&topLevelInputs, &topLevelPrebuildInfo);
+    // m_fallbackDevice->GetRaytracingAccelerationStructurePrebuildInfo(&topLevelInputs, &topLevelPrebuildInfo);
   }
   // DirectX Raytracing
   else if (m_raytracingMode == RTXMode::DirectXRaytracing) {
@@ -1317,7 +1427,7 @@ GraphicsAPI::BuildAccelerationStructures() {
   bottomLevelInputs.Type = D3D12_RAYTRACING_ACCELERATION_STRUCTURE_TYPE_BOTTOM_LEVEL;
   bottomLevelInputs.pGeometryDescs = &geometryDesc;
   if (m_raytracingMode == RTXMode::FallbackLayer) {
-    //m_fallbackDevice->GetRaytracingAccelerationStructurePrebuildInfo(&bottomLevelInputs, &bottomLevelPrebuildInfo);
+    // m_fallbackDevice->GetRaytracingAccelerationStructurePrebuildInfo(&bottomLevelInputs, &bottomLevelPrebuildInfo);
   }
   // DirectX Raytracing
   else if (m_raytracingMode == RTXMode::DirectXRaytracing) {
@@ -1340,7 +1450,7 @@ GraphicsAPI::BuildAccelerationStructures() {
   {
     D3D12_RESOURCE_STATES initialResourceState;
     if (m_raytracingMode == RTXMode::FallbackLayer) {
-      //initialResourceState = m_fallbackDevice->GetAccelerationStructureResourceState();
+      // initialResourceState = m_fallbackDevice->GetAccelerationStructureResourceState();
     }
     // DirectX Raytracing
     else if (m_raytracingMode == RTXMode::DirectXRaytracing) {
@@ -1358,19 +1468,19 @@ GraphicsAPI::BuildAccelerationStructures() {
   // In order to handle the requirements of DXR, the Fallback Layer uses the concept of Emulated GPU pointers, 
   // which requires apps to create views around all memory they will access for raytracing, 
   // but retains the DXR-like flexibility of only needing to bind the top level acceleration structure at DispatchRays.
-  //
+  // 
   // The Fallback Layer interface uses WRAPPED_GPU_POINTER to encapsulate the underlying pointer
   // which will either be an emulated GPU pointer for the compute - based path or a GPU_VIRTUAL_ADDRESS for the DXR path.
 
   // Create an instance desc for the bottom-level acceleration structure.
   ID3D12Resource* instanceDescs = nullptr;
   if (m_raytracingMode == RTXMode::FallbackLayer) {
-    //D3D12_RAYTRACING_FALLBACK_INSTANCE_DESC instanceDesc = {};
-    //instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
-    //instanceDesc.InstanceMask = 1;
-    //UINT numBufferElements = static_cast<UINT>(bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes) / sizeof(UINT32);
-    //instanceDesc.AccelerationStructure = CreateFallbackWrappedPointer(m_bottomLevelAccelerationStructure, numBufferElements);
-    //AllocateUploadBuffer(device, &instanceDesc, sizeof(instanceDesc), &instanceDescs, L"InstanceDescs");
+    // D3D12_RAYTRACING_FALLBACK_INSTANCE_DESC instanceDesc = {};
+    // instanceDesc.Transform[0][0] = instanceDesc.Transform[1][1] = instanceDesc.Transform[2][2] = 1;
+    // instanceDesc.InstanceMask = 1;
+    // UINT numBufferElements = static_cast<UINT>(bottomLevelPrebuildInfo.ResultDataMaxSizeInBytes) / sizeof(UINT32);
+    // instanceDesc.AccelerationStructure = CreateFallbackWrappedPointer(m_bottomLevelAccelerationStructure, numBufferElements);
+    // AllocateUploadBuffer(device, &instanceDesc, sizeof(instanceDesc), &instanceDescs, L"InstanceDescs");
   }
   // DirectX Raytracing
   else if (m_raytracingMode == RTXMode::DirectXRaytracing) {
@@ -1383,8 +1493,8 @@ GraphicsAPI::BuildAccelerationStructures() {
 
   // Create a wrapped pointer to the acceleration structure.
   if (m_raytracingMode == RTXMode::FallbackLayer) {
-    //UINT numBufferElements = static_cast<UINT>(topLevelPrebuildInfo.ResultDataMaxSizeInBytes) / sizeof(UINT32);
-    //m_fallbackTopLevelAccelerationStructurePointer = CreateFallbackWrappedPointer(m_topLevelAccelerationStructure, numBufferElements);
+    // UINT numBufferElements = static_cast<UINT>(topLevelPrebuildInfo.ResultDataMaxSizeInBytes) / sizeof(UINT32);
+    // m_fallbackTopLevelAccelerationStructurePointer = CreateFallbackWrappedPointer(m_topLevelAccelerationStructure, numBufferElements);
   }
 
   // Bottom Level Acceleration Structure desc
@@ -1420,10 +1530,10 @@ GraphicsAPI::BuildAccelerationStructures() {
 
   // Build acceleration structure.
   if (m_raytracingMode == RTXMode::FallbackLayer) {
-    //// Set the descriptor heaps to be used during acceleration structure build for the Fallback Layer.
-    //ID3D12DescriptorHeap *pDescriptorHeaps[] = { m_descriptorHeap.Get() };
-    //m_fallbackCommandList->SetDescriptorHeaps(ARRAYSIZE(pDescriptorHeaps), pDescriptorHeaps);
-    //BuildAccelerationStructure(m_fallbackCommandList.Get());
+    // // Set the descriptor heaps to be used during acceleration structure build for the Fallback Layer.
+    // ID3D12DescriptorHeap *pDescriptorHeaps[] = { m_descriptorHeap.Get() };
+    // m_fallbackCommandList->SetDescriptorHeaps(ARRAYSIZE(pDescriptorHeaps), pDescriptorHeaps);
+    // BuildAccelerationStructure(m_fallbackCommandList.Get());
   }
   // DirectX Raytracing
   else if (m_raytracingMode == RTXMode::DirectXRaytracing) {
@@ -1438,11 +1548,11 @@ GraphicsAPI::BuildAccelerationStructures() {
   if (FAILED(hr)) {
     throw std::exception();
   }
-  //ID3D12CommandList* commandLists[] = { m_commandList };
-  //m_commandQueue->ExecuteCommandLists(ARRAYSIZE(commandLists), commandLists);
+  // ID3D12CommandList* commandLists[] = { m_commandList };
+  // m_commandQueue->ExecuteCommandLists(ARRAYSIZE(commandLists), commandLists);
   
   // Wait for GPU to finish as the locally created temporary GPU resources will get released once we go out of scope.
-  //m_deviceResources->WaitForGpu();
+  // m_deviceResources->WaitForGpu();
   WaitForGPU();
 }
 
@@ -1452,8 +1562,8 @@ GraphicsAPI::CreateRaytracingOutputBuffer() {
   heapProperty.Type = D3D12_HEAP_TYPE_DEFAULT;
   heapProperty.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
   heapProperty.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-  heapProperty.CreationNodeMask = 1; //0?
-  heapProperty.VisibleNodeMask = 1; //0?
+  heapProperty.CreationNodeMask = 1; // 0?
+  heapProperty.VisibleNodeMask = 1; // 0?
 
   D3D12_RESOURCE_DESC resDesc = {};
   resDesc.DepthOrArraySize = 1;
@@ -1542,7 +1652,7 @@ GraphicsAPI::CreateConstantBuffer() {
   resourceDesc.MipLevels = 1;
   resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
   resourceDesc.DepthOrArraySize = 1;
-  //resourceDesc.Width = sizeof(CBuffer);
+  // resourceDesc.Width = sizeof(CBuffer);
   resourceDesc.Width = 256;
   resourceDesc.Height = 1;
   resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
@@ -1686,10 +1796,10 @@ GraphicsAPI::CreateQuadIB() {
 
 void
 GraphicsAPI::CreateShaderHeap() {
-  //m_cbvsrvHeap.Create(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 10, true);
+  // m_cbvsrvHeap.Create(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 10, true);
 
   // Thing           Array  offset
-  //
+  // 
   // CBV
   //  GBuffer      = 1      (0)
   //  Compute      = 1      (1)
@@ -1700,7 +1810,7 @@ GraphicsAPI::CreateShaderHeap() {
   //   Model Tex   = 1      (8)
   // UAV = 0
 
-  //Start of create GPU Heap
+  // Start of create GPU Heap
   D3D12_DESCRIPTOR_HEAP_DESC GPUHDesc;
   GPUHDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
   GPUHDesc.NodeMask = 0;
@@ -1720,43 +1830,43 @@ GraphicsAPI::CreateShaderHeap() {
   m_ShaderCPUHeapStartHandle = m_ShaderDHPtr->GetCPUDescriptorHandleForHeapStart();
   m_ShaderGPUHeapStartHandle = m_ShaderDHPtr->GetGPUDescriptorHandleForHeapStart();
   m_SHandleIncrementSize = m_device->GetDescriptorHandleIncrementSize(GPUHDesc.Type);
-  //End of create of GPU Heap
+  // End of create of GPU Heap
 
   D3D12_CPU_DESCRIPTOR_HANDLE CPUHandle;
   D3D12_CONSTANT_BUFFER_VIEW_DESC	descBuffer;
 
-  //Camera CBV
+  // Camera CBV
   descBuffer.BufferLocation = m_GbufferCB->GetGPUVirtualAddress();
-  //Constant buffer must be larger than 256 bytes
-  //descBuffer.SizeInBytes = sizeof(CBuffer); //Memory should be aligned
-  //descBuffer.SizeInBytes = (sizeof(CBuffer) + 255) & ~255; //Aligns memory to 256
-  descBuffer.SizeInBytes = 256; //Aligns memory to 256
+  // Constant buffer must be larger than 256 bytes
+  // descBuffer.SizeInBytes = sizeof(CBuffer); // Memory should be aligned
+  // descBuffer.SizeInBytes = (sizeof(CBuffer) + 255) & ~255; // Aligns memory to 256
+  descBuffer.SizeInBytes = 256; // Aligns memory to 256
 
   CPUHandle.ptr = m_ShaderCPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 0);
   m_device->CreateConstantBufferView(&descBuffer, CPUHandle);
 
   descBuffer.BufferLocation = m_ComputeCB->GetGPUVirtualAddress();
-  //Constant buffer must be larger than 256 bytes
-  //descBuffer.SizeInBytes = sizeof(CBuffer); //Memory should be aligned
-  //descBuffer.SizeInBytes = (sizeof(CBuffer) + 255) & ~255; //Aligns memory to 256
-  descBuffer.SizeInBytes = 256; //Aligns memory to 256
+  // Constant buffer must be larger than 256 bytes
+  // descBuffer.SizeInBytes = sizeof(CBuffer); // Memory should be aligned
+  // descBuffer.SizeInBytes = (sizeof(CBuffer) + 255) & ~255; // Aligns memory to 256
+  descBuffer.SizeInBytes = 256; // Aligns memory to 256
   CPUHandle.ptr = m_ShaderCPUHeapStartHandle.ptr + (m_SHandleIncrementSize * 1);
   m_device->CreateConstantBufferView(&descBuffer, CPUHandle);
 }
 
 void
 GraphicsAPI::CreateGBufferRootSignature() {
-  //Init descriptor tables
+  // Init descriptor tables
 
   D3D12_DESCRIPTOR_RANGE range[2];
   {
-    //SRV (The albedo texture)
+    // SRV (The albedo texture)
     range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
     range[0].NumDescriptors = 1;
     range[0].BaseShaderRegister = 0;
     range[0].RegisterSpace = 0;
     range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-    //CBV (The camera one)
+    // CBV (The camera one)
     range[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
     range[1].NumDescriptors = 1;
     range[1].BaseShaderRegister = 0;
@@ -1766,12 +1876,12 @@ GraphicsAPI::CreateGBufferRootSignature() {
 
   D3D12_ROOT_PARAMETER rootParameters[2];
   {
-    //
+    // 
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
     rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
     rootParameters[0].DescriptorTable.pDescriptorRanges = &range[0];
-    //
+    // 
     rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
     rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
     rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
@@ -1826,23 +1936,23 @@ GraphicsAPI::CreateGBufferRootSignature() {
 
 void
 GraphicsAPI::CreateInverterRootSignature() {
-  //Init descriptor tables
+  // Init descriptor tables
 
   D3D12_DESCRIPTOR_RANGE range[3];
   {
-    //SRV (The depth stencil)
+    // SRV (The depth stencil)
     range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
     range[0].NumDescriptors = 1;
     range[0].BaseShaderRegister = 0;
     range[0].RegisterSpace = 0;
     range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-    //SRV (The depth stencil)
+    // SRV (The depth stencil)
     range[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
     range[1].NumDescriptors = 1;
     range[1].BaseShaderRegister = 0;
     range[1].RegisterSpace = 0;
     range[1].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-    //SRV (GBuffer RTs)
+    // SRV (GBuffer RTs)
     range[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
     range[2].NumDescriptors = 1;
     range[2].BaseShaderRegister = 0;
@@ -1852,17 +1962,17 @@ GraphicsAPI::CreateInverterRootSignature() {
 
   D3D12_ROOT_PARAMETER rootParameters[3];
   {
-    //
+    // 
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
     rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
     rootParameters[0].DescriptorTable.pDescriptorRanges = &range[0];
-    //
+    // 
     rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
     rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
     rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
     rootParameters[1].DescriptorTable.pDescriptorRanges = &range[1];
-    //
+    // 
     rootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
     rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
     rootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
@@ -1918,17 +2028,17 @@ GraphicsAPI::CreateInverterRootSignature() {
 
 void
 GraphicsAPI::CreateForwardRootSignature() {
-  //Init descriptor tables
+  // Init descriptor tables
 
   D3D12_DESCRIPTOR_RANGE range[2];
   {
-    //SRV (GBuffer RTs)
+    // SRV (GBuffer RTs)
     range[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
     range[0].NumDescriptors = 4;
     range[0].BaseShaderRegister = 0;
     range[0].RegisterSpace = 0;
     range[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-    //SRV (The depth stencil)
+    // SRV (The depth stencil)
     range[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
     range[1].NumDescriptors = 1;
     range[1].BaseShaderRegister = 4;
@@ -1938,12 +2048,12 @@ GraphicsAPI::CreateForwardRootSignature() {
 
   D3D12_ROOT_PARAMETER rootParameters[2];
   {
-    //
+    // 
     rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
     rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
     rootParameters[0].DescriptorTable.NumDescriptorRanges = 1;
     rootParameters[0].DescriptorTable.pDescriptorRanges = &range[0];
-    //
+    // 
     rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
     rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
     rootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
@@ -1968,7 +2078,7 @@ GraphicsAPI::CreateForwardRootSignature() {
   }
 
   D3D12_ROOT_SIGNATURE_DESC descRootSignature;
-  //descRootSignature.Init(3, rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+  // descRootSignature.Init(3, rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
   descRootSignature.NumParameters = 2;
   descRootSignature.pParameters = &rootParameters[0];
   descRootSignature.NumStaticSamplers = 1;
@@ -2062,9 +2172,9 @@ GraphicsAPI::CreateGPSOGBuffer() {
   ZeroMemory(&GPSODescPipelineState, sizeof(GPSODescPipelineState));
 
   GPSODescPipelineState.VS = { GBufferVSBytecodePtr, GBufferVSbytecodeSz };
-  //GPSODescPipelineState.DS = { GBufferDSBytecodePtr, GBufferDSbytecodeSz };
-  //GPSODescPipelineState.HS = { GBufferHSBytecodePtr, GBufferHSbytecodeSz };
-  //GPSODescPipelineState.GS = { GBufferGSBytecodePtr, GBufferGSbytecodeSz };
+  // GPSODescPipelineState.DS = { GBufferDSBytecodePtr, GBufferDSbytecodeSz };
+  // GPSODescPipelineState.HS = { GBufferHSBytecodePtr, GBufferHSbytecodeSz };
+  // GPSODescPipelineState.GS = { GBufferGSBytecodePtr, GBufferGSbytecodeSz };
   GPSODescPipelineState.PS = { GBufferPSBytecodePtr, GBufferPSbytecodeSz };
   GPSODescPipelineState.InputLayout.pInputElementDescs = ModelVertexDesc;
   GPSODescPipelineState.InputLayout.NumElements = _countof(ModelVertexDesc);
@@ -2157,16 +2267,16 @@ GraphicsAPI::CreateGPSOForward() {
   D3D12_GRAPHICS_PIPELINE_STATE_DESC descPipelineState;
   ZeroMemory(&descPipelineState, sizeof(descPipelineState));
 
-  //ShaderObject* vs = g_ShaderManager.getShaderObj("ScreenQuadVS");
-  //ShaderObject* ds = g_ShaderManager.getShaderObj("ScreenQuadDS");
-  //ShaderObject* hs = g_ShaderManager.getShaderObj("ScreenQuadHS");
-  //ShaderObject* gs = g_ShaderManager.getShaderObj("ScreenQuadGS");
-  //ShaderObject* ps = g_ShaderManager.getShaderObj("ScreenQuadPS");
+  // ShaderObject* vs = g_ShaderManager.getShaderObj("ScreenQuadVS");
+  // ShaderObject* ds = g_ShaderManager.getShaderObj("ScreenQuadDS");
+  // ShaderObject* hs = g_ShaderManager.getShaderObj("ScreenQuadHS");
+  // ShaderObject* gs = g_ShaderManager.getShaderObj("ScreenQuadGS");
+  // ShaderObject* ps = g_ShaderManager.getShaderObj("ScreenQuadPS");
 
   descPipelineState.VS = { ForwardVSBytecodePtr, ForwardVSbytecodeSz };
-  //descPipelineState.DS = { GBufferDSBytecodePtr, GBufferDSbytecodeSz };
-  //descPipelineState.HS = { GBufferHSBytecodePtr, GBufferHSbytecodeSz };
-  //descPipelineState.GS = { GBufferGSBytecodePtr, GBufferGSbytecodeSz };
+  // descPipelineState.DS = { GBufferDSBytecodePtr, GBufferDSbytecodeSz };
+  // descPipelineState.HS = { GBufferHSBytecodePtr, GBufferHSbytecodeSz };
+  // descPipelineState.GS = { GBufferGSBytecodePtr, GBufferGSbytecodeSz };
   descPipelineState.PS = { ForwardPSBytecodePtr, ForwardPSbytecodeSz };
   descPipelineState.InputLayout.pInputElementDescs = QuadVertexDesc;
   descPipelineState.InputLayout.NumElements = _countof(QuadVertexDesc);
@@ -2179,7 +2289,7 @@ GraphicsAPI::CreateGPSOForward() {
   descPipelineState.SampleMask = UINT_MAX;
   descPipelineState.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
   descPipelineState.NumRenderTargets = 1;
-  descPipelineState.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; //Swapchain desc
+  descPipelineState.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM; // Swapchain desc
   descPipelineState.SampleDesc.Count = 1;
 
   HRESULT HRPSO = m_device->CreateGraphicsPipelineState(&descPipelineState,
@@ -2192,7 +2302,7 @@ GraphicsAPI::CreateGPSOForward() {
 
 void
 GraphicsAPI::CreateDSV() {
-  //m_dsvHeap.Create(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
+  // m_dsvHeap.Create(m_device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1);
   D3D12_DESCRIPTOR_HEAP_DESC HeapDesc;
   
   HeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
@@ -2239,7 +2349,7 @@ GraphicsAPI::CreateDSV() {
 	HRESULT HRCR = m_device->CreateCommittedResource(&heapProperty,
                                                    D3D12_HEAP_FLAG_NONE,
                                                    &resourceDesc,
-                                                   //D3D12_RESOURCE_STATE_DEPTH_WRITE,
+                                                   // D3D12_RESOURCE_STATE_DEPTH_WRITE,
                                                    D3D12_RESOURCE_STATE_GENERIC_READ,
                                                    &clearVal,
                                                    __uuidof(**(&m_DSTexture)),
@@ -2282,12 +2392,12 @@ GraphicsAPI::CreateDSV() {
 void
 GraphicsAPI::CreateRTV() {
   const Int32 GBufferRTSize = 5;
-  //Create deferred buffers
-  //1.WorldPosition
-  //2.Metallic
-	//3.Roughness
-  //4.Emissive
-  //5.ComputeRT
+  // Create deferred buffers
+  // 1.WorldPosition
+  // 2.Metallic
+	// 3.Roughness
+  // 4.Emissive
+  // 5.ComputeRT
 
   D3D12_DESCRIPTOR_HEAP_DESC RTHeapDesc;
   
@@ -2342,7 +2452,7 @@ GraphicsAPI::CreateRTV() {
     HRESULT HRCR = m_device->CreateCommittedResource(&RTVHeapProperty,
                                                     D3D12_HEAP_FLAG_NONE,
                                                     &RTVResourceDesc,
-                                                    //D3D12_RESOURCE_STATE_RENDER_TARGET,
+                                                    // D3D12_RESOURCE_STATE_RENDER_TARGET,
                                                     D3D12_RESOURCE_STATE_GENERIC_READ,
                                                     &clearVal,
                                                     __uuidof(**(&m_RTTexture[i])),
@@ -2376,7 +2486,7 @@ GraphicsAPI::CreateRTV() {
                                      RTCPUDescriptorhandle);
 	}
 
-	//Create SRV for RTs
+	// Create SRV for RTs
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC RTVDescSRV;
 
@@ -2422,7 +2532,7 @@ GraphicsAPI::CompileShaderFromFile(WString filepath,
     shaderModel = "hs_5_0";
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kTeselation:
-    exit(666); //This doesn't exist in directx.
+    exit(666); // This doesn't exist in directx.
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kDomain:
     shaderModel = "ds_5_0";
@@ -2434,16 +2544,16 @@ GraphicsAPI::CompileShaderFromFile(WString filepath,
     shaderModel = "ps_5_0";
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kMesh:
-    exit(666); //This doesn't exists yet in directx.
+    exit(666); // This doesn't exists yet in directx.
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kRaytracing:
-    exit(666); //This isn't a shader yet.
+    exit(666); // This isn't a shader yet.
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kCompute:
     shaderModel = "cs_5_0";
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kTexture:
-    exit(666); //This never has existed.
+    exit(666); // This never has existed.
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kNone:
     break;
@@ -2494,7 +2604,7 @@ GraphicsAPI::CompileShaderFromBuffer(WString code,
     shaderModel = "hs_5_0";
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kTeselation:
-    exit(666); //This doesn't exist in directx.
+    exit(666); // This doesn't exist in directx.
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kDomain:
     shaderModel = "ds_5_0";
@@ -2506,16 +2616,16 @@ GraphicsAPI::CompileShaderFromBuffer(WString code,
     shaderModel = "ps_5_0";
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kMesh:
-    exit(666); //This doesn't exists yet in directx.
+    exit(666); // This doesn't exists yet in directx.
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kRaytracing:
-    exit(666); //This isn't a shader yet.
+    exit(666); // This isn't a shader yet.
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kCompute:
     shaderModel = "cs_5_0";
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kTexture:
-    exit(666); //This never has existed.
+    exit(666); // This never has existed.
     break;
   case toyboxSDK::TB_SHADER_TYPE::E::kNone:
     break;
@@ -2551,7 +2661,7 @@ GraphicsAPI::GetFactory(UInt32 flags) {
 
 #if TB_DEBUG_MODE
   // Enable the debug layer (requires the Graphics Tools "optional feature").
-  //NOTE: Enabling the debug layer after device creation will invalidate the active device.
+  // NOTE: Enabling the debug layer after device creation will invalidate the active device.
   {
     ID3D12Debug* dbgController;
     HRESULT HRDbgInterface = D3D12GetDebugInterface(__uuidof(**(&dbgController)),
