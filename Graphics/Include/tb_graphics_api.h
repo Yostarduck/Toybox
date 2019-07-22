@@ -221,8 +221,11 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
 
   //RTX
   void CreateRaytracingInterfaces();
+  void CreateEmptyRootSignatures();
   void CreateRaytracingPipelineStateObject();
+  public:
   void BuildAccelerationStructures();
+  private:
   void CreateRaytracingOutputBuffer();
   //void CreateShaderResourceHeap();
   //void CreateShaderBindingTable();
@@ -288,6 +291,9 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ID3DBlob* m_missLibrary;
   ID3DBlob* m_shadowLibrary;
   /////DXR
+  IDxcBlob* m_rayGenBlob;
+  IDxcBlob* m_closestHitBlob;
+  IDxcBlob* m_missBlob;
 
   IDXGIAdapter1* m_hardwareAdapter;
   ID3D12Device* m_device; //Common Device
@@ -338,6 +344,12 @@ class TB_GRAPHICS_EXPORT GraphicsAPI : public Module<GraphicsAPI> {
   ID3D12RootSignature* m_GBufferRootSignature;
   ID3D12RootSignature* m_ForwardRootSignature;
   ID3D12RootSignature* m_InverterRootSignature;
+
+  ID3D12RootSignature* m_RayGenpRootSignature;
+  ID3D12RootSignature* m_ClosestHitRootSignature;
+  ID3D12RootSignature* m_MissRootSignature;
+  ID3D12RootSignature* m_emptyLocalRootSignature;
+  ID3D12RootSignature* m_emptyGlobalRootSignature;
 
   ID3D12PipelineState* m_GPSOGBuffer;
   ID3D12PipelineState* m_CPSOInverter;

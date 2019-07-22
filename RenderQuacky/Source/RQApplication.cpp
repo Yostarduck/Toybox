@@ -212,6 +212,7 @@ RenderQuackyApp::postInit() {
     //Commands
     GraphicsAPI::instance().UpdateCB(CBData);
     GraphicsAPI::instance().CreateModel(byteVertexList, byteIndexList, totalIndex);
+    GraphicsAPI::instance().BuildAccelerationStructures();
     if (nullptr != tgaData) {
       GraphicsAPI::instance().CreateTexture(tgaWidth,
                                             tgaHeight,
